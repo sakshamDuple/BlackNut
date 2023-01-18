@@ -98,7 +98,7 @@ exports.deleteAgentById = async (id) => {
 
 exports.updateThisAgent = async (agent) => {
     try {
-        let prevAgent = await Agent.findOne(agent._id) //to Check For Future Conditions
+        let prevAgent = await Agent.findById(agent._id) //to Check For Future Conditions
         let newAgent = agent
         let updateThisAgent = await Agent.updateOne({ _id: agent._id}, { $set: newAgent })
         return { data: updateThisAgent.modifiedCount > 0, message: updateThisAgent.modifiedCount > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.modifiedCount > 0 ? 200 : 400 }

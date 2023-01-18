@@ -77,6 +77,24 @@ exports.findOneById = async (id) => {
     return await product.findById(id)
 }
 
+exports.findOneByProductId = async (ProductId) => {
+    return await product.findOne({ProductID:ProductId})
+}
+
 exports.deleteOnly = async (id) => {
     return await product.deleteOne(id)
 }
+
+// router.get('/exporttocsv', function(req, res, next) {
+//     var filename   = "products.csv";
+//     var dataArray;
+//     Product.find().lean().exec({}, function(err, products) {
+//         if (err) res.send(err);
+        
+//         res.statusCode = 200;
+//         res.setHeader('Content-Type', 'text/csv');
+//         res.setHeader("Content-Disposition", 'attachment; filename='+filename);
+//         res.csv(products, true);
+//     });
+//  });
+// module.exports = router;

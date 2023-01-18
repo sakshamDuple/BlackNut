@@ -9,4 +9,5 @@ router.get("/getAllCrops", productC.getAllCrops)
 router.get("/getAllMachines", productC.getAllMachines)
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct)
 
+
 module.exports = router;

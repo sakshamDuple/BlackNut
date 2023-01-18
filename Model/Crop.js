@@ -7,8 +7,6 @@ const Crop = new mongoose.Schema({
         required: true
     },
 
-    products: [products],
-
     createdAt: {
         type: Date,
         default: () => Date.now()

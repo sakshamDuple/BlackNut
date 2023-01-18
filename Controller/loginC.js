@@ -25,6 +25,7 @@ exports.commonlogin = async (req, res) => {
         res.setHeader("Authorization", accessToken).status(201).json({ accessToken, message: "login success", status: 201 })
     } else if (phone && password) {
         theAgentFound = await AgentS.getCommonByPhone(phone)
+        if(theAgentFound.data == null) return res.status(theAgentFound.status).json({ message: theAgentFound.message, status: theAgentFound.status })
         let compare = await hashCompare(password, theAgentFound.data.password)
         if (!compare) return res.status(400).json({ error: "password not matched", message: "password to the given phone is not matched", status: 400 })
         let accessToken = generateAccessToken({ role: theAgentFound.data.role, firstName: theAgentFound.data.firstName, lastName: theAgentFound.data.lastName, phone: theAgentFound.data.phone, email: theAgentFound.data.email, id: theAgentFound.data._id })
@@ -37,6 +38,7 @@ exports.forgotPassword = async (req, res) => {
     if (phone && email) {
         let theAgentFound1 = await AgentS.getCommonByEmail(email)
         let theAgentFound2 = await AgentS.getCommonByPhone(phone)
+        if(!theAgentFound1.data || !theAgentFound2.data) return res.status(404).json({ message: "agents not found", status: 404 })
         console.log(theAgentFound2)
         if (theAgentFound1.data._id.toString() == theAgentFound2.data._id.toString()) {
             let otp = generateOtp()
@@ -76,7 +78,7 @@ exports.resetPassword = async (req, res) => {
     let { password, confirmPassword, resetPassword, id } = req.body
     console.log(req.body)
     if (!password || !confirmPassword || !resetPassword) return res.status(400).send({ error: "fields missing", message: "please enter all required fields consisting password, confirmPassword, resetPasswprd", status: 404 })
-    if (password !== confirmPassword) return res.status(400).send({ error: "passwords do not match", message: "given fields of password & confirmPassword do not match", status: 400 })
+    if (resetPassword !== confirmPassword) return res.status(400).send({ error: "reset passwords do not match", message: "given fields of resetPassword & confirmPassword do not match", status: 400 })
     if (resetPassword === "") return res.status(404).send({ error: "reset field is empty", message: "reset field can't be empty", status: 404 })
     let theNewPassword = await hashPassword(resetPassword)
     let foundAccount = await AgentS.getCommonById(id)

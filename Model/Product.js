@@ -2,15 +2,18 @@ const mongoose = require("mongoose")
 const crypto = require("crypto");
 
 // User Schema
-const productDetail = {
+const productDetail = new mongoose.Schema({
     Capacity: {
         type: Number,
+        required: true
     },
     Model: {
         type: String,
+        required: true
     },
     Price: {
         type: Number,
+        required: true
     },
     Status: {
         type: String,
@@ -27,39 +30,19 @@ const productDetail = {
     createdAt: {
         type: Date,
         default: () => Date.now()
-    }
-}
-
-const machines = {
-    Machine_name: {
-        type: String,
-        required: true
     },
-    productDetail: [productDetail]
-}
-
-const products = {
-    Product_name: {
+    cropId: {
         type: String,
-        required: true
+        required:true
     },
-    machines: [machines]
-}
-
-const Agent = new mongoose.Schema({
-
-    crop: {
+    machineId: {
         type: String,
-        required: true
+        required:true
     },
-
-    products: [products],
-
-    createdAt: {
+    updateAt: {
         type: Date,
         default: () => Date.now()
     }
+})
 
-});
-
-module.exports = mongoose.model("Product", Agent);
+module.exports = mongoose.model("Product", productDetail);

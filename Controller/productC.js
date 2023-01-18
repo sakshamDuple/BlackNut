@@ -5,6 +5,7 @@ const MachineS = require('../Service/MachineS')
 const product = require("../Model/Product");
 // var csv = require('csv-express');
 const csv = require('csvtojson')
+let file = "./matinetNew.csv"
 
 exports.productCreate = async (req, res) => {
     let { crop, products, Unit } = req.body
@@ -97,6 +98,7 @@ exports.generateCsvOfOneMachine = async (req, res) => {
 exports.updateForOneMachineFromCsvFile = async (req, res) => {
     try {
         console.log(req.file)
+        // csv().fr
         csv().fromFile(req.file).then(async (jsonObj) => {
             console.log(jsonObj)
             let data = [];
@@ -118,7 +120,7 @@ exports.updateForOneMachineFromCsvFile = async (req, res) => {
                     // }
                 }
             }
-            res.send(data)
+            // res.send(data)
         })
         res.send("nothing")
     } catch (e) {

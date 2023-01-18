@@ -1,0 +1,7 @@
+_id,Capacity,Model,Price,ProductID,createdAt,result
+"63c7a50bddc43c56bb702ec8",600,"OnionRetail",120000,"PId1674028299637","Wed Jan 18 2023 13:21:39 GMT+0530 (India Standard Time)","[object Object]"
+"63c7a60ce84c8eb85c7a5ee0",600,"OnionRetail",120000,"PId1674028556862","Wed Jan 18 2023 13:25:56 GMT+0530 (India Standard Time)","[object Object]"
+"63c7ad77eb4356e11b2e8311",5,"OnionRetail",130000,"PId1674030455233","Wed Jan 18 2023 13:57:35 GMT+0530 (India Standard Time)","[object Object]"
+"63c7b0f22a8ca36536d96679",5,"OnionRetail",130000,"PId1674031346625","Wed Jan 18 2023 14:12:26 GMT+0530 (India Standard Time)","[object Object]"
+"63c7b0f92a8ca36536d96680",5,"OnionRetail",130000,"PId1674031353134","Wed Jan 18 2023 14:12:33 GMT+0530 (India Standard Time)","[object Object]"
+"63c7b1012a8ca36536d96685",5,"OnionRetail",120000,"PId1674031361549","Wed Jan 18 2023 14:12:41 GMT+0530 (India Standard Time)","[object Object]"

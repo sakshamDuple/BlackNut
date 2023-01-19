@@ -64,15 +64,6 @@ exports.create = async (data) => {
     }
 }
 
-// exports.createVariant = async (prevProduct, data) => {
-//     let prevProduct_variants = prevProduct.productDetail
-//     console.log(prevProduct_variants)
-//     prevProduct_variants.push(data)
-//     prevProduct.productDetail = prevProduct_variants
-//     let updatePrdtVar = await product.updateOne({ _id: prevProduct._id }, { $set: prevProduct })
-//     return { data: updatePrdtVar.modifiedCount > 0, message: updatePrdtVar.modifiedCount > 0 ? "variant creatred Successfully" : "some issue while creation", status: updatePrdtVar.modifiedCount > 0 ? 201 : 400 }
-// }
-
 exports.findOneById = async (id) => {
     return await product.findById(id)
 }
@@ -85,16 +76,7 @@ exports.deleteOnly = async (id) => {
     return await product.deleteOne(id)
 }
 
-// router.get('/exporttocsv', function(req, res, next) {
-//     var filename   = "products.csv";
-//     var dataArray;
-//     Product.find().lean().exec({}, function(err, products) {
-//         if (err) res.send(err);
-        
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'text/csv');
-//         res.setHeader("Content-Disposition", 'attachment; filename='+filename);
-//         res.csv(products, true);
-//     });
-//  });
-// module.exports = router;
+exports.updateProductById = async ({Capacity, Model, Price, _id },Unit) => {
+    let updateThisProductDetail = await product.updateOne({ _id }, { $set: {Capacity, Model, Price} })
+    return { data: updateThisProductDetail.modifiedCount > 0, message: updateThisProductDetail.modifiedCount > 0?"updated Successfully":"update Failed", status: updateThisProductDetail.modifiedCount > 0?200:400 }
+}

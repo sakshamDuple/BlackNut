@@ -60,17 +60,24 @@ exports.forgotPassword = async (req, res) => {
 exports.verifyForgotPassword = async (req, res) => {
     let { phone, otp } = req.body
     let theAgentFound2 = await AgentS.getCommonByPhone(phone)
+    console.log(theAgentFound2.data)
     let findOtpByPhone = await OtpS.findOnly(phone)
+    console.log(findOtpByPhone)
     let tempPass = createTempPass()
     if (!findOtpByPhone) return res.status(404).send({ data: "no otp found", message: "there was no active otp found for this phone", status: 404 })
     if (theAgentFound2.data) {
         if (otp == findOtpByPhone.otp) {
+            console.log("\n\n\n newPass \n\n\n",tempPass)
             let newPassword = await hashPassword(tempPass)
+            console.log("\n\n\n newPass \n\n\n",newPassword)
             let theAgentFound2Update = theAgentFound2.data
             theAgentFound2Update.password = newPassword
-            let updatedAgent = await AgentS.updateThisAgent(theAgentFound2Update)
+            console.log(theAgentFound2Update)
+            let updatedAgent = await AgentS.updateThisAgent(theAgentFound2Update ,"password")
+            console.log(updatedAgent)
             if (updatedAgent) sendEmail(theAgentFound2.data.email, "new Password Created", tempPass)
             res.status(201).send({ message: "the new password creation process is completed, please check your mail for newPassword", status: 201 })
+            await OtpS.deleteOnly(phone)
         }
     }
     return res.status(404).send({ error: "no such account found", message: "the retreived account for this phone is not found", status: 404 })

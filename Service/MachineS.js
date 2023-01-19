@@ -36,7 +36,7 @@ exports.findMachineById = async (id) => {
     }
 }
 
-exports.getAllCMachines = async () => {
+exports.getAllMachines = async () => {
     try {
         return { data: await Machine.find(), message: "retrieval Success", status: 200 }
     } catch (e) {

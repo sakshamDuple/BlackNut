@@ -11,22 +11,23 @@ const { updateProductById } = require("../Service/productS");
 
 router.post("/createProduct", productC.productCreate);
 router.get("/getAllUnit", productC.getAllProductUnits);
-router.get("/getAllCrops", productC.getAllCrops)
-router.get("/getAllMachines", productC.getAllMachines)
-router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct)
-router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine)
-router.get("/bulkProductPriceUpdate", upload.single("file"), async (req, res) => {
+router.get("/getAllCrops", productC.getAllCrops);
+router.get("/getAllMachines", productC.getAllMachines);
+router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
+router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
+router.get("/bulkProductPriceUpdateOfOneMachine", upload.single("file"), async (req, res) => {
     let file = req.file;
     let products = await csvtojson().fromFile(file.path);
     var fails = []
     var successes = []
-    let data = await update(products,fails,successes)
+    let data = await update(products, fails, successes)
     let failure = fails.length == products.length
     let success = fails.length == 0
     return res.send({ status: failure ? 400 : 200, message: failure ? "Nothing was updated" : success ? "Success, all data were updated successfully" : "Partial Success", data: { fails, successes } });
 });
+router.get("/generateListOfCropsMachines", productC.generateListOfCropsMachines);
 
-let update = (products,fails,successes) => {
+let update = (products, fails, successes) => {
     return new Promise(async function (resolve, reject) {
         Promise.all(
             products.map(async element => {

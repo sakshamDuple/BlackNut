@@ -1,2 +1,0 @@
-Machine_name,Product_name,__v,_id,createdAt,crop,productDetail
-OnR,OnionRetail,0,63c546fb985c93ba8143ef25,2023-01-16T12:45:47.503Z,Onion,"[{""Capacity"":500,""Model"":""OnionRetail"",""Price"":120000,""Status"":""INACTIVE"",""ProductID"":""PId1673873155888"",""_id"":{""$oid"":""63c54703985c93ba8143ef28""}},{""Capacity"":500,""Model"":""OnionRetail"",""Price"":120000,""Status"":""INACTIVE"",""ProductID"":""PId1673927451471"",""_id"":{""$oid"":""63c61b1b4730bbc7b2c380b1""}}]"

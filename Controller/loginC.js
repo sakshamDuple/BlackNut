@@ -85,15 +85,16 @@ exports.verifyForgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     let { password, confirmPassword, resetPassword, id } = req.body
-    console.log(req.body)
     if (!password || !confirmPassword || !resetPassword) return res.status(400).send({ error: "fields missing", message: "please enter all required fields consisting password, confirmPassword, resetPasswprd", status: 404 })
     if (resetPassword !== confirmPassword) return res.status(400).send({ error: "reset passwords do not match", message: "given fields of resetPassword & confirmPassword do not match", status: 400 })
     if (resetPassword === "") return res.status(404).send({ error: "reset field is empty", message: "reset field can't be empty", status: 404 })
     let theNewPassword = await hashPassword(resetPassword)
     let foundAccount = await AgentS.getCommonById(id)
-    console.log(theNewPassword,foundAccount.data.password)
-    foundAccount.data.password = theNewPassword
-    let updatedAgent = await AgentS.updateThisAgent(foundAccount.data)
+    if(!foundAccount.data) return res.status(404).send({ message: `no such account found for the id: ${id}`, status: 404 })
+    let checkPrevPass = await hashCompare(password,foundAccount.data.password)
+    if(!checkPrevPass) return res.status(404).send({ message: `Previous password is not matched with the account`, status: 404 })
+    console.log(foundAccount)
+    let updatedAgent = await AgentS.updateThisAgent({password:theNewPassword,_id:id},"password")
     if (updatedAgent.data) {
         return res.status(updatedAgent.status).send({ message: "password updated successfully", status: updatedAgent.status })
     } else {

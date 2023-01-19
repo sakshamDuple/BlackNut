@@ -5,7 +5,6 @@ const MachineS = require('../Service/MachineS')
 const product = require("../Model/Product");
 // var csv = require('csv-express');
 const csv = require('csvtojson')
-let file = "./matinetNew.csv"
 
 exports.productCreate = async (req, res) => {
     let { crop, products, Unit } = req.body
@@ -98,30 +97,33 @@ exports.generateCsvOfOneMachine = async (req, res) => {
 exports.updateForOneMachineFromCsvFile = async (req, res) => {
     try {
         console.log(req.file)
+        var file = req.file;
+        let products = await csv().fromFile(file.path);
+        console.log(products)
         // csv().fr
-        csv().fromFile(req.file).then(async (jsonObj) => {
-            console.log(jsonObj)
-            let data = [];
-            for (let i = 0; i < 2; i++) {
-                if (jsonObj[i].field8) {
-                    let ProductDetail = await ProductS.findOneByProductId(jsonObj[i].ProductID);
-                    console.log(ProductDetail)
-                    data.push(ProductDetail)
-                    // if (!user) {
-                    //     let element = jsonObj[i].field8.replace(/ /g, "?");
-                    //     var expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
-                    //     var regex = new RegExp(expression);
-                    //     var t = element;
-                    //     if (element && t.match(regex)) {
-                    //         let comanyData = { companyName: jsonObj[i].field7, email: jsonObj[i].field8, password: "12345678", companyType: "company", dateEstablished: 1664476200, location: "demo", bio: "demo", inviteCode: "ZJRA31", role: "C", userType: "web", isAutomatedUser: true }
-                    //         console.log("comanyData :", comanyData);
-                    //         await createCompany(comanyData)
-                    //     }
-                    // }
-                }
-            }
-            // res.send(data)
-        })
+        // csv().fromFile(req.file).then(async (jsonObj) => {
+        //     console.log(jsonObj)
+        //     let data = [];
+        //     for (let i = 0; i < 2; i++) {
+        //         if (jsonObj[i].field8) {
+        //             let ProductDetail = await ProductS.findOneByProductId(jsonObj[i].ProductID);
+        //             console.log(ProductDetail)
+        //             data.push(ProductDetail)
+        //             // if (!user) {
+        //             //     let element = jsonObj[i].field8.replace(/ /g, "?");
+        //             //     var expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+        //             //     var regex = new RegExp(expression);
+        //             //     var t = element;
+        //             //     if (element && t.match(regex)) {
+        //             //         let comanyData = { companyName: jsonObj[i].field7, email: jsonObj[i].field8, password: "12345678", companyType: "company", dateEstablished: 1664476200, location: "demo", bio: "demo", inviteCode: "ZJRA31", role: "C", userType: "web", isAutomatedUser: true }
+        //             //         console.log("comanyData :", comanyData);
+        //             //         await createCompany(comanyData)
+        //             //     }
+        //             // }
+        //         }
+        //     }
+        //     // res.send(data)
+        // })
         res.send("nothing")
     } catch (e) {
         console.log(e)

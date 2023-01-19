@@ -1,24 +1,9 @@
 const router = require("express").Router()
 const express = require('express');
 const multer = require('multer');
+const csvtojson = require('csvtojson')
 
-const app = express()
-
-const upload = multer({
-    dest: 'uploads/'
-});
-
-// var storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, file)
-//     },
-//     filename: (req, file, cb) => {
-//         console.log(file)
-//         cb(null, file.originalname)
-//     },
-// })
-
-// var uploads = multer({ storage: storage })
+const uploadCsv = multer({ dest: "./csv_files/uploaded/" });
 
 const productC = require("../Controller/productC")
 
@@ -28,6 +13,12 @@ router.get("/getAllCrops", productC.getAllCrops)
 router.get("/getAllMachines", productC.getAllMachines)
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct)
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine)
-router.post("/updateForOneMachineFromCsvFile", upload.single("File"), productC.updateForOneMachineFromCsvFile)
+router.post("/bulkProduct", uploadCsv.single("csv"), async (req, res) => {
+    console.log(req.file)
+    var file = req.file;
+    let products = await csvtojson().fromFile(file.path);
+    console.log(products)
+    return res.send({ statusCode: 200, message: "Success", data: { products } });
+});
 
 module.exports = router;

@@ -34,25 +34,27 @@ exports.commonlogin = async (req, res) => {
 }
 
 exports.forgotPassword = async (req, res) => {
-    let { phone, email } = req.body
-    if (phone && email) {
+    let { email } = req.body
+    if (email) {
         let theAgentFound1 = await AgentS.getCommonByEmail(email)
-        let theAgentFound2 = await AgentS.getCommonByPhone(phone)
-        if(!theAgentFound1.data || !theAgentFound2.data) return res.status(404).json({ message: "agents not found", status: 404 })
-        console.log(theAgentFound2)
-        if (theAgentFound1.data._id.toString() == theAgentFound2.data._id.toString()) {
+        // let theAgentFound2 = await AgentS.getCommonByPhone(phone)
+        if(!theAgentFound1.data 
+            // || !theAgentFound2.data
+            ) return res.status(404).json({ message: "agents not found", status: 404 })
+        // console.log(theAgentFound2)
+        if (theAgentFound1.data._id.toString()) {
             let otp = generateOtp()
             let genTempOtpOnDB = await OtpS.create({
-                number: phone,
+                number: theAgentFound1.data.phone,
                 id: theAgentFound1.data._id.toString(),
                 otp: otp
             })
             await sendEmail(email, "password change request otp", otp)
-            return res.status(200).send({ message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
+            return res.status(200).send({ data: {phone: theAgentFound1.data.phone}, message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
         }
-        return res.status(400).send({ data: "accounts from phone & email do not match", message: "the retreived accounts for email & phone are not macthed", status: 400 })
+        // return res.status(400).send({ data: "accounts from phone & email do not match", message: "the retreived accounts for email & phone are not macthed", status: 400 })
     }
-    else return res.status(400).send({ error: "email & phone fields not found", message: "email & phone both fields are required", status: 400 })
+    else return res.status(400).send({ error: "email field not found", message: "email field is required", status: 400 })
 }
 
 exports.verifyForgotPassword = async (req, res) => {

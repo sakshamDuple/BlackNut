@@ -50,6 +50,32 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
     res.status(200).send({ data: DetailedProduct, Message: "get Full Detail View Of Product", status: 200 })
 }
 
+exports.cropCreate = async (req, res) => {
+    let crop = req.body.crop
+    let createdCrop = await CropS.create(crop)
+    res.status(createdCrop.status).json(createdCrop)
+}
+
+exports.machineCreate = async (req, res) => {
+    let Machine_name = req.body.Machine_name
+    let Product_name = req.body.Product_name
+    let cropId = req.body.cropId
+    let createdCrop = await MachineS.create({ Machine_name, Product_name, cropId })
+    res.status(createdCrop.status).json(createdCrop)
+}
+
+exports.machinesForASelectCrop = async (req,res) => {
+    let cropId = req.query.cropId
+    let machines = await MachineS.findMachineByCropId(cropId)
+    res.status(machines.status).json(machines)
+}
+
+exports.productDetailForASelectMachine = async (req, res) => {
+    let machineId = req.query.machineId
+    let products = await ProductS.findProductsForMachineId(machineId)
+    res.status(products.status).json(products)
+}
+
 exports.generateCsvOfOneMachine = async (req, res) => {
     var filename = "products.csv";
     let id = req.query.id
@@ -102,7 +128,7 @@ exports.generateListOfCropsMachines = async (req, res) => {
     machines.data.map(machine => {
         let crop = crops.data.find(crop => machine.cropId == crop._id.toString());
         machine.crop = crop.crop
-        machineToShow.push({_id:machine._id,Machine_name:machine.Machine_name,Product_name:machine.Product_name,createdAt:machine.createdAt,crop:machine.crop})
+        machineToShow.push({ _id: machine._id, Machine_name: machine.Machine_name, Product_name: machine.Product_name, createdAt: machine.createdAt, crop: machine.crop })
     });
-    res.status(machines.status).json({data:machineToShow,status:200,message:"retrieved successfully"})
+    res.status(machines.status).json({ data: machineToShow, status: 200, message: "retrieved successfully" })
 }

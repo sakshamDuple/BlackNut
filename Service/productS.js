@@ -68,6 +68,11 @@ exports.findOneById = async (id) => {
     return await product.findById(id)
 }
 
+exports.findProductsForMachineId = async (MachineId) => {
+    let products = await product.find({machineId:MachineId})
+    return { data: products, message: products.length>0 ? "retrieval Success" : "not products found", status: products.length>0 ? 200 : 404 }
+}
+
 exports.findOneByProductId = async (ProductId) => {
     return await product.findOne({ProductID:ProductId})
 }

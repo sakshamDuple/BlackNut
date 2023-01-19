@@ -10,6 +10,10 @@ const productC = require("../Controller/productC");
 const { updateProductById } = require("../Service/productS");
 
 router.post("/createProduct", productC.productCreate);
+router.post("/createCrop", productC.cropCreate);
+router.post("/machineCreate", productC.machineCreate);
+router.get("/machinesForASelectCrop", productC.machinesForASelectCrop);
+router.get("/productDetailForASelectMachine", productC.productDetailForASelectMachine);
 router.get("/getAllUnit", productC.getAllProductUnits);
 router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);

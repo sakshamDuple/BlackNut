@@ -20,8 +20,7 @@ const productDetail = new mongoose.Schema({
         default: () => "INACTIVE"
     },
     UnitId: {
-        type: String,
-        required: true
+        type: String
     },
     ProductID: {
         type: String,

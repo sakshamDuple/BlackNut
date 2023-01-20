@@ -8,7 +8,8 @@ var csv = require('csv-express');
 
 exports.productCreate = async (req, res) => {
     let { crop, products, Unit } = req.body
-    let UnitId = await manageUnit(Unit)
+    let UnitId
+    if (Unit) UnitId = await manageUnit(Unit)
     const createTheProduct = await ProductS.create({ crop, products, UnitId })
     console.log(createTheProduct)
     res.status(createTheProduct.status).send({ data: createTheProduct.data, Message: createTheProduct.message, status: createTheProduct.status })

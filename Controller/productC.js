@@ -11,15 +11,15 @@ exports.productCreate = async (req, res) => {
     let UnitId = await manageUnit(Unit)
     const createTheProduct = await ProductS.create({ crop, products, UnitId })
     console.log(createTheProduct)
-    res.status(createTheProduct.status).send({ Agent_ID: createTheProduct.Agent_ID, Message: createTheProduct.message, status: createTheProduct.status })
+    res.status(createTheProduct.status).send({ data: createTheProduct.data, Message: createTheProduct.message, status: createTheProduct.status })
 }
 
 async function manageUnit(Unit) {
     let theUnit = Unit[0]
     let foundId = (await UnitS.findUnit(theUnit.Unit, theUnit.field))
-    if(foundId) foundId = foundId.toString()
+    if (foundId) foundId = foundId.toString()
     if (!foundId) {
-        return (await UnitS.create({unitName:theUnit.Unit, field:theUnit.field})).toString()
+        return (await UnitS.create({ unitName: theUnit.Unit, field: theUnit.field })).toString()
     } else {
         return foundId
     }
@@ -65,7 +65,7 @@ exports.machineCreate = async (req, res) => {
     res.status(createdCrop.status).json(createdCrop)
 }
 
-exports.machinesForASelectCrop = async (req,res) => {
+exports.machinesForASelectCrop = async (req, res) => {
     let cropId = req.query.cropId
     let machines = await MachineS.findMachineByCropId(cropId)
     res.status(machines.status).json(machines)

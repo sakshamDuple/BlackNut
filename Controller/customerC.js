@@ -9,6 +9,19 @@ exports.getActiveCustomers = async (req, res) => {
     }
 }
 
+exports.addCustomer = async (req, res) => {
+    let agentId = req.body.agentId
+    let Customer = req.body.Customer
+    if(!agentId) return res.status(400).send({ Message: "can't add customer without agentId", status: 400 })
+    Customer.password = Customer.confirmPassword = "Pa$$w0rd!"
+    const newCustomer = await CustomerS.create(Customer)
+    if (newCustomer.status == 201) {
+        res.status(newCustomer.status).send({ data: newCustomer.data, Message: newCustomer.message, status: newCustomer.status })
+    } else {
+        res.status(newCustomer.status).send({ error: newCustomer.error, Message: newCustomer.message, status: newCustomer.status })
+    }
+}
+
 exports.getAllCustomers = async (req, res) => {
     let theCustomers = await CustomerS.getAllCustomer()
     console.log(theCustomers)

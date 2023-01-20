@@ -27,7 +27,7 @@ exports.create = async (customer) => {
         }
         let createdAgent = await Agent.create(newcustomer)
         let doMobileRegistration = await VerifiedNumberS.create({ role: customer.role, number: customer.phone, id: createdAgent.id })
-        return { Agent_ID: createdAgent._id, message: "customer successfully created", status: 201 }
+        return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "customer successfully created", status: 201 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }
@@ -39,8 +39,8 @@ exports.getAllCustomer = async (bool) => {
         let allCustomers
         if (bool) allCustomers = await Agent.find({ role: "customer", status: "Active" })
         allCustomers = await Agent.find({ role: "customer" })
-        console.log("allCustomers",allCustomers.length>0)
-        return { data: allCustomers, message: allCustomers.length>0?"retrieval Success":"please upload some customer to view", status: allCustomers.length>0?200:404 }
+        console.log("allCustomers", allCustomers.length > 0)
+        return { data: allCustomers, message: allCustomers.length > 0 ? "retrieval Success" : "please upload some customer to view", status: allCustomers.length > 0 ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error", status: 400 }
@@ -85,7 +85,7 @@ exports.getAllCustomer = async (bool) => {
 
 exports.deleteCustomerById = async (id) => {
     try {
-        let theCustomer = await Agent.findOne({_id:id,role:"customer"})
+        let theCustomer = await Agent.findOne({ _id: id, role: "customer" })
         let theNumberToDelete = parseInt(theCustomer.phone)
         let theCustomerToDelete = await Agent.deleteOne(theCustomer)
         VerifiedNumberS.deleteOnly(theNumberToDelete)

@@ -16,9 +16,10 @@ exports.productCreate = async (req, res) => {
 
 async function manageUnit(Unit) {
     let theUnit = Unit[0]
-    let foundId = (await UnitS.findUnit(theUnit.Unit, theUnit.field)).toString()
+    let foundId = (await UnitS.findUnit(theUnit.Unit, theUnit.field))
+    if(foundId) foundId = foundId.toString()
     if (!foundId) {
-        return (await UnitS.create(theUnit.Unit, theUnit.field)).toString()
+        return (await UnitS.create({unitName:theUnit.Unit, field:theUnit.field})).toString()
     } else {
         return foundId
     }

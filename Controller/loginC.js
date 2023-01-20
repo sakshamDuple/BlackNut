@@ -5,6 +5,7 @@ const { generateAccessToken } = require("../Middleware/jwtSign")
 const { hashCompare, hashPassword } = require("../Middleware/salt")
 const TempOtp = require("../Model/TempOtp")
 const AgentS = require("../Service/AgentS")
+const AdminS = require("../Service/AdminS")
 const OtpS = require("../Service/OtpS")
 
 // exports.loginAgent = async (req,res) => {
@@ -25,7 +26,7 @@ exports.commonlogin = async (req, res) => {
         res.setHeader("Authorization", accessToken).status(201).json({ accessToken, message: "login success", status: 201 })
     } else if (phone && password) {
         theAgentFound = await AgentS.getCommonByPhone(phone)
-        if(theAgentFound.data == null) return res.status(theAgentFound.status).json({ message: theAgentFound.message, status: theAgentFound.status })
+        if (theAgentFound.data == null) return res.status(theAgentFound.status).json({ message: theAgentFound.message, status: theAgentFound.status })
         let compare = await hashCompare(password, theAgentFound.data.password)
         if (!compare) return res.status(400).json({ error: "password not matched", message: "password to the given phone is not matched", status: 400 })
         let accessToken = generateAccessToken({ role: theAgentFound.data.role, firstName: theAgentFound.data.firstName, lastName: theAgentFound.data.lastName, phone: theAgentFound.data.phone, email: theAgentFound.data.email, id: theAgentFound.data._id })
@@ -38,9 +39,9 @@ exports.forgotPassword = async (req, res) => {
     if (email) {
         let theAgentFound1 = await AgentS.getCommonByEmail(email)
         // let theAgentFound2 = await AgentS.getCommonByPhone(phone)
-        if(!theAgentFound1.data 
+        if (!theAgentFound1.data
             // || !theAgentFound2.data
-            ) return res.status(404).json({ message: "agents not found", status: 404 })
+        ) return res.status(404).json({ message: "agents not found", status: 404 })
         // console.log(theAgentFound2)
         if (theAgentFound1.data._id.toString()) {
             let otp = generateOtp()
@@ -50,7 +51,7 @@ exports.forgotPassword = async (req, res) => {
                 otp: otp
             })
             await sendEmail(email, "password change request otp", otp)
-            return res.status(200).send({ data: {phone: theAgentFound1.data.phone}, message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
+            return res.status(200).send({ data: { phone: theAgentFound1.data.phone }, message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
         }
         // return res.status(400).send({ data: "accounts from phone & email do not match", message: "the retreived accounts for email & phone are not macthed", status: 400 })
     }
@@ -67,13 +68,13 @@ exports.verifyForgotPassword = async (req, res) => {
     if (!findOtpByPhone) return res.status(404).send({ data: "no otp found", message: "there was no active otp found for this phone", status: 404 })
     if (theAgentFound2.data) {
         if (otp == findOtpByPhone.otp) {
-            console.log("\n\n\n newPass \n\n\n",tempPass)
+            console.log("\n\n\n newPass \n\n\n", tempPass)
             let newPassword = await hashPassword(tempPass)
-            console.log("\n\n\n newPass \n\n\n",newPassword)
+            console.log("\n\n\n newPass \n\n\n", newPassword)
             let theAgentFound2Update = theAgentFound2.data
             theAgentFound2Update.password = newPassword
             console.log(theAgentFound2Update)
-            let updatedAgent = await AgentS.updateThisAgent(theAgentFound2Update ,"password")
+            let updatedAgent = await AgentS.updateThisAgent(theAgentFound2Update, "password")
             console.log(updatedAgent)
             if (updatedAgent) sendEmail(theAgentFound2.data.email, "new Password Created", tempPass)
             res.status(201).send({ message: "the new password creation process is completed, please check your mail for newPassword", status: 201 })
@@ -90,14 +91,29 @@ exports.resetPassword = async (req, res) => {
     if (resetPassword === "") return res.status(404).send({ error: "reset field is empty", message: "reset field can't be empty", status: 404 })
     let theNewPassword = await hashPassword(resetPassword)
     let foundAccount = await AgentS.getCommonById(id)
-    if(!foundAccount.data) return res.status(404).send({ message: `no such account found for the id: ${id}`, status: 404 })
-    let checkPrevPass = await hashCompare(password,foundAccount.data.password)
-    if(!checkPrevPass) return res.status(404).send({ message: `Previous password is not matched with the account`, status: 404 })
+    if (!foundAccount.data) return res.status(404).send({ message: `no such account found for the id: ${id}`, status: 404 })
+    let checkPrevPass = await hashCompare(password, foundAccount.data.password)
+    if (!checkPrevPass) return res.status(404).send({ message: `Previous password is not matched with the account`, status: 404 })
     console.log(foundAccount)
-    let updatedAgent = await AgentS.updateThisAgent({password:theNewPassword,_id:id},"password")
+    let updatedAgent = await AgentS.updateThisAgent({ password: theNewPassword, _id: id }, "password")
     if (updatedAgent.data) {
         return res.status(updatedAgent.status).send({ message: "password updated successfully", status: updatedAgent.status })
     } else {
         return res.status(updatedAgent.status).send({ error: updatedAgent.error, Message: updatedAgent.message, status: updatedAgent.status })
     }
+}
+
+exports.adminLogin = async (req, res) => {
+    let email = req.body.email
+    let password = req.body.password
+    let phone = req.body.phone
+    console.log(email, password, phone)
+    let match = true
+    let adminFound = await AdminS.adminLogin({ email, password, phone })
+    if (adminFound) match = await hashCompare(password, adminFound.data.password)
+    if (match) {
+        let accessToken = generateAccessToken({ role: adminFound.data.role, firstName: adminFound.data.firstName, lastName: adminFound.data.lastName, phone: adminFound.data.phone, email: adminFound.data.email, id: adminFound.data._id })
+        return res.setHeader("Authorization", accessToken).status(adminFound.status).send({ Message: adminFound.message, status: adminFound.status })
+    }
+    return res.status(match ? adminFound.status : 400).send({ error: adminFound.error, Message: match ? adminFound.message : "password wasn't matched", status: match ? adminFound.status : 400 })
 }

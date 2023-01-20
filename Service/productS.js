@@ -3,14 +3,14 @@ const CropS = require('./CropS')
 const MachineS = require('./MachineS')
 
 exports.create = async (data) => {
-    try{
+    try {
         let foundCrop
         let foundMachine
         let foundCropId
         let foundMachineId
         let UnitId = data.UnitId
         if (data.crop) foundCrop = await CropS.findCrop({ cropName: data.crop })
-        let {Capacity, Model, Price} = data.products[0].productDetail[0]
+        let { Capacity, Model, Price, ProductID, Status } = data.products[0].productDetail[0]
         // if (data.Unit[0]) foundUnit = await UnitS.findUnit(data.Unit[0].Unit, data.Unit[0].field)
         // if(!foundUnit) foundUnit = await UnitS.create({unitName:data.Unit[0].Unit,field:data.Unit[0].field})
         // if(foundUnit) UnitId = foundUnit._id
@@ -44,21 +44,33 @@ exports.create = async (data) => {
 
 
             foundCropId = foundCrop.data._id
-            if(data.products[0].Machine_name) foundMachine = await MachineS.findMachine({ Machine_name: data.products[0].Machine_name })
-            if(foundMachine.data != null) {
+            if (data.products[0].Machine_name) foundMachine = await MachineS.findMachine({ Machine_name: data.products[0].Machine_name })
+            if (foundMachine.data != null) {
                 foundMachineId = foundMachine.data._id
-                let createProduct = await product.create({Capacity, Model, Price, cropId:foundCropId, machineId:foundMachineId, UnitId})
+                let createProduct
+                // if (Status && ProductID) {createProduct = await product.create({ Capacity, Model, Price, ProductID:ProductID, Status:Status, cropId: foundCropId, machineId: foundMachineId, UnitId })}else{
+                //     createProduct = await product.create({ Capacity, Model, Price, cropId: foundCropId, machineId: foundMachineId, UnitId })
+                // }
+                data.products[0].productDetail.map(productD => {
+                    productD.cropId = foundCropId
+                    productD.machineId = foundMachineId
+                    productD.UnitId = UnitId
+                });
+                createProduct = await product.insertMany(data.products[0].productDetail)
                 return { data: createProduct, message: "productDetail created Successfully", status: 201 }
             }
-            let createMachine = await MachineS.create({ Machine_name: data.products[0].Machine_name, Product_name:data.products[0].Product_name, cropId:foundCrop.data._id })
-            return { data: await product.create({Capacity, Model, Price, cropId: foundCrop.data._id, machineId: createMachine.data._id, UnitId}), message: "created Successfully", status: 201 }
+            let createMachine = await MachineS.create({ Machine_name: data.products[0].Machine_name, Product_name: data.products[0].Product_name, cropId: foundCrop.data._id })
+            console.log("ProductID, Status 2", ProductID, Status)
+            if (Status && ProductID) return { data: await product.create({ Capacity, Model, Price, ProductID, Status, cropId: foundCrop.data._id, machineId: createMachine.data._id, UnitId }), message: "created Successfully", status: 201 }
+            return { data: await product.create({ Capacity, Model, Price, cropId: foundCrop.data._id, machineId: createMachine.data._id, UnitId }), message: "created Successfully", status: 201 }
         } else {
             let createCrop = await CropS.create(data.crop)
-            let createMachine = await MachineS.create({ Machine_name: data.products[0].Machine_name, Product_name:data.products[0].Product_name, cropId:createCrop.data._id })
-            console.log(createMachine)
-            return { data: await product.create({Capacity, Model, Price, cropId: createCrop.data._id, machineId: createMachine.data._id, UnitId}), message: "created Successfully", status: 201 }
+            let createMachine = await MachineS.create({ Machine_name: data.products[0].Machine_name, Product_name: data.products[0].Product_name, cropId: createCrop.data._id })
+            console.log("ProductID, Status 2", ProductID, Status)
+            if (Status && ProductID) return { data: await product.create({ Capacity, Model, Price, ProductID, Status, cropId: createCrop.data._id, machineId: createMachine.data._id, UnitId }), message: "created Successfully", status: 201 }
+            return { data: await product.create({ Capacity, Model, Price, cropId: createCrop.data._id, machineId: createMachine.data._id, UnitId }), message: "created Successfully", status: 201 }
         }
-    }catch(e){
+    } catch (e) {
         console.log(e)
         return { error: e, message: "creation / updation failed" }
     }
@@ -69,19 +81,19 @@ exports.findOneById = async (id) => {
 }
 
 exports.findProductsForMachineId = async (MachineId) => {
-    let products = await product.find({machineId:MachineId})
-    return { data: products, message: products.length>0 ? "retrieval Success" : "not products found", status: products.length>0 ? 200 : 404 }
+    let products = await product.find({ machineId: MachineId })
+    return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }
 }
 
 exports.findOneByProductId = async (ProductId) => {
-    return await product.findOne({ProductID:ProductId})
+    return await product.findOne({ ProductID: ProductId })
 }
 
 exports.deleteOnly = async (id) => {
     return await product.deleteOne(id)
 }
 
-exports.updateProductById = async ({Capacity, Model, Price, _id },Unit) => {
-    let updateThisProductDetail = await product.updateOne({ _id }, { $set: {Capacity, Model, Price} })
-    return { data: updateThisProductDetail.modifiedCount > 0, message: updateThisProductDetail.modifiedCount > 0?"updated Successfully":"update Failed", status: updateThisProductDetail.modifiedCount > 0?200:400 }
+exports.updateProductById = async ({ Capacity, Model, Price, _id }, Unit) => {
+    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price } })
+    return { data: updateThisProductDetail.modifiedCount > 0, message: updateThisProductDetail.modifiedCount > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.modifiedCount > 0 ? 200 : 400 }
 }

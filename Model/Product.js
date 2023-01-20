@@ -4,7 +4,7 @@ const crypto = require("crypto");
 // User Schema
 const productDetail = new mongoose.Schema({
     Capacity: {
-        type: Number,
+        type: String,
         required: true
     },
     Model: {

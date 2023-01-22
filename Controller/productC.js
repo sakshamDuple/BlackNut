@@ -35,7 +35,11 @@ exports.getAllCrops = async (req, res) => {
 }
 
 exports.getAllMachines = async (req, res) => {
-    res.status(200).send({ data: (await MachineS.getAllCMachines()).data, Message: "All Machines", status: 200 })
+    res.status(200).send({ data: (await MachineS.getAllMachines()).data, Message: "All Machines", status: 200 })
+}
+
+exports.getAllProducts = async (req, res) => {
+    res.status(200).send({ data: (await ProductS.getAllProducts()), Message: "All Products", status: 200 })
 }
 
 exports.getFullDetailOfOneProduct = async (req, res) => {

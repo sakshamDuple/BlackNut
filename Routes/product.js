@@ -11,6 +11,7 @@ const { updateProductById } = require("../Service/productS");
 
 router.post("/createProduct", productC.productCreate);
 router.post("/createCrop", productC.cropCreate);
+router.get("/getAllProducts", productC.getAllProducts);
 router.post("/machineCreate", productC.machineCreate);
 router.get("/machinesForASelectCrop", productC.machinesForASelectCrop);
 router.get("/productDetailForASelectMachine", productC.productDetailForASelectMachine);

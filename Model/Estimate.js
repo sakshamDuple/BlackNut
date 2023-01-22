@@ -1,11 +1,17 @@
 const mongoose = require("mongoose")
 
 // Temple User Schema
+const Products = {
+    type: String,
+    required:true
+}
+
 const Estimate = new mongoose.Schema({
 
-    ProductId: {
-        type: String,
-        required:true
+    ProductId: [Products],
+
+    EstimateNo:{
+        type: Number
     },
 
     quantiy: {
@@ -13,7 +19,7 @@ const Estimate = new mongoose.Schema({
         required:true
     },
 
-    approvalFromAdmin: {
+    approvalFromAdminAsQuotes: {
         type: Boolean,
         default: () => false
     },
@@ -21,6 +27,16 @@ const Estimate = new mongoose.Schema({
     agentId: {
         type: String,
         required:true
+    },
+
+    customerId:{
+        type:String,
+        required:true
+    },
+
+    EstimateDateOfPurchase: {
+        type:Date,
+        default: () => Date.now() + 60*60*1000*24*5
     },
 
     createdAt: {

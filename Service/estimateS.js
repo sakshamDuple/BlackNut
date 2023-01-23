@@ -165,8 +165,8 @@ exports.getDetailEstimateById = async (id) => {
     newEstimate._doc.Products = successes
     delete newEstimate._doc.agentId
     delete newEstimate._doc.customerId
-    newEstimate._doc.customer = customer
-    newEstimate._doc.agent = agent
+    newEstimate._doc.customer = customer.data
+    newEstimate._doc.agent = agent.data
     return {
       data: newEstimate._doc,
       message: "estimate found",

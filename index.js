@@ -11,10 +11,13 @@ const product = require("./Routes/product")
 const agent = require("./Routes/agent")
 const customer = require("./Routes/customer")
 const estimate = require("./Routes/estimate")
+const quotation = require("./Routes/quotation")
+const cors = require("cors")
 
 let app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors())
 
 mongoose.connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
@@ -38,6 +41,7 @@ app.use("/product", product)
 app.use("/agent", agent)
 app.use("/customer", customer)
 app.use("/estimate",estimate)
+app.use("/quotation",quotation)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)

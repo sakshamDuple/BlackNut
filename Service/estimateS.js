@@ -138,12 +138,63 @@ exports.getAllEstimates = async () => {
   }
 };
 
-exports.getEstimateById = async (id) => {
+exports.getAllQuotation = async () => {
+  try {
+    let AllEstimates = await Estimate.find({
+      approvalFromAdminAsQuotes: true,
+    });
+    return {
+      data: AllEstimates,
+      message:
+        AllEstimates.length > 0
+          ? "retrieval Success"
+          : "please create some estimates to view",
+      status: AllEstimates.length > 0 ? 200 : 404,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error" };
+  }
+};
+
+exports.updateEstimateToQuotation = async (id) => {
+  let foundEstimate = await Estimate.findById(id)
+  foundEstimate.approvalFromAdminAsQuotes = true
+  if(!foundEstimate) return { error: "Estimate Not Found", message:"Updation failed", status: 404 };
+  let updateThisEstimate = await Estimate.updateOne({_id:id},{$set:foundEstimate})
   try {
     return {
-      data: await Estimate.findOne(id),
-      message: "estimate found",
-      status: 200,
+      data: updateThisEstimate.modifiedCount>0,
+      message: updateThisEstimate.modifiedCount>0?"Updatation Of Estimate To Quotation Success":"Updation failed",
+      status: updateThisEstimate.modifiedCount>0?200:400,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error", status: 400 };
+  }
+}
+
+exports.getEstimateById = async (id) => {
+  try {
+    let estimate =await Estimate.findOne({_id:id,approvalFromAdminAsQuotes:false})
+    return {
+      data: estimate,
+      message: estimate?"Estimate found":"Estimate Not Found",
+      status: estimate?200:404,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error", status: 400 };
+  }
+};
+
+exports.getQuotationById = async (id) => {
+  try {
+    let Quotation =await Estimate.findOne({_id:id,approvalFromAdminAsQuotes:true})
+    return {
+      data: Quotation,
+      message: Quotation?"Quotation found":"Quotation Not Found",
+      status: Quotation?200:404,
     };
   } catch (e) {
     console.log(e);

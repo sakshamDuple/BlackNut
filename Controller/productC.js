@@ -102,7 +102,7 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
   let {
     data: { Machine_name, Product_name },
   } = await MachineS.findMachineById(machineId);
-  let { field, Unit } = await UnitS.findUnitById(UnitId);
+  // let { field, Unit } = await UnitS.findUnitById(UnitId);
   let DetailedProduct = {
     Capacity,
     Model,
@@ -110,7 +110,6 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
     Status,
     ProductID,
     createdAt,
-    Unit: { field, Unit },
     Machine_name,
     Product_name,
     crop,

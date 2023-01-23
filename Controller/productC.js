@@ -12,13 +12,11 @@ exports.productCreate = async (req, res) => {
   if (Unit) UnitId = await manageUnit(Unit);
   const createTheProduct = await ProductS.create({ crop, products, UnitId });
   console.log(createTheProduct);
-  res
-    .status(createTheProduct.status)
-    .send({
-      data: createTheProduct.data,
-      Message: createTheProduct.message,
-      status: createTheProduct.status,
-    });
+  res.status(createTheProduct.status).send({
+    data: createTheProduct.data,
+    Message: createTheProduct.message,
+    status: createTheProduct.status,
+  });
 };
 
 async function manageUnit(Unit) {
@@ -41,33 +39,36 @@ exports.getAllProductUnits = async (req, res) => {
 };
 
 exports.getAllCrops = async (req, res) => {
-  res
-    .status(200)
-    .send({
-      data: (await CropS.getAllCrops()).data,
-      Message: "All Crops",
-      status: 200,
-    });
+  res.status(200).send({
+    data: (await CropS.getAllCrops()).data,
+    Message: "All Crops",
+    status: 200,
+  });
 };
 
 exports.getAllMachines = async (req, res) => {
-  res
-    .status(200)
-    .send({
-      data: (await MachineS.getAllMachines()).data,
-      Message: "All Machines",
-      status: 200,
-    });
+  res.status(200).send({
+    data: (await MachineS.getAllMachines()).data,
+    Message: "All Machines",
+    status: 200,
+  });
 };
 
 exports.getAllProducts = async (req, res) => {
-  res
-    .status(200)
-    .send({
-      data: await ProductS.getAllProducts(),
-      Message: "All Products",
-      status: 200,
-    });
+  res.status(200).send({
+    data: await ProductS.getAllProducts(),
+    Message: "All Products",
+    status: 200,
+  });
+};
+
+exports.getAllProductsForSelectCrop = async (req, res) => {
+    let products = await ProductS.findByCropId(req.query.id)
+  res.status(200).send({
+    data: products,
+    Message: products.length>0?"All Products For Select Crop":"no products for this crop",
+    status: products.length>0?200:404,
+  });
 };
 
 exports.getFullDetailOfOneProduct = async (req, res) => {
@@ -106,13 +107,11 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
     crop,
   };
   // let {data2} = await MachineS.findCrop(machineId)
-  res
-    .status(200)
-    .send({
-      data: DetailedProduct,
-      Message: "get Full Detail View Of Product",
-      status: 200,
-    });
+  res.status(200).send({
+    data: DetailedProduct,
+    Message: "get Full Detail View Of Product",
+    status: 200,
+  });
 };
 
 exports.cropCreate = async (req, res) => {
@@ -149,11 +148,11 @@ exports.generateCsvOfOneMachine = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;
   let agg = [
-      {
-          '$match': {
-              'machineId': id
-          }
-      }, 
+    {
+      $match: {
+        machineId: id,
+      },
+    },
     //   {
     //       '$addFields': {
     //           'newUnitId': {
@@ -167,26 +166,26 @@ exports.generateCsvOfOneMachine = async (req, res) => {
     //           'foreignField': '_id',
     //           'as': 'result'
     //       }
-    //   }, 
-      {
-          '$project': {
-              'Model': 1,
-              'Price': 1,
-              'ProductID': 1,
-              'createdAt': 1,
-              'Capacity': 1,
-              'updateAt': 1
-          }
-      }
-  ]
+    //   },
+    {
+      $project: {
+        Model: 1,
+        Price: 1,
+        ProductID: 1,
+        createdAt: 1,
+        Capacity: 1,
+        updateAt: 1,
+      },
+    },
+  ];
   let productRes = await product.aggregate(agg);
-//   let productRes = await product.find({machineId: id});
-  console.log(productRes)
+  //   let productRes = await product.find({machineId: id});
+  console.log(productRes);
   // let productC = []
-//   productRes.map((element) => {
-//     element.Unit = element.result[0].Unit;
-//     delete element.result;
-//   });
+  //   productRes.map((element) => {
+  //     element.Unit = element.result[0].Unit;
+  //     delete element.result;
+  //   });
   console.log(productRes);
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/csv");
@@ -209,11 +208,9 @@ exports.generateListOfCropsMachines = async (req, res) => {
       crop: machine.crop,
     });
   });
-  res
-    .status(machines.status)
-    .json({
-      data: machineToShow,
-      status: 200,
-      message: "retrieved successfully",
-    });
+  res.status(machines.status).json({
+    data: machineToShow,
+    status: 200,
+    message: "retrieved successfully",
+  });
 };

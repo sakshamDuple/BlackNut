@@ -48,6 +48,10 @@ exports.findOneById = async (id) => {
     return await product.findById(id)
 }
 
+exports.findByCropId = async (id) => {
+    return await product.find({cropId:id})
+}
+
 exports.findProductsForMachineId = async (MachineId) => {
     let products = await product.find({ machineId: MachineId })
     return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }

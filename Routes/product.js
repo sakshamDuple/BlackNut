@@ -14,6 +14,7 @@ router.post("/createCrop", productC.cropCreate);
 router.get("/getAllProducts", productC.getAllProducts);
 router.post("/machineCreate", productC.machineCreate);
 router.get("/machinesForASelectCrop", productC.machinesForASelectCrop);
+router.get("/getAllProductsForSelectCrop",productC.getAllProductsForSelectCrop)
 router.get("/productDetailForASelectMachine", productC.productDetailForASelectMachine);
 router.get("/getAllUnit", productC.getAllProductUnits);
 router.get("/getAllCrops", productC.getAllCrops);

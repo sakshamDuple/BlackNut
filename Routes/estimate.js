@@ -4,7 +4,7 @@ const estimateC = require("../Controller/estimateC")
 
 router.get("/", estimateC.getAll);
 router.post("/create", estimateC.create);
-router.getById
+router.post("/getById", estimateC.getById)
 // router.post("/forgotPassword", estimateC.forgotPassword);
 // router.post("/verifyForgotPassword", estimateC.verifyForgotPassword);
 // router.post("/resetPassword", estimateC.resetPassword);

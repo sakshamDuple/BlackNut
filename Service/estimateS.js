@@ -122,13 +122,19 @@ exports.getEstimateById = async (id) => {
     };
   } catch (e) {
     console.log(e);
-    return { error: e, message: "we have an error" };
+    return { error: e, message: "we have an error", status: 400 };
   }
 };
 
-// exports.init = async () => {
-//   let AllEstimates = await Estimate.find({ approvalFromAdminAsQuotes: false });
-//   if (AllEstimates.length==0)
-//     await Estimate.create({ _id: 0, sequenceValue: 0, customerId:0,agentId:0,quantiy:0,ProductId:0 });
-//   if (AllEstimates.length!=0) await Estimate.deleteOne({ _id: 0 });
-// };
+exports.getDetailEstimateById = async (id) => {
+  try {
+    return {
+      data: await Estimate.findOne(id),
+      message: "estimate found",
+      status: 200,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error", status: 400 };
+  }
+};

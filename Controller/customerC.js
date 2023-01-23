@@ -25,9 +25,10 @@ exports.addCustomer = async (req, res) => {
     if(otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
     Customer.password = Customer.confirmPassword = "Pa$$w0rd!"
     const newCustomer = await CustomerS.create(Customer)
+    console.log(newCustomer)
     await OtpS.deleteOnly(foundAgent.data.phone)
     if (newCustomer.status == 201) {
-        res.status(newCustomer.status).send({ data: newCustomer.data, Message: newCustomer.message, status: newCustomer.status })
+        res.status(newCustomer.status).send({ data: newCustomer.Agent_ID, Message: newCustomer.message, status: newCustomer.status })
     } else {
         res.status(newCustomer.status).send({ error: newCustomer.error, Message: newCustomer.message, status: newCustomer.status })
     }

@@ -202,6 +202,20 @@ exports.getQuotationById = async (id) => {
   }
 };
 
+exports.getByAgentId = async (id) => {
+  try {
+    let Quotation =await Estimate.find({agentId:id,approvalFromAdminAsQuotes:true})
+    return {
+      data: Quotation,
+      message: Quotation?"Quotation found":"Quotation Not Found",
+      status: Quotation?200:404,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error", status: 400 };
+  }
+};
+
 exports.getDetailEstimateById = async (id) => {
   try {
     console.log(id)

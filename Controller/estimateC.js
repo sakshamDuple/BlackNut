@@ -27,6 +27,15 @@ exports.getQuotationById = async (req, res) => {
     }
 }
 
+exports.getByAgentId = async (req, res) => {
+    let AllEstimates = await EstimateS.getByAgentId(req.query.id)
+    if (AllEstimates.status == 200) {
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+    } else {
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+    }
+}
+
 exports.create = async (req, res) => {
     let estimate = req.body
     let createdEstimate = await EstimateS.create(estimate)

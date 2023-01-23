@@ -5,7 +5,7 @@ const { generateAccessToken } = require("../Middleware/jwtSign")
 const { hashCompare, hashPassword } = require("../Middleware/salt")
 const TempOtp = require("../Model/TempOtp")
 const AgentS = require("../Service/AgentS")
-const AdminS = require("../Service/AdminS")
+const AdminS = require("../Service/adminS")
 const OtpS = require("../Service/OtpS")
 
 // exports.loginAgent = async (req,res) => {

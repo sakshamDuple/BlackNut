@@ -2,21 +2,22 @@ const mongoose = require("mongoose")
 
 // Temple User Schema
 const Products = {
-    type: String,
-    required:true
+    ProductId:{
+        type: String,
+        required:true
+    },
+    quantity: {
+        type: Number,
+        default: () => 1
+    },
 }
 
 const Estimate = new mongoose.Schema({
 
-    ProductId: [Products],
+    Products: [Products],
 
     EstimateNo:{
         type: Number
-    },
-
-    quantiy: {
-        type: String,
-        required:true
     },
 
     approvalFromAdminAsQuotes: {

@@ -6,27 +6,24 @@ const { dateToDateNowConverter } = require("../Middleware/dateConverter");
 
 exports.create = async (estimate) => {
   let {
-    ProductId,
+    Products,
     agentId,
     customerId,
     EstimateDateOfPurchase,
-    approvalFromAdminAsQuotes,
-    quantiy,
+    approvalFromAdminAsQuotes
   } = estimate;
-  if (!ProductId || ProductId.length == 0)
-    return error("ProductId", "missing field");
+  if (!Products || Products.length == 0)
+    return error("Products", "missing field");
   if (!agentId) return error("agentId", "missing field");
   if (!customerId) return error("customerId", "missing field");
   if (!EstimateDateOfPurchase)
     return error("EstimateDateOfPurchase", "missing field");
   //   if (!approvalFromAdminAsQuotes)
   //     return error("approvalFromAdminAsQuotes", "missing field");
-  if (!quantiy) return error("quantiy", "missing field");
-  let foundcustomer, foundAgent, newDate;
-  let data = await allFound(ProductId);
-  console.log("NotfoundProduct", data);
-  if (data.ProductNotFound != 0)
-    return error(`ProductId: ${data.ProductNotFound}`, "id's not found");
+  let foundcustomer, foundAgent, newDate, fails = [], successes = [];
+  let data = await allProducts(Products,fails,successes);
+  console.log("NotfoundProduct", data, fails);
+  if(fails.length>0) return error(`ProductId: ${fails}`, "id's not found");
   foundcustomer = await AgentS.getCommonById(customerId);
   if (!foundcustomer.data || foundcustomer.data.role == "agent")
     return error("customerId", "id not found");
@@ -37,13 +34,13 @@ exports.create = async (estimate) => {
     newDate = await dateToDateNowConverter(EstimateDateOfPurchase);
   let nextSeq = await getValueForNextSequence();
   try {
+    console.log(Products)
     let createdEstimate = await Estimate.create({
-      ProductId,
+      Products,
       agentId,
       customerId,
       approvalFromAdminAsQuotes,
       EstimateDateOfPurchase: newDate,
-      quantiy,
       EstimateNo: nextSeq,
     });
     return {
@@ -57,42 +54,28 @@ exports.create = async (estimate) => {
   }
 };
 
-let allFound = async (ProductId) => {
-  let ProductNotFound = [],
-    foundProducts = [];
-  //   return new Promise(async function (resolve, reject) {
-  //     Promise.all(
-  //       ProductId.map(async (element, i) => {
-  //         return new Promise(async function (resolve, reject) {
-  //           let foundProduct = await productS.findOneById(element);
-  //           console.log("foundProduct",foundProduct)
-  //           if (!foundProduct) {
-  //             ProductNotFound = element
-  //           } else {
-  //             foundProducts.push(element);
-  //           }
-  //           resolve(ProductNotFound);
-  //         });
-  //       })
-  //     ).then((data) => {
-  //       resolve(data);
-  //     });
-  //   });
+let allProducts = (products, fails, successes) => {
   return new Promise(async function (resolve, reject) {
-    ProductId.map(async (element) => {
-      let foundProduct = await productS.findOneById(element);
-      if (!foundProduct) {
-        ProductNotFound.push(element);
-      } else {
-        foundProducts.push(element);
-      }
-    });
-    resolve({ProductNotFound});
-  }).then(data => {
-    console.log(data)
-    return data
-  });
-};
+      Promise.all(
+          products.map(async element => {
+              return new Promise(async function (resolve, reject) {
+                  let fail, success;
+                  let { ProductId, quantity } = element
+                  console.log(element)
+                  let foundProduct = await productS.findOneById(ProductId)
+                  if (!foundProduct) {
+                      fails.push(ProductId);
+                  } else {
+                      successes.push(ProductId)
+                  }
+                  resolve({ fail, success })
+              })
+          })
+      ).then((data) => {
+          resolve(data)
+      })
+  })
+}
 
 async function getValueForNextSequence() {
   let foundEstimates = await Estimate.find();

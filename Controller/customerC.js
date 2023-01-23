@@ -34,6 +34,11 @@ exports.addCustomer = async (req, res) => {
     }
 }
 
+exports.getThisCustomer = async (req,res) => {
+    let customerId = req.query.id
+    await CustomerS.getAllCustomer()
+}
+
 exports.getAllCustomers = async (req, res) => {
     let theCustomers = await CustomerS.getAllCustomer()
     console.log(theCustomers)

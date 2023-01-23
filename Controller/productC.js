@@ -122,6 +122,43 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
   });
 };
 
+exports.toGetAllDetailsOfProduct = async (id) => {
+  let idOfProduct = id;
+  let {
+    Capacity,
+    Model,
+    Price,
+    Status,
+    ProductID,
+    cropId,
+    machineId,
+    createdAt,
+  } = await ProductS.findOneById(idOfProduct);
+  let {
+    data: { crop },
+  } = await CropS.findCropById(cropId);
+  let {
+    data: { Machine_name, Product_name },
+  } = await MachineS.findMachineById(machineId);
+  // let { field, Unit } = await UnitS.findUnitById(UnitId);
+  let DetailedProduct = {
+    Capacity,
+    Model,
+    Price,
+    Status,
+    ProductID,
+    createdAt,
+    Machine_name,
+    Product_name,
+    crop,
+  };
+  return DetailedProduct
+}
+
+// exports.getFullDetailOfTheseProducts = async (products) => {
+//   products
+// }
+
 exports.cropCreate = async (req, res) => {
   let crop = req.body.crop;
   let createdCrop = await CropS.create(crop);

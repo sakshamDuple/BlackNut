@@ -47,17 +47,19 @@ exports.getAllCustomer = async (bool) => {
     }
 }
 
-// exports.getCustomerById = async (id, bool) => {
-//     try {
-//         let theCustomer
-//         if (bool) theCustomer = await Agent.findOne({ _id: id, role: "customer", status: "Active" })
-//         theCustomer = await Agent.findOne({ _id: id })
-//         return { data: theCustomer, message: "retrieval Success", status: 201 }
-//     } catch (e) {
-//         console.log(e)
-//         return { error: e, message: "we have an error", status: 400 }
-//     }
-// }
+exports.getCustomerToShowById = async (id, bool) => {
+    try {
+        let theCustomer
+        theCustomer = await Agent.findOne({ _id: id, role: "customer" })
+        if (bool) theCustomer = await Agent.findOne({ _id: id, role: "customer", status: "Active" })
+        let {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address} = theCustomer
+        let customerToShow = {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address}
+        return { data: customerToShow, message: "retrieval Success", status: 201 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "we have an error", status: 400 }
+    }
+}
 
 // exports.getCustomerByEmail = async (email, bool) => {
 //     try {

@@ -1,8 +1,10 @@
 const productS = require("./productS");
 const AgentS = require("./AgentS");
+const productC = require("../Controller/productC");
 const { error } = require("../Middleware/error");
 const Estimate = require("../Model/Estimate");
 const { dateToDateNowConverter } = require("../Middleware/dateConverter");
+const { getCustomerToShowById } = require("./CustomerS");
 
 exports.create = async (estimate) => {
   let {
@@ -77,6 +79,29 @@ let allProducts = (products, fails, successes) => {
   })
 }
 
+let allProductsDetailed = (products, fails, successes) => {
+  return new Promise(async function (resolve, reject) {
+      Promise.all(
+          products.map(async element => {
+              return new Promise(async function (resolve, reject) {
+                  let fail, success;
+                  let { ProductId, quantity } = element
+                  console.log(element)
+                  let Product = await productC.toGetAllDetailsOfProduct(ProductId)
+                  if (!Product) {
+                      fails.push(ProductId);
+                  } else {
+                      successes.push({Product,quantity})
+                  }
+                  resolve({ fail, success })
+              })
+          })
+      ).then((data) => {
+          resolve(data)
+      })
+  })
+}
+
 async function getValueForNextSequence() {
   let foundEstimates = await Estimate.find();
   if (foundEstimates.length == 0) return 1;
@@ -128,8 +153,22 @@ exports.getEstimateById = async (id) => {
 
 exports.getDetailEstimateById = async (id) => {
   try {
+    console.log(id)
+    let estimate = await Estimate.findById(id)
+    let {agentId, customerId} = estimate
+    let customer = await getCustomerToShowById(customerId)
+    let agent = await AgentS.getAgentToShowById(agentId)
+    let newEstimate = {...estimate}
+    let fails = [], successes = []
+    await allProductsDetailed(estimate.Products,fails,successes)
+    console.log("successes",successes)
+    newEstimate._doc.Products = successes
+    delete newEstimate._doc.agentId
+    delete newEstimate._doc.customerId
+    newEstimate._doc.customer = customer
+    newEstimate._doc.agent = agent
     return {
-      data: await Estimate.findOne(id),
+      data: newEstimate._doc,
       message: "estimate found",
       status: 200,
     };

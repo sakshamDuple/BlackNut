@@ -5,9 +5,6 @@ const estimateC = require("../Controller/estimateC")
 router.get("/", estimateC.getAll);
 router.post("/create", estimateC.create);
 router.post("/getById", estimateC.getById)
-// router.post("/forgotPassword", estimateC.forgotPassword);
-// router.post("/verifyForgotPassword", estimateC.verifyForgotPassword);
-// router.post("/resetPassword", estimateC.resetPassword);
-// router.post("/admin", estimateC.adminLogin);
+router.get("/getDetailedEstimateById", estimateC.getDetailedEstimateById)
 
 module.exports = router;

@@ -46,6 +46,20 @@ exports.getAllAgents = async (bool) => {
     }
 }
 
+exports.getAgentToShowById = async (id, bool) => {
+    try {
+        let theCustomer
+        theCustomer = await Agent.findOne({ _id: id, role: "agent" })
+        if (bool) theCustomer = await Agent.findOne({ _id: id, role: "agent", status: "Active" })
+        let {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address} = theCustomer
+        let customerToShow = {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address}
+        return { data: customerToShow, message: "retrieval Success", status: 201 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "we have an error", status: 400 }
+    }
+}
+
 exports.getCommonById = async (id, bool) => {
     try {
         let theAgent

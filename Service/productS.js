@@ -48,8 +48,9 @@ exports.findOneById = async (id) => {
     return await product.findById(id)
 }
 
-exports.findByCropId = async (id) => {
-    return await product.find({cropId:id})
+exports.findByCropName = async (name) => {
+    let foundCrop = await CropS.findCrop({cropName:name})
+    return await product.find({cropId:foundCrop.data._id})
 }
 
 exports.findProductsForMachineId = async (MachineId) => {

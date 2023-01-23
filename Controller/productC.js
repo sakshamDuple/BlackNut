@@ -62,8 +62,17 @@ exports.getAllProducts = async (req, res) => {
   });
 };
 
-exports.getAllProductsForSelectCrop = async (req, res) => {
+exports.getAllProductsForSelectCropId = async (req, res) => {
     let products = await ProductS.findByCropId(req.query.id)
+  res.status(200).send({
+    data: products,
+    Message: products.length>0?"All Products For Select Crop":"no products for this crop",
+    status: products.length>0?200:404,
+  });
+};
+
+exports.getAllProductsForSelectCropName = async (req, res) => {
+    let products = await ProductS.findByCropName(req.query.name)
   res.status(200).send({
     data: products,
     Message: products.length>0?"All Products For Select Crop":"no products for this crop",

@@ -11,8 +11,6 @@ exports.getAll = async (req, res) => {
 
 exports.create = async (req, res) => {
     let estimate = req.body
-    estimate.agentId = req.query.agentId
-    estimate.customerId =req.query.customerId
     let createdEstimate = await EstimateS.create(estimate)
     res.status(createdEstimate.status).send({ data: createdEstimate.data, error:createdEstimate.error, Message: createdEstimate.message, status: createdEstimate.status })
 }

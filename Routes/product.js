@@ -17,6 +17,7 @@ router.get("/machinesForASelectCrop", productC.machinesForASelectCrop);
 router.get("/getAllProductsForSelectCrop",productC.getAllProductsForSelectCropId)
 router.get("/getAllProductsForSelectCropName",productC.getAllProductsForSelectCropName)
 router.get("/productDetailForASelectMachine", productC.productDetailForASelectMachine);
+router.put("/productUpdateForASelectMachine", productC.productUpdateForASelectMachine);
 router.get("/getAllUnit", productC.getAllProductUnits);
 router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);

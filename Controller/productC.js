@@ -189,6 +189,15 @@ exports.productDetailForASelectMachine = async (req, res) => {
   res.status(products.status).json(products);
 };
 
+exports.productUpdateForASelectMachine = async (req, res) => {
+  let updateProductsList = req.body
+  let machineId = req.query.machineId;
+  let products = await ProductS.findProductsForMachineId(machineId);
+  if(!products.data) return res.status(products.status).json(products);
+  let updateProcess = await ProductS.updateTheProductByMachine(machineId,products.data,updateProductsList)
+  res.status(updateProcess.status).json(updateProcess);
+};
+
 exports.generateCsvOfOneMachine = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;

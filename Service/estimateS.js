@@ -23,9 +23,9 @@ exports.create = async (estimate) => {
   //   if (!approvalFromAdminAsQuotes)
   //     return error("approvalFromAdminAsQuotes", "missing field");
   let foundcustomer, foundAgent, newDate, fails = [], successes = [];
-  let data = await allProducts(Products,fails,successes);
+  let data = await allProducts(Products, fails, successes);
   console.log("NotfoundProduct", data, fails);
-  if(fails.length>0) return error(`ProductId: ${fails}`, "id's not found");
+  if (fails.length > 0) return error(`ProductId: ${fails}`, "id's not found");
   foundcustomer = await AgentS.getCommonById(customerId);
   if (!foundcustomer.data || foundcustomer.data.role == "agent")
     return error("customerId", "id not found");
@@ -34,7 +34,7 @@ exports.create = async (estimate) => {
     return error("agentId", "id not found");
   if (EstimateDateOfPurchase)
     newDate = await dateToDateNowConverter(EstimateDateOfPurchase);
-  let nextSeq = await getValueForNextSequence();
+  let nextSeq = await getValueForNextSequence("Estimate");
   try {
     console.log(Products)
     let createdEstimate = await Estimate.create({
@@ -58,60 +58,73 @@ exports.create = async (estimate) => {
 
 let allProducts = (products, fails, successes) => {
   return new Promise(async function (resolve, reject) {
-      Promise.all(
-          products.map(async element => {
-              return new Promise(async function (resolve, reject) {
-                  let fail, success;
-                  let { ProductId, quantity } = element
-                  console.log(element)
-                  let foundProduct = await productS.findOneById(ProductId)
-                  if (!foundProduct) {
-                      fails.push(ProductId);
-                  } else {
-                      successes.push(ProductId)
-                  }
-                  resolve({ fail, success })
-              })
-          })
-      ).then((data) => {
-          resolve(data)
+    Promise.all(
+      products.map(async element => {
+        return new Promise(async function (resolve, reject) {
+          let fail, success;
+          let { ProductId, quantity } = element
+          console.log(element)
+          let foundProduct = await productS.findOneById(ProductId)
+          if (!foundProduct) {
+            fails.push(ProductId);
+          } else {
+            successes.push(ProductId)
+          }
+          resolve({ fail, success })
+        })
       })
+    ).then((data) => {
+      resolve(data)
+    })
   })
 }
 
 let allProductsDetailed = (products, fails, successes) => {
   return new Promise(async function (resolve, reject) {
-      Promise.all(
-          products.map(async element => {
-              return new Promise(async function (resolve, reject) {
-                  let fail, success;
-                  let { ProductId, quantity } = element
-                  console.log(element)
-                  let Product = await productC.toGetAllDetailsOfProduct(ProductId)
-                  if (!Product) {
-                      fails.push(ProductId);
-                  } else {
-                      successes.push({Product,quantity})
-                  }
-                  resolve({ fail, success })
-              })
-          })
-      ).then((data) => {
-          resolve(data)
+    Promise.all(
+      products.map(async element => {
+        return new Promise(async function (resolve, reject) {
+          let fail, success;
+          let { ProductId, quantity } = element
+          console.log(element)
+          let Product = await productC.toGetAllDetailsOfProduct(ProductId)
+          if (!Product) {
+            fails.push(ProductId);
+          } else {
+            successes.push({ Product, quantity })
+          }
+          resolve({ fail, success })
+        })
       })
+    ).then((data) => {
+      resolve(data)
+    })
   })
 }
 
-async function getValueForNextSequence() {
+async function getValueForNextSequence(val) {
+  let MaxEstimateNo
+  switch (val) {
+    case "Estimate":
+      MaxEstimateNo = { $max: "$EstimateNo" }
+      break;
+    case "Quotation":
+      MaxEstimateNo = { $max: "$QuotationNo" }
+      break;
+    case "PI":
+      MaxEstimateNo = { $max: "$PI_No" }
+      break;
+    case "PO":
+      MaxEstimateNo = { $max: "$PO_No" }
+      break;
+  }
   let foundEstimates = await Estimate.find();
   if (foundEstimates.length == 0) return 1;
   let agg = [
     {
       $group: {
         _id: null,
-        MaxEstimateNo: {
-          $max: "$EstimateNo",
-        },
+        MaxEstimateNo
       },
     },
   ];
@@ -157,19 +170,21 @@ exports.getAllQuotation = async () => {
   }
 };
 
-exports.updateEstimateToQuotation = async (id,boolean) => {
-  // console.log(id,boolean)
+exports.updateEstimateToQuotation = async (id) => {
   let foundEstimate = await Estimate.findById(id)
+  if(!foundEstimate) return { message: "Id Not Found", status: 404 };
   foundEstimate.approvalFromAdminAsQuotes = true
-  if(!foundEstimate) return { error: "Estimate Not Found", message:"Updation failed", status: 404 };
-  // if(!boolean) foundEstimate.approvalFromAdminAsQuotes = boolean
-  console.log(foundEstimate)
-  let updateThisEstimate = await Estimate.updateOne({_id:id},{$set:foundEstimate})
+  foundEstimate.QuotationNo = getValueForNextSequence("Quotation")
+  foundEstimate.Updates.EstimateToQuotation = Date.now()
+  foundEstimate.QuotationId = "Q_Id" + Date.now().toString()
+  if (!foundEstimate) return { error: "Estimate Not Found", message: "Updation failed", status: 404 };
+  let updateThisEstimate = await Estimate.updateOne({ _id: id }, { $set: foundEstimate })
+  console.log(updateThisEstimate.nModified)
   try {
     return {
-      data: updateThisEstimate.modifiedCount>0,
-      message: updateThisEstimate.modifiedCount>0?"Updatation Of Estimate To Quotation Success":"Updation failed",
-      status: updateThisEstimate.modifiedCount>0?200:400,
+      data: updateThisEstimate.nModified > 0,
+      message: updateThisEstimate.nModified > 0 ? "Updatation Of Estimate To Quotation Success" : "Updation failed",
+      status: updateThisEstimate.nModified > 0 ? 200 : 400,
     };
   } catch (e) {
     console.log(e);
@@ -179,11 +194,11 @@ exports.updateEstimateToQuotation = async (id,boolean) => {
 
 exports.getEstimateById = async (id) => {
   try {
-    let estimate =await Estimate.findOne({_id:id,approvalFromAdminAsQuotes:false})
+    let estimate = await Estimate.findOne({ _id: id, approvalFromAdminAsQuotes: false })
     return {
       data: estimate,
-      message: estimate?"Estimate found":"Estimate Not Found",
-      status: estimate?200:404,
+      message: estimate ? "Estimate found" : "Estimate Not Found",
+      status: estimate ? 200 : 404,
     };
   } catch (e) {
     console.log(e);
@@ -193,11 +208,11 @@ exports.getEstimateById = async (id) => {
 
 exports.getQuotationById = async (id) => {
   try {
-    let Quotation =await Estimate.findOne({_id:id,approvalFromAdminAsQuotes:true})
+    let Quotation = await Estimate.findOne({ _id: id, approvalFromAdminAsQuotes: true })
     return {
       data: Quotation,
-      message: Quotation?"Quotation found":"Quotation Not Found",
-      status: Quotation?200:404,
+      message: Quotation ? "Quotation found" : "Quotation Not Found",
+      status: Quotation ? 200 : 404,
     };
   } catch (e) {
     console.log(e);
@@ -207,11 +222,11 @@ exports.getQuotationById = async (id) => {
 
 exports.getByAgentId = async (id) => {
   try {
-    let Quotation =await Estimate.find({agentId:id,approvalFromAdminAsQuotes:true})
+    let Quotation = await Estimate.find({ agentId: id, approvalFromAdminAsQuotes: true })
     return {
-      data: Quotation.length>0,
-      message: Quotation.length>0?"Quotation found":"Quotation Not Found",
-      status: Quotation.length>0?200:404,
+      data: Quotation.length > 0,
+      message: Quotation.length > 0 ? "Quotation found" : "Quotation Not Found",
+      status: Quotation.length > 0 ? 200 : 404,
     };
   } catch (e) {
     console.log(e);
@@ -223,13 +238,13 @@ exports.getDetailEstimateById = async (id) => {
   try {
     console.log(id)
     let estimate = await Estimate.findById(id)
-    let {agentId, customerId} = estimate
+    let { agentId, customerId } = estimate
     let customer = await getCustomerToShowById(customerId)
     let agent = await AgentS.getAgentToShowById(agentId)
-    let newEstimate = {...estimate}
+    let newEstimate = { ...estimate }
     let fails = [], successes = []
-    await allProductsDetailed(estimate.Products,fails,successes)
-    console.log("successes",successes)
+    await allProductsDetailed(estimate.Products, fails, successes)
+    console.log("successes", successes)
     newEstimate._doc.Products = successes
     delete newEstimate._doc.agentId
     delete newEstimate._doc.customerId

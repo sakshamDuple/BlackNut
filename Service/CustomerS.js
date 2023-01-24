@@ -103,7 +103,7 @@ exports.updateThisCustomer = async (customer) => {
         let prevCustomer = await Agent.findOne(customer._id) //to Check For Future Conditions
         let newCustomer = { ...customer }
         let updateThisCustomer = await Agent.updateOne({ _id: customer._id, role: "customer" }, { $set: newCustomer })
-        return { data: updateThisCustomer.modifiedCount > 0, message: "updated Successfully", status: 200 }
+        return { data: updateThisCustomer.nModified > 0, message: updateThisCustomer.nModified > 0?"updated Successfully":"failed", status: updateThisCustomer.nModified > 0?200:400 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

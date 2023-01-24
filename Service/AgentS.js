@@ -125,7 +125,7 @@ exports.updateThisAgent = async (agent,field) => {
         if(PAN_Agent) newAgent.PAN_Agent = PAN_Agent
         if(Address) newAgent.Address = Address
         let updateThisAgent = await Agent.updateOne({ _id: agent._id}, { $set: newAgent })
-        return { data: updateThisAgent.modifiedCount > 0, message: updateThisAgent.modifiedCount > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.modifiedCount > 0 ? 200 : 400 }
+        return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

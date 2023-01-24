@@ -64,8 +64,17 @@ exports.getDetailedEstimateById = async (req, res) => {
 
 exports.updateEstimateToQuotation = async (req,res) => {
     let id = req.query.id
-    let back = req.query.back
-    let Estimate = await EstimateS.updateEstimateToQuotation(id,back)
+    let Estimate = await EstimateS.updateEstimateToQuotation(id)
+    if (Estimate.status == 200) {
+        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
+    } else {
+        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
+    }
+}
+
+exports.updateQuotationToPI = async (req,res) => {
+    let id = req.query.id
+    let Estimate = await EstimateS.updateEstimateToQuotation(id)
     if (Estimate.status == 200) {
         res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
     } else {

@@ -112,6 +112,8 @@ exports.adminLogin = async (req, res) => {
     console.log(email, password, phone)
     let match = true
     let adminFound = await AdminS.adminLogin({ email, password, phone })
+    console.log(adminFound)
+    if(!adminFound.data) return res.status(adminFound.status).send({ error: adminFound.error, Message: adminFound.message, status: adminFound.status })
     if (adminFound) match = await hashCompare(password, adminFound.data.password)
     if (match) {
         let accessToken = generateAccessToken({ role: adminFound.data.role, firstName: adminFound.data.firstName, lastName: adminFound.data.lastName, phone: adminFound.data.phone, email: adminFound.data.email, id: adminFound.data._id })

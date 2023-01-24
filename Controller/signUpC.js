@@ -1,6 +1,6 @@
 const AgentS = require("../Service/AgentS")
 const CustomerS = require("../Service/CustomerS")
-const AdminS = require("../Service/AdminS")
+const AdminS = require("../Service/adminS")
 
 exports.signUpAgent = async (req, res) => {
     let { role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address } = req.body
@@ -23,7 +23,7 @@ exports.signUpCustomer = async (req, res) => {
 }
 
 exports.createAdmin = async (req, res) => {
-    let email = "sdbhous@gmail.com"
+    let email = "blacknut.2023@gmail.com"
     let phone = 1111111111
     let firstName = "admin"
     let lastName = "admin"

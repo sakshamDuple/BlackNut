@@ -157,10 +157,13 @@ exports.getAllQuotation = async () => {
   }
 };
 
-exports.updateEstimateToQuotation = async (id) => {
+exports.updateEstimateToQuotation = async (id,boolean) => {
+  // console.log(id,boolean)
   let foundEstimate = await Estimate.findById(id)
   foundEstimate.approvalFromAdminAsQuotes = true
   if(!foundEstimate) return { error: "Estimate Not Found", message:"Updation failed", status: 404 };
+  // if(!boolean) foundEstimate.approvalFromAdminAsQuotes = boolean
+  console.log(foundEstimate)
   let updateThisEstimate = await Estimate.updateOne({_id:id},{$set:foundEstimate})
   try {
     return {
@@ -206,9 +209,9 @@ exports.getByAgentId = async (id) => {
   try {
     let Quotation =await Estimate.find({agentId:id,approvalFromAdminAsQuotes:true})
     return {
-      data: Quotation,
-      message: Quotation?"Quotation found":"Quotation Not Found",
-      status: Quotation?200:404,
+      data: Quotation.length>0,
+      message: Quotation.length>0?"Quotation found":"Quotation Not Found",
+      status: Quotation.length>0?200:404,
     };
   } catch (e) {
     console.log(e);

@@ -23,14 +23,16 @@ exports.commonlogin = async (req, res) => {
         let compare = await hashCompare(password, theAgentFound.data.password)
         if (!compare) return res.status(400).send({ error: "password not matched", message: "password to the given email is not matched", status: 400 })
         let accessToken = generateAccessToken({ role: theAgentFound.data.role, firstName: theAgentFound.data.firstName, lastName: theAgentFound.data.lastName, phone: theAgentFound.data.phone, email: theAgentFound.data.email, id: theAgentFound.data._id })
-        res.setHeader("Authorization", accessToken).status(201).json({ accessToken, message: "login success", status: 201 })
+        res.setHeader("Authorization", accessToken)
+        res.status(201).json({ Authorization: accessToken, message: "login success", status: 201 })
     } else if (phone && password) {
         theAgentFound = await AgentS.getCommonByPhone(phone)
         if (theAgentFound.data == null) return res.status(theAgentFound.status).json({ message: theAgentFound.message, status: theAgentFound.status })
         let compare = await hashCompare(password, theAgentFound.data.password)
         if (!compare) return res.status(400).json({ error: "password not matched", message: "password to the given phone is not matched", status: 400 })
         let accessToken = generateAccessToken({ role: theAgentFound.data.role, firstName: theAgentFound.data.firstName, lastName: theAgentFound.data.lastName, phone: theAgentFound.data.phone, email: theAgentFound.data.email, id: theAgentFound.data._id })
-        res.setHeader("Authorization", accessToken).status(201).json({ message: "login success", status: 201 })
+        res.setHeader("Authorization", accessToken)
+        res.status(201).json({ Authorization: accessToken, message: "login success", status: 201 })
     }
 }
 
@@ -113,7 +115,9 @@ exports.adminLogin = async (req, res) => {
     if (adminFound) match = await hashCompare(password, adminFound.data.password)
     if (match) {
         let accessToken = generateAccessToken({ role: adminFound.data.role, firstName: adminFound.data.firstName, lastName: adminFound.data.lastName, phone: adminFound.data.phone, email: adminFound.data.email, id: adminFound.data._id })
-        return res.setHeader("Authorization", accessToken).status(adminFound.status).send({ Message: adminFound.message, status: adminFound.status })
+        res.setHeader("Authorization", accessToken)
+        res.status(adminFound.status).send({ Authorization: accessToken, Message: adminFound.message, status: adminFound.status })
+    } else {
+        res.status(match ? adminFound.status : 400).send({ error: adminFound.error, Message: match ? adminFound.message : "password wasn't matched", status: match ? adminFound.status : 400 })
     }
-    return res.status(match ? adminFound.status : 400).send({ error: adminFound.error, Message: match ? adminFound.message : "password wasn't matched", status: match ? adminFound.status : 400 })
 }

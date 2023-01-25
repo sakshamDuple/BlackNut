@@ -3,8 +3,8 @@ const CustomerS = require("../Service/CustomerS")
 const AdminS = require("../Service/adminS")
 
 exports.signUpAgent = async (req, res) => {
-    let { role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address } = req.body
-    const newAgent = await AgentS.create({ role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address })
+    let { role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, PAN_A_File, PAN_C_File } = req.body
+    const newAgent = await AgentS.create({ role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, PAN_Company_File: PAN_C_File, PAN_Agent_File: PAN_A_File })
     if (newAgent.status == 201) {
         res.status(newAgent.status).send({ Agent_ID: newAgent.Agent_ID, Message: newAgent.message, status: newAgent.status })
     } else {

@@ -16,12 +16,9 @@ const Updates = {
     EstimateToQuotation: {
         type: Date,
     },
-    QuotationToPI: {
+    QuotationToPO: {
         type: Date,
-    },
-    PI_To_Po: {
-        type: Date,
-    },
+    }
 }
 
 const Estimate = new mongoose.Schema({
@@ -33,10 +30,6 @@ const Estimate = new mongoose.Schema({
     },
 
     QuotationNo: {
-        type: Number
-    },
-
-    PI_No: {
         type: Number
     },
 
@@ -64,12 +57,7 @@ const Estimate = new mongoose.Schema({
         type: Boolean,
         default: () => false
     },
-
-    approvalFromAdminAsPI: {
-        type: Boolean,
-        default: () => false
-    },
-
+    
     approvalFromAdminAsPO: {
         type: Boolean,
         default: () => false

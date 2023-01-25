@@ -1,4 +1,8 @@
+const { sendEmail } = require("../Middleware/emailSend")
+const { generateOtp } = require("../Middleware/genOtp")
 const AgentS = require("../Service/AgentS")
+const verifiedNumberS = require("../Service/verifyNumberS")
+const OtpS = require("../Service/OtpS")
 
 exports.getActiveAgents = async (req, res) => {
     let theAgents = await AgentS.getAllAgents(true)
@@ -30,7 +34,7 @@ exports.getCommonById = async (req, res) => {
 
 exports.deleteTheAgent = async (req, res) => {
     let agentId = req.body.id
-    let deleteAgent= await AgentS.deleteAgentById(agentId)
+    let deleteAgent = await AgentS.deleteAgentById(agentId)
     if (deleteAgent.status == 202) {
         res.status(deleteAgent.status).send({ data: deleteAgent.data, Message: deleteAgent.message, status: deleteAgent.status })
     } else {
@@ -40,7 +44,7 @@ exports.deleteTheAgent = async (req, res) => {
 
 exports.updateAgentById = async (req, res) => {
     let Agent = req.body.agent
-    let updatedAgent= await AgentS.updateThisAgent(Agent)
+    let updatedAgent = await AgentS.updateThisAgent(Agent)
     if (updatedAgent.status == 200) {
         res.status(updatedAgent.status).send({ data: updatedAgent.data, Message: updatedAgent.message, status: updatedAgent.status })
     } else {
@@ -48,6 +52,43 @@ exports.updateAgentById = async (req, res) => {
     }
 }
 
-exports.addEstimates = async (req, res) => {
-    
+exports.getOtpForUpdateDocument = async (req, res) => {
+    let phone = req.query.phone
+    console.log(phone)
+    let { role, id } = await verifiedNumberS.findOnly(phone)
+    if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
+    let foundAgent = await AgentS.getCommonById(id)
+    let otp = generateOtp()
+    console.log(foundAgent.data.email,otp)
+    await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp)
+    await OtpS.create({
+        number: foundAgent.data.phone,
+        id: id,
+        otp: otp
+    })
+    if (foundAgent.status == 200) {
+        res.status(foundAgent.status).send({ Message: "An Otp is sent on your email, please verify to complete the process", status: foundAgent.status })
+    } else {
+        res.status(foundAgent.status).send({ error: foundAgent.error, Message: foundAgent.message, status: foundAgent.status })
+    }
+}
+
+exports.getAgrFileToVerifyUpdate = async (req,res) => {
+    let {otp,phone,file} = req.body
+    let { role, id } = await verifiedNumberS.findOnly(phone)
+    if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
+    let otpRecieved = await OtpS.findOnly(phone)
+    if(otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
+    await OtpS.deleteOnly(phone)
+    let DocumentFile = file
+    let Agent ={
+        DocumentFile,
+        _id:id
+    }
+    let updatedAgent = await AgentS.updateThisAgent(Agent)
+    if (updatedAgent.status == 200) {
+        res.status(updatedAgent.status).send({ data: updatedAgent.data, Message: "Agreement File Successfully Updated", status: updatedAgent.status })
+    } else {
+        res.status(updatedAgent.status).send({ error: updatedAgent.error, Message: updatedAgent.message, status: updatedAgent.status })
+    }
 }

@@ -3,16 +3,32 @@ const crypto = require("crypto");
 
 // User Schema
 const Address = {
-    city: String,
-    state: String,
-    mainAddressText: String,
-    pincode: Number,
+    city: {
+        type: String,
+        required: true
+    },
+    state: {
+        type: String,
+        required: true
+    },
+    mainAddressText: {
+        type: String,
+        required: true
+    },
+    pincode: {
+        type: Number,
+        required: true
+    },
 }
 
 const Agent = new mongoose.Schema({
     role: {
         type: String,
         default: () => "user"
+    },
+
+    AgentNo: {
+        type: Number
     },
 
     firstName: {
@@ -40,16 +56,6 @@ const Agent = new mongoose.Schema({
         required: true
     },
 
-    // resetPasswordToken: {
-    //     type: String,
-    //     required: false
-    // },
-
-    // resetPasswordExpires: {
-    //     type: Date,
-    //     required: false
-    // },
-
     status: {
         type: String,
         default: () => "ACTIVE"
@@ -73,8 +79,12 @@ const Agent = new mongoose.Schema({
     Company_Name: String,
     GST_Number: String,
     PAN_Company: String,
+    PAN_Company_File: String,
     PAN_Agent: String,
-    Address: Address
+    PAN_Agent_File: String,
+    Address: Address,
+    DocumentFile: String
+
 });
 
 Agent.methods.generatePasswordReset = function () {

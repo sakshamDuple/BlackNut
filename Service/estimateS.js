@@ -132,11 +132,19 @@ async function getValueForNextSequence(val) {
   return findMax[0].MaxEstimateNo + 1;
 }
 
-exports.getAllEstimates = async () => {
+exports.getAllEstimates = async (id, field) => {
   try {
-    let AllEstimates = await Estimate.find({
-      approvalFromAdminAsQuotes: false,
-    });
+    let agentId,AllEstimates
+    if(field == "agent") {
+      agentId =id
+      AllEstimates = await Estimate.find({
+        approvalFromAdminAsQuotes: false,agentId
+      });  
+    } else {
+      AllEstimates = await Estimate.find({
+        approvalFromAdminAsQuotes: false
+      });
+    }
     return {
       data: AllEstimates,
       message:

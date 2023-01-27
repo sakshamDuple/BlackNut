@@ -62,6 +62,16 @@ exports.getDetailedEstimateById = async (req, res) => {
     }
 }
 
+exports.getEstimatesByAgentId = async (req,res) => {
+    let id = req.query.id
+    let AllEstimates = await EstimateS.getAllEstimates(id,"agent")
+    if (AllEstimates.status == 200) {
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+    } else {
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+    }
+}
+
 exports.updateEstimateToQuotation = async (req,res) => {
     let id = req.query.id
     let Estimate = await EstimateS.updateEstimateToQuotation(id)

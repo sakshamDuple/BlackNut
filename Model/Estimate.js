@@ -10,6 +10,7 @@ const Products = {
         type: Number,
         default: () => 1
     },
+    ProductEstimatedPrice: Number
 }
 
 const Updates = {
@@ -28,6 +29,10 @@ const Estimate = new mongoose.Schema({
     EstimateNo: {
         type: Number
     },
+
+    DiscountPrice: Number,
+
+    TotalCost:Number,
 
     QuotationNo: {
         type: Number
@@ -57,7 +62,7 @@ const Estimate = new mongoose.Schema({
         type: Boolean,
         default: () => false
     },
-    
+
     approvalFromAdminAsPO: {
         type: Boolean,
         default: () => false

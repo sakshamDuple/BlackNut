@@ -115,6 +115,7 @@ exports.updateQuotationToPI = async (req, res) => {
 
 exports.getReportsFromEstimates = async (req, res) => {
     try {
+        let agentId = req.query.id
         let foundEstimates = await Estimate.find()
         let Report = [{
             ProductID: "",
@@ -123,8 +124,14 @@ exports.getReportsFromEstimates = async (req, res) => {
             PurchaseOrder: 0,
             ProductOrderPrice: 0
         }]
+        let getValueFlag = true
+        getValueFlag = agentId?false:true
         foundEstimates.map((estimate,index) => {
-            estimate.Products.map((product) => {
+            if(estimate.agentId == agentId){
+                getValueFlag = true
+            }
+            console.log(getValueFlag)
+            getValueFlag && estimate.Products.map((product) => {
                 let report = {
                     Estimate: 0,
                     Quotation: 0,

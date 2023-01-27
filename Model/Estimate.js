@@ -10,7 +10,16 @@ const Products = {
         type: Number,
         default: () => 1
     },
-    ProductEstimatedPrice: Number
+    ProductEstimatedPrice: {
+        type: Number
+    },
+    OriginalPriceOfProduct: {
+        type: Number
+    },
+    ProductIDToShow: {
+        type: String,
+        required: true
+    }
 }
 
 const Updates = {
@@ -26,13 +35,13 @@ const Estimate = new mongoose.Schema({
 
     Products: [Products],
 
+    DiscountPrice: Number,
+
+    TotalCost: Number,
+
     EstimateNo: {
         type: Number
     },
-
-    DiscountPrice: Number,
-
-    TotalCost:Number,
 
     QuotationNo: {
         type: Number
@@ -47,10 +56,6 @@ const Estimate = new mongoose.Schema({
     },
 
     QuotationId: {
-        type: String,
-    },
-
-    PI_Id: {
         type: String,
     },
 
@@ -89,6 +94,8 @@ const Estimate = new mongoose.Schema({
     },
 
     Updates: Updates,
+
+    customerName:String
 
 });
 

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-// Temple User Schema
+// Product Schema
 const Products = {
     ProductId: {
         type: String,
@@ -13,7 +13,7 @@ const Products = {
     ProductEstimatedPrice: {
         type: Number
     },
-    OriginalPriceOfProduct: {
+    ProductQuotedPrice: {
         type: Number
     },
     ProductIDToShow: {
@@ -95,7 +95,11 @@ const Estimate = new mongoose.Schema({
 
     Updates: Updates,
 
-    customerName:String
+    customerName: String,
+
+    ProductName: {
+        type: String
+    }
 
 });
 

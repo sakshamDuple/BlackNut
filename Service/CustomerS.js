@@ -8,11 +8,11 @@ exports.create = async (customer) => {
     customer.role = "customer"
     let newcustomer = { ...customer }
     try {
-        let agentExistsWithSuchEmail = await Agent.findOne({ email: customer.email })
+        // let agentExistsWithSuchEmail = await Agent.findOne({ email: customer.email })
         let phoneAlreadyRegistered = await VerifiedNumberS.findOnly(customer.phone)
-        if (agentExistsWithSuchEmail) {
-            return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
-        }
+        // if (agentExistsWithSuchEmail) {
+        //     return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
+        // }
         if (phoneAlreadyRegistered) {
             return { error: "mobile already registered", message: "given phone is already registered with some id, please provide some other phone", status: 409 }
         }
@@ -21,6 +21,9 @@ exports.create = async (customer) => {
             delete newcustomer.confirmPassword
             console.log(await hashPassword(customer.password))
             newcustomer.password = await hashPassword(customer.password)
+            newcustomer.AgentNo = await getValueForNextSequence()
+            console.log(newcustomer.AgentNo)
+            newcustomer.CustomerID = "C_"+newcustomer.AgentNo
             // process.env.DATABASE_URL
         } else {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
@@ -32,6 +35,21 @@ exports.create = async (customer) => {
         console.log(e)
         return { error: e, message: "we have an error" }
     }
+}
+
+async function getValueForNextSequence() {
+    let foundAgents = await Agent.find();
+    if (foundAgents.length == 0) return 1;
+    let agg = [
+        {
+            $group: {
+                _id: null,
+                MaxEstimateNo: { $max: "$AgentNo" }
+            },
+        },
+    ];
+    let findMax = await Agent.aggregate(agg);
+    return findMax[0].MaxEstimateNo + 1;
 }
 
 exports.getAllCustomer = async (bool) => {

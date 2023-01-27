@@ -19,7 +19,9 @@ exports.create = async (agent) => {
         if (agent.password == agent.confirmPassword) {
             delete newagent.confirmPassword
             newagent.password = await hashPassword(agent.password)
-            // newagent.AgentNo = getValueForNextSequence()
+            newagent.AgentNo = await getValueForNextSequence()
+            console.log(newagent.AgentNo)
+            newagent.AgentID = "AG_"+newagent.AgentNo
         } else {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
@@ -32,7 +34,7 @@ exports.create = async (agent) => {
     }
 }
 
-async function getValueForNextSequence(val) {
+async function getValueForNextSequence() {
     let foundAgents = await Agent.find();
     if (foundAgents.length == 0) return 1;
     let agg = [
@@ -78,7 +80,7 @@ exports.getCommonById = async (id, bool) => {
         let theAgent
         if (bool) theAgent = await Agent.findOne({ _id: id, status: "Active" })
         theAgent = await Agent.findOne({ _id: id })
-        return { data: theAgent, message: theAgent ? "retrieval Success" : "not found", status: theAgent ? 200 : 400 }
+        return { data: theAgent, message: theAgent ? "retrieval Success" : "agent/customer not found", status: theAgent ? 200 : 400 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

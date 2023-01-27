@@ -31,6 +31,14 @@ const Agent = new mongoose.Schema({
         type: Number
     },
 
+    AgentID: {
+        type: String
+    },
+
+    CustomerID: {
+        type: String
+    },
+
     firstName: {
         type: String,
         required: true

@@ -71,20 +71,29 @@ exports.updateCustomerById = async (req, res) => {
 
 exports.customerOtpRecieve = async (req, res) => {
     let phone = req.query.phone
-    let email = req.query.email
-    let agentid = req.query.agentid
-    if (!phone && !email && !agentid) return res.status(400).send({ Message: "fields missing", status: 400 })
-    let foundAgent = await getCommonById(agentid)
-    if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
-    let mobileExists = await findOnly(phone)
-    if (mobileExists != null) return res.status(409).send({ Message: "requested phone is already registered", status: 409 })
-    let otp = generateOtp()
-    await OtpS.deleteOnly(foundAgent.data.phone)
-    await OtpS.create({
-        number: foundAgent.data.phone,
-        id: agentid,
-        otp: otp
-    })
-    await sendEmail(email, "OTP request for Customer Creation on Blacknut", otp)
-    res.status(200).send({ message: "an otp is sent on customer mail, please verifying otp to process customer creation", status: 200 })
+    let Nphone = parseInt(phone)
+    console.log(10000000000>Nphone && Nphone>=1000000000)
+    if(10000000000>Nphone && Nphone>=1000000000){
+        let email = req.query.email
+        let agentid = req.query.agentid
+        if (!phone && !email && !agentid) return res.status(400).send({ Message: "fields missing", status: 400 })
+        let foundAgent = await getCommonById(agentid)
+        if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
+        let mobileExists = await findOnly(phone)
+        // if (mobileExists != null) return res.status(409).send({ Message: "requested phone is already registered", status: 409 })
+        let otp = generateOtp()
+        await OtpS.deleteOnly(foundAgent.data.phone)
+        await OtpS.create({
+            number: foundAgent.data.phone,
+            id: agentid,
+            otp: otp
+        })
+        if(mobileExists != null) {
+            await sendEmail(email, "OTP request for Existing Customer Verify on Blacknut", otp)
+            return res.status(200).send({ message: `The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,, tempOtp:${otp}`, status: 200 })
+        }
+        await sendEmail(email, "OTP request for Customer Creation on Blacknut", otp)
+        res.status(200).send({ message: `an otp is sent on customer mail, please verifying otp to process customer creation, tempOtp:${otp}`, status: 200 })
+    }
+    res.status(400).send({error:"Not a valid phone", message:"Please enter a valid phone number", status:400})
 }

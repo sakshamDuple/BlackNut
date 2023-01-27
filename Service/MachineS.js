@@ -19,7 +19,7 @@ exports.create = async (data) => {
 exports.findMachine = async (data) => {
     try {
         let foundMachine = await Machine.findOne({ Machine_name: data.Machine_name })
-        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "not found", status: foundMachine ? 200 : 404 }
+        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
@@ -29,7 +29,7 @@ exports.findMachine = async (data) => {
 exports.findMachineById = async (id) => {
     try {
         let foundMachine = await Machine.findById(id)
-        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "not found", status: foundMachine ? 200 : 404 }
+        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
@@ -39,7 +39,7 @@ exports.findMachineById = async (id) => {
 exports.findMachineByCropId = async (cropId) => {
     try {
         let foundMachine = await Machine.find({cropId:cropId})
-        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "not found", status: foundMachine ? 200 : 404 }
+        return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }

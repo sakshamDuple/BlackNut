@@ -17,6 +17,9 @@ exports.sendEmail = async (email, subject, text) => {
             case "otp for Agreement Document Submit":
                 message = `Your Request For BlackNut Agent Agreement Document Creation is processed, Your Otp is ${text}, Please complete your process of agreement document upload`
                 break;
+            case "OTP request for Existing Customer Verify on Blacknut":
+                message = `Your Request For Existing Customer Verify is processed, Your Otp is ${text}`
+                break;
             default:
                 break;
         }

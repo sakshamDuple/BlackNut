@@ -39,17 +39,19 @@ exports.create = async (estimate) => {
   let nextSeq = await getValueForNextSequence("Estimate");
   console.log("foundcustomer", foundcustomer)
   let customerName = foundcustomer.data.firstName + " " + foundcustomer.data.lastName
-  console.log(customerName)
+  let agentName = foundAgent.data.firstName + " " + foundAgent.data.lastName
+  let Agent_Code = foundAgent.data.AgentID
   try {
     let createdEstimate = await Estimate.create({
       Products: data[0].products,
       agentId,
       customerId,
       customerName,
+      Agent_Code,
+      agentName,
       approvalFromAdminAsQuotes,
       EstimateDateOfPurchase: newDate,
-      EstimateNo: nextSeq,
-      ProductName
+      EstimateNo: nextSeq
     });
     return {
       data: createdEstimate,
@@ -68,7 +70,7 @@ let allProducts = (products, fails, successes) => {
       products.map(async element => {
         return new Promise(async function (resolve, reject) {
           let fail, success;
-          let { ProductId, quantity, ProductEstimatedPrice } = element
+          let { ProductId, quantity, ProductEstimatedPrice, ProductName } = element
           let foundProduct = await productS.findOneById(ProductId)
           let foundMachine = await MachineS.findMachineById(foundProduct.machineId)
           element.ProductIDToShow = foundProduct.ProductID
@@ -223,12 +225,15 @@ exports.updateQuotationToPO = async (id, quotation, approval) => {
   if (approval == true) {
     foundEstimate.approvalFromAdminAsQuotes = false
     foundEstimate.approvalFromAdminAsPO = true
+    foundEstimate.Status = "ACTIVE"
   } else if (approval == false) {
     foundEstimate.approvalFromAdminAsQuotes = true
     foundEstimate.approvalFromAdminAsPO = false
+    foundEstimate.Status = "INACTIVE"
   } else {
     foundEstimate.approvalFromAdminAsQuotes = false
     foundEstimate.approvalFromAdminAsPO = true
+    foundEstimate.Status = "ACTIVE"
   }
   foundEstimate.PO_No = getValueForNextSequence("PO")
   foundEstimate.Updates.QuotationToPO = Date.now()
@@ -237,7 +242,7 @@ exports.updateQuotationToPO = async (id, quotation, approval) => {
   try {
     return {
       data: updateThisEstimate.nModified > 0,
-      message: updateThisEstimate.nModified > 0 ? approval? "Updatation Of Quotation To Purchase Order Success": `Price was Updatated${approval != undefined ? " But Quotation To Purchase Order Request Rejected": ""}` : "Updation failed",
+      message: updateThisEstimate.nModified > 0 ? approval ? "Updatation Of Quotation To Purchase Order Success" : `Price was Updatated${approval != undefined ? " But Quotation To Purchase Order Request Rejected" : ""}` : "Updation failed",
       status: updateThisEstimate.nModified > 0 ? 200 : 400,
     };
   } catch (e) {

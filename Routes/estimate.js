@@ -8,6 +8,7 @@ router.post("/getById", estimateC.getById)
 router.get("/getDetailedEstimateById", estimateC.getDetailedEstimateById)
 router.get("/getEstimatesByAgentId", estimateC.getEstimatesByAgentId)
 router.get("/getProductReport", estimateC.getReportsFromEstimates)
+router.get("/getAgentReport", estimateC.getAgentReportsFromEstimates)
 router.put("/updateEstimateToQuotation",estimateC.updateEstimateToQuotation)
 
 module.exports = router;

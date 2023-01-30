@@ -49,8 +49,8 @@ exports.findOneById = async (id) => {
 }
 
 exports.findByCropName = async (name) => {
-    let foundCrop = await CropS.findCrop({cropName:name})
-    return await product.find({cropId:foundCrop.data._id})
+    let foundCrop = await CropS.findCrop({ cropName: name })
+    return await product.find({ cropId: foundCrop.data._id })
 }
 
 exports.findProductsForMachineId = async (MachineId) => {
@@ -58,12 +58,12 @@ exports.findProductsForMachineId = async (MachineId) => {
     return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }
 }
 
-exports.updateTheProductByMachine = async (MachineId,PrevProduct,Updates) => {
+exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
     let thisMachine = await MachineS.findMachineById(MachineId)
-    console.log(thisMachine.data.Product_name,Updates.Product_name)
-    if(thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name){
+    console.log(thisMachine.data.Product_name, Updates.Product_name)
+    if (thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name) {
         console.log("hii");
-        Updates.productDetail.map((element,i) => {
+        Updates.productDetail.map((element, i) => {
             PrevProduct[i].Capacity = element.Capacity
             PrevProduct[i].Model = element.Model
             PrevProduct[i].Price = element.Price
@@ -71,7 +71,7 @@ exports.updateTheProductByMachine = async (MachineId,PrevProduct,Updates) => {
             PrevProduct[i].Status = element.Status
         });
         let fails = [], successes = []
-        await update(PrevProduct,fails,successes)
+        await update(PrevProduct, fails, successes)
         let failure = fails.length == PrevProduct.length
         let success = fails.length == 0
         return { status: failure ? 400 : 200, message: failure ? "Nothing was updated" : success ? "Success, all data were updated successfully" : "Partial Success", data: { fails, successes } }
@@ -111,11 +111,19 @@ exports.getAllProducts = async () => {
 }
 
 exports.deleteOnly = async (id) => {
-    return await product.deleteOne(id)
+    try {
+        let deleted = await product.deleteOne({_id:id})
+        return { data: deleted.deletedCount>0, message: deleted.deletedCount>0?"deletion success":"deletion failed", status: deleted.deletedCount>0?200:400 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "deletion failed", status: 400 }
+    }
 }
 
-exports.updateProductById = async ({ Capacity, Model, Price, _id }, Unit) => {
-    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price } })
+exports.updateProductById = async ({ Capacity, Model, Price, _id }, Status) => {
+    let query = { Capacity, Model, Price }
+    if (Status) query = { Capacity, Model, Price, Status }
+    let updateThisProductDetail = await product.updateOne({ _id }, { $set: query })
     return { data: updateThisProductDetail.nModified > 0, message: updateThisProductDetail.nModified > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.nModified > 0 ? 200 : 400 }
 }
 

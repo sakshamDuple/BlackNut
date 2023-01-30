@@ -19,7 +19,11 @@ const Products = {
     ProductIDToShow: {
         type: String,
         required: true
-    }
+    },
+    ProductName: {
+        type: String,
+        required: true
+    },
 }
 
 const Updates = {
@@ -97,11 +101,14 @@ const Estimate = new mongoose.Schema({
 
     customerName: String,
 
-    ProductName: {
-        type: String
-    },
+    agentName: String,
 
-    Status: String
+    // ProductName: {
+    //     type: String
+    // },
+
+    Status: String,
+    Agent_Code: String
 
 });
 

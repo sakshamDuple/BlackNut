@@ -1,4 +1,5 @@
 const Estimate = require("../Model/Estimate")
+const { getCommonById } = require("../Service/AgentS")
 const EstimateS = require("../Service/estimateS")
 
 exports.getAll = async (req, res) => {
@@ -87,21 +88,11 @@ exports.updateQuotationToPO = async (req, res) => {
     let id = req.query.id
     let quotation = req.body.Quotation
     let approval = req.body.approval
-    let Quotation = await EstimateS.updateQuotationToPO(id,quotation,approval)
+    let Quotation = await EstimateS.updateQuotationToPO(id, quotation, approval)
     if (Quotation.status == 200) {
         res.status(Quotation.status).send({ data: Quotation.data, Message: Quotation.message, status: Quotation.status })
     } else {
         res.status(Quotation.status).send({ error: Quotation.error, Message: Quotation.message, status: Quotation.status })
-    }
-}
-
-exports.updateQuotationToPI = async (req, res) => {
-    let id = req.query.id
-    let Estimate = await EstimateS.updateEstimateToQuotation(id)
-    if (Estimate.status == 200) {
-        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
-    } else {
-        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
     }
 }
 
@@ -128,12 +119,11 @@ exports.getReportsFromEstimates = async (req, res) => {
             ProductName: ""
         }]
         let getValueFlag = true
-        getValueFlag = agentId?false:true
-        foundEstimates.map((estimate,index) => {
-            if(estimate.agentId == agentId){
+        getValueFlag = agentId ? false : true
+        foundEstimates.map((estimate, index) => {
+            if (estimate.agentId == agentId) {
                 getValueFlag = true
             }
-            console.log(getValueFlag)
             getValueFlag && estimate.Products.map((product) => {
                 let report = {
                     Estimate: 0,
@@ -142,7 +132,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                 }
                 if (Report.length == 1 && Report[0].ProductID == "") {
                     Report[0].ProductID = product.ProductIDToShow
-                    Report[0].ProductName = estimate.ProductName
+                    Report[0].ProductName = product.ProductName
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) Report[0].Estimate += 1
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         Report[0].Quotation += 1
@@ -156,20 +146,21 @@ exports.getReportsFromEstimates = async (req, res) => {
                     }
                 } else {
                     let m
-                    console.log("index",index,Report)
                     let foundreport = Report.find((report, i) => {
                         if (report.ProductID == product.ProductIDToShow) {
                             m = i
                             return report
                         }
                     });
-                    let NewReport = Report.filter((report)=>{
+                    let NewReport = Report.filter((report) => {
                         return report.ProductID != product.ProductIDToShow
                     })
                     if (foundreport) {
-                        if(foundreport.ProductOrderPrice == undefined) foundreport.ProductOrderPrice =0
+                        if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
                         foundreport.ProductID = product.ProductIDToShow
                         foundreport.ProductName = estimate.ProductName
+                        console.log(foundreport)
+                        console.log(foundreport.ProductOrderPrice)
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             foundreport.Quotation += 1
@@ -181,12 +172,109 @@ exports.getReportsFromEstimates = async (req, res) => {
                             foundreport.Estimate += 1
                             foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
                         }
-                        Report.push(foundreport)
                         NewReport.push(foundreport)
                         Report = NewReport
                     } else {
                         report.ProductID = product.ProductIDToShow
                         report.ProductName = estimate.ProductName
+                        report.ProductOrderPrice = 0
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) report.Estimate += 1
+                        if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
+                            report.Quotation += 1
+                            report.Estimate += 1
+                        }
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
+                            report.PurchaseOrder += 1
+                            report.Quotation += 1
+                            report.Estimate += 1
+                            report.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
+                        }
+                        Report.push(report)
+                    }
+                }
+            })
+        })
+        return res.status(200).send({
+            data: Report,
+            message: "reports made",
+            status: 200,
+        });
+    } catch (e) {
+        console.log(e);
+        return { error: e, message: "we have an error", status: 400 };
+    }
+}
+
+exports.getAgentReportsFromEstimates = async (req, res) => {
+    try {
+        let foundEstimates = await Estimate.find()
+        let Report = [{
+            Agent_Code: "",
+            Agent_Id: "",
+            Agent_Name: "",
+            Estimate: 0,
+            Quotation: 0,
+            PurchaseOrder: 0,
+            ProductOrderPrice: 0
+        }]
+        foundEstimates.map((estimate) => {
+            estimate.Products.map((product) => {
+                let report = {
+                    Estimate: 0,
+                    Quotation: 0,
+                    PurchaseOrder: 0
+                }
+                if (Report.length == 1 && Report[0].Agent_Code == "") {
+                    Report[0].Agent_Id = estimate.agentId
+                    Report[0].Agent_Name = estimate.Agent_Name
+                    Report[0].Agent_Code = estimate.Agent_Code
+                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) Report[0].Estimate += 1
+                    if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
+                        Report[0].Quotation += 1
+                        Report[0].Estimate += 1
+                    }
+                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
+                        Report[0].PurchaseOrder += 1
+                        Report[0].Quotation += 1
+                        Report[0].Estimate += 1
+                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? product.ProductEstimatedPrice : 0
+                    }
+                } else {
+                    let m
+                    let foundreport = Report.find((report, i) => {
+                        if (report.Agent_Id == estimate.agentId) {
+                            m = i
+                            return report
+                        }
+                    });
+                    let NewReport = Report.filter((report) => {
+                        return report.Agent_Id != estimate.agentId
+                    })
+                    if (foundreport) {
+                        if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
+                        foundreport.Agent_Id = estimate.agentId
+                        foundreport.Agent_Name = estimate.Agent_Name
+                        foundreport.Agent_Code = estimate.Agent_Code
+                        console.log(foundreport)
+                        console.log(foundreport.ProductOrderPrice)
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
+                        if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
+                            foundreport.Quotation += 1
+                            foundreport.Estimate += 1
+                        }
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
+                            foundreport.PurchaseOrder += 1
+                            foundreport.Quotation += 1
+                            foundreport.Estimate += 1
+                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
+                        }
+                        NewReport.push(foundreport)
+                        Report = NewReport
+                    } else {
+                        report.Agent_Id = estimate.agentId
+                        report.Agent_Name = estimate.Agent_Name
+                        report.Agent_Code = estimate.Agent_Code
+                        report.ProductOrderPrice = 0
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) report.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             report.Quotation += 1

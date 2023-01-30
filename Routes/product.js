@@ -23,6 +23,8 @@ router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
+router.put("/updateOneProduct", productC.updateOneProduct)
+router.delete("/deleteOneProduct", productC.deleteOneProduct)
 router.get("/bulkProductPriceUpdateOfOneMachine", upload.single("file"), async (req, res) => {
     let file = req.file;
     let products = await csvtojson().fromFile(file.path);

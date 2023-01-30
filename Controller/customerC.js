@@ -1,5 +1,6 @@
 const { sendEmail } = require("../Middleware/emailSend")
 const { generateOtp } = require("../Middleware/genOtp")
+const Agent = require("../Model/Agent")
 const { getCommonById } = require("../Service/AgentS")
 const CustomerS = require("../Service/CustomerS")
 const OtpS = require("../Service/OtpS")
@@ -29,9 +30,15 @@ exports.addCustomer = async (req, res) => {
     if(!Customer.Address.mainAddressText) return res.status(400).send({ error: "mainAddressText field is empty", Message: "mainAddressText field can't be empty", status: 400 })
     if(!Customer.Address.pincode) return res.status(400).send({ error: "pincode field is empty", Message: "pincode field can't be empty", status: 400 })
     const newCustomer = await CustomerS.create(Customer)
+    if(newCustomer.error == "mobile already registered"){
+        let RegisteredCustomerByThisPhone = await Agent.findOne({phone:Customer.phone})
+        newCustomer.Agent_ID = RegisteredCustomerByThisPhone._id
+        newCustomer.status = 200
+        newCustomer.message = "customer retrieved instead of create"
+    }
     console.log(newCustomer)
     await OtpS.deleteOnly(foundAgent.data.phone)
-    if (newCustomer.status == 201) {
+    if (newCustomer.status == 201 ||200) {
         res.status(newCustomer.status).send({ data: newCustomer.Agent_ID, Message: newCustomer.message, status: newCustomer.status })
     } else {
         res.status(newCustomer.status).send({ error: newCustomer.error, Message: newCustomer.message, status: newCustomer.status })
@@ -93,7 +100,7 @@ exports.customerOtpRecieve = async (req, res) => {
             otp: otp
         })
         if(mobileExists != null) {
-            await sendEmail(email, "OTP request for Existing Customer Verify on Blacknut", otp)
+            await sendEmail(email, "OTP request for Existing Customer Verify on Blacknut", otp, {Name:foundAgent.data.firstName})
             return res.status(200).send({ message: `The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,, tempOtp:${otp}`, status: 200 })
         }
         await sendEmail(email, "OTP request for Customer Creation on Blacknut", otp)

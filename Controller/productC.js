@@ -63,20 +63,20 @@ exports.getAllProducts = async (req, res) => {
 };
 
 exports.getAllProductsForSelectCropId = async (req, res) => {
-    let products = await ProductS.findByCropId(req.query.id)
+  let products = await ProductS.findByCropId(req.query.id)
   res.status(200).send({
     data: products,
-    Message: products.length>0?"All Products For Select Crop":"no products for this crop",
-    status: products.length>0?200:404,
+    Message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
+    status: products.length > 0 ? 200 : 404,
   });
 };
 
 exports.getAllProductsForSelectCropName = async (req, res) => {
-    let products = await ProductS.findByCropName(req.query.name)
+  let products = await ProductS.findByCropName(req.query.name)
   res.status(200).send({
     data: products,
-    Message: products.length>0?"All Products For Select Crop":"no products for this crop",
-    status: products.length>0?200:404,
+    Message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
+    status: products.length > 0 ? 200 : 404,
   });
 };
 
@@ -193,8 +193,8 @@ exports.productUpdateForASelectMachine = async (req, res) => {
   let updateProductsList = req.body
   let machineId = req.query.machineId;
   let products = await ProductS.findProductsForMachineId(machineId);
-  if(!products.data) return res.status(products.status).json(products);
-  let updateProcess = await ProductS.updateTheProductByMachine(machineId,products.data,updateProductsList)
+  if (!products.data) return res.status(products.status).json(products);
+  let updateProcess = await ProductS.updateTheProductByMachine(machineId, products.data, updateProductsList)
   res.status(updateProcess.status).json(updateProcess);
 };
 
@@ -268,3 +268,15 @@ exports.generateListOfCropsMachines = async (req, res) => {
     message: "retrieved successfully",
   });
 };
+
+exports.updateOneProduct = async (req, res) => {
+  let { Capacity, Model, Price, _id, ProductID, Status } = req.body
+  let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID },Status)
+  res.status(updateProduct.status).send({ data: updateProduct.data, message: updateProduct.message, status: updateProduct.status })
+}
+
+exports.deleteOneProduct = async (req, res) => {
+  let id = req.query.id
+  let deleted = await ProductS.deleteOnly(id)
+  res.status(deleted.status).send(deleted)
+}

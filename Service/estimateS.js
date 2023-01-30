@@ -207,13 +207,29 @@ exports.updateEstimateToQuotation = async (id) => {
   }
 }
 
-exports.updateQuotationToPO = async (id) => {
+exports.updateQuotationToPO = async (id, quotation, approval) => {
+  console.log(approval)
   let foundEstimate = await Estimate.findById(id)
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   if (!foundEstimate) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
   if (foundEstimate.approvalFromAdminAsQuotes != true) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
-  foundEstimate.approvalFromAdminAsQuotes = false
-  foundEstimate.approvalFromAdminAsPO = true
+  if (quotation) {
+    let { Products, _id } = quotation
+    if (_id == foundEstimate._id)
+      Products.map((product, i) => {
+        if (product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow) foundEstimate.Products[i].ProductEstimatedPrice = product.ProductEstimatedPrice
+      })
+  }
+  if (approval == true) {
+    foundEstimate.approvalFromAdminAsQuotes = false
+    foundEstimate.approvalFromAdminAsPO = true
+  } else if (approval == false) {
+    foundEstimate.approvalFromAdminAsQuotes = true
+    foundEstimate.approvalFromAdminAsPO = false
+  } else {
+    foundEstimate.approvalFromAdminAsQuotes = false
+    foundEstimate.approvalFromAdminAsPO = true
+  }
   foundEstimate.PO_No = getValueForNextSequence("PO")
   foundEstimate.Updates.QuotationToPO = Date.now()
   foundEstimate.PO_Id = "PO_Id" + Date.now().toString()
@@ -221,7 +237,7 @@ exports.updateQuotationToPO = async (id) => {
   try {
     return {
       data: updateThisEstimate.nModified > 0,
-      message: updateThisEstimate.nModified > 0 ? "Updatation Of Quotation To Purchase Order Success" : "Updation failed",
+      message: updateThisEstimate.nModified > 0 ? approval? "Updatation Of Quotation To Purchase Order Success": `Price was Updatated${approval != undefined ? " But Quotation To Purchase Order Request Rejected": ""}` : "Updation failed",
       status: updateThisEstimate.nModified > 0 ? 200 : 400,
     };
   } catch (e) {
@@ -262,7 +278,7 @@ exports.getByAgentId = async (id) => {
   try {
     let Quotation = await Estimate.find({ agentId: id, approvalFromAdminAsQuotes: true })
     return {
-      data: Quotation.length > 0,
+      data: Quotation,
       message: Quotation.length > 0 ? "Quotation found" : "Quotation Not Found",
       status: Quotation.length > 0 ? 200 : 404,
     };

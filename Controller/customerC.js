@@ -18,12 +18,16 @@ exports.addCustomer = async (req, res) => {
     let agentId = req.body.agentId
     let Customer = req.body.Customer
     let otp = req.body.otp
-    if (!agentId) return res.status(400).send({ Message: "can't add customer without agentId", status: 400 })
+    if (!agentId) return res.status(400).send({ Message: "can't add custffffffffffffffffffffomer without agentId", status: 400 })
     let foundAgent = await getCommonById(agentId)
     if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
     let otpRecieved = await OtpS.findOnly(foundAgent.data.phone)
     if(otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
     Customer.password = Customer.confirmPassword = "Pa$$w0rd!"
+    if(!Customer.Address.city) return res.status(400).send({ error: "city field is empty", Message: "city field can't be empty", status: 400 })
+    if(!Customer.Address.state) return res.status(400).send({ error: "state field is empty", Message: "state field can't be empty", status: 400 })
+    if(!Customer.Address.mainAddressText) return res.status(400).send({ error: "mainAddressText field is empty", Message: "mainAddressText field can't be empty", status: 400 })
+    if(!Customer.Address.pincode) return res.status(400).send({ error: "pincode field is empty", Message: "pincode field can't be empty", status: 400 })
     const newCustomer = await CustomerS.create(Customer)
     console.log(newCustomer)
     await OtpS.deleteOnly(foundAgent.data.phone)

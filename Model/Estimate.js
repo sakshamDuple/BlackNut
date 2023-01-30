@@ -99,7 +99,9 @@ const Estimate = new mongoose.Schema({
 
     ProductName: {
         type: String
-    }
+    },
+
+    Status: String
 
 });
 

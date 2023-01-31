@@ -103,9 +103,7 @@ const Estimate = new mongoose.Schema({
 
     agentName: String,
 
-    // ProductName: {
-    //     type: String
-    // },
+    PurchaseInvoice: String,
 
     Status: String,
     Agent_Code: String

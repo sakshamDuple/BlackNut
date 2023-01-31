@@ -1,3 +1,4 @@
+const { error } = require("../Middleware/error");
 const product = require("../Model/Product");
 const CropS = require('./CropS')
 const MachineS = require('./MachineS')
@@ -60,17 +61,33 @@ exports.findProductsForMachineId = async (MachineId) => {
 
 exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
     let thisMachine = await MachineS.findMachineById(MachineId)
-    console.log(thisMachine.data.Product_name, Updates.Product_name)
+    let addProduct = false
+    let ProductsToAdd = []
+    let addedproductres = { status: 201 }
+    console.log(thisMachine.data.Product_name,thisMachine)
     if (thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name) {
-        console.log("hii");
+        console.log("hii", MachineId, PrevProduct[0], Updates);
         Updates.productDetail.map((element, i) => {
-            PrevProduct[i].Capacity = element.Capacity
-            PrevProduct[i].Model = element.Model
-            PrevProduct[i].Price = element.Price
-            PrevProduct[i].ProductID = element.ProductID
-            PrevProduct[i].Status = element.Status
+            if (PrevProduct[i] != undefined) {
+                PrevProduct[i].Capacity = element.Capacity
+                PrevProduct[i].Model = element.Model
+                PrevProduct[i].Price = element.Price
+                PrevProduct[i].ProductID = element.ProductID
+                PrevProduct[i].Status = element.Status
+            } else {
+                addProduct = true
+                element.cropId = thisMachine.data.cropId
+                element.machineId = MachineId
+                ProductsToAdd.push(element)
+            }
         });
         let fails = [], successes = []
+        if (ProductsToAdd.length > 0) {
+            console.log("ProductsToAdd",ProductsToAdd)
+            addedproductres = await addTheseProduct(ProductsToAdd)
+            console.log("addedproductres",addedproductres)
+            if (addedproductres.status != 201) return addedproductres
+        }
         await update(PrevProduct, fails, successes)
         let failure = fails.length == PrevProduct.length
         let success = fails.length == 0
@@ -102,6 +119,23 @@ let update = (products, fails, successes) => {
     })
 }
 
+let addTheseProduct = async (products) => {
+    let e
+    e = products.map(element => {
+        // let { Capacity, Model, Price, ProductID, Status, cropId, machineId } = element
+        if (!element.Capacity || element.Capacity == undefined) return error("Capacity", "missing field")
+        if (!element.Price || element.Price == undefined) return error("Price", "missing field")
+        if (!element.ProductID || element.ProductID == undefined) return error("ProductID", "missing field")
+        if (!element.Status || element.Status == undefined) return error("Status", "missing field")
+        if (!element.cropId || element.cropId == undefined) return error("cropId", "missing field")
+        if (!element.machineId || element.machineId == undefined) return error("machineId", "missing field")
+        return e = "continue"
+    });
+    if(e != "continue") return e[0]
+    console.log("element,element.cropId == undefined")
+    return { data: await product.insertMany(products), message: "created products Successfully", status: 201 }
+}
+
 exports.findOneByProductId = async (ProductId) => {
     return await product.findOne({ ProductID: ProductId })
 }
@@ -112,8 +146,8 @@ exports.getAllProducts = async () => {
 
 exports.deleteOnly = async (id) => {
     try {
-        let deleted = await product.deleteOne({_id:id})
-        return { data: deleted.deletedCount>0, message: deleted.deletedCount>0?"deletion success":"deletion failed", status: deleted.deletedCount>0?200:400 }
+        let deleted = await product.deleteOne({ _id: id })
+        return { data: deleted.deletedCount > 0, message: deleted.deletedCount > 0 ? "deletion success" : "deletion failed", status: deleted.deletedCount > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "deletion failed", status: 400 }

@@ -21,7 +21,7 @@ exports.create = async (agent) => {
             newagent.password = await hashPassword(agent.password)
             newagent.AgentNo = await getValueForNextSequence()
             console.log(newagent.AgentNo)
-            newagent.AgentID = "AG_"+newagent.AgentNo
+            newagent.AgentID = "AG_" + newagent.AgentNo
         } else {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
@@ -128,7 +128,7 @@ exports.deleteAgentById = async (id) => {
 exports.updateThisAgent = async (agent, field) => {
     try {
         let prevAgent = await Agent.findById(agent._id) //to Check For Future Conditions
-        let { role, firstName, lastName, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, password, DocumentFile } = agent
+        let { role, firstName, lastName, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, password, DocumentFile, status } = agent
         let newAgent = prevAgent
         if (field == "password") newAgent.password = password
         if (role) newAgent.role = role
@@ -141,6 +141,7 @@ exports.updateThisAgent = async (agent, field) => {
         if (Address) newAgent.Address = Address
         if (Address) newAgent.Address = Address
         if (DocumentFile) newAgent.DocumentFile = DocumentFile
+        if (status) newAgent.status = status
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
         return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {

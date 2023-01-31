@@ -8,8 +8,7 @@ const productDetail = new mongoose.Schema({
         required: true
     },
     Model: {
-        type: String,
-        required: true
+        type: String
     },
     Price: {
         type: Number,

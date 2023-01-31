@@ -209,30 +209,29 @@ exports.updateEstimateToQuotation = async (id) => {
   }
 }
 
-exports.updateQuotationToPO = async (id, quotation, approval) => {
+exports.updateQuotationToPO = async (id, quotation, approval, bool) => {
   console.log(approval)
   let foundEstimate = await Estimate.findById(id)
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   if (!foundEstimate) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
   if (foundEstimate.approvalFromAdminAsQuotes != true) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
   if (quotation) {
-    let { Products, _id } = quotation
+    let { Products, _id, PurchaseInvoice } = quotation
     if (_id == foundEstimate._id)
       Products.map((product, i) => {
         if (product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow) foundEstimate.Products[i].ProductEstimatedPrice = product.ProductEstimatedPrice
       })
+    if (PurchaseInvoice) {
+      foundEstimate.PurchaseInvoice = PurchaseInvoice
+      foundEstimate.approvalFromAdminAsQuotes = false
+      foundEstimate.approvalFromAdminAsPO = true
+    }
   }
   if (approval == true) {
-    foundEstimate.approvalFromAdminAsQuotes = false
-    foundEstimate.approvalFromAdminAsPO = true
     foundEstimate.Status = "ACTIVE"
   } else if (approval == false) {
-    foundEstimate.approvalFromAdminAsQuotes = true
-    foundEstimate.approvalFromAdminAsPO = false
     foundEstimate.Status = "INACTIVE"
   } else {
-    foundEstimate.approvalFromAdminAsQuotes = false
-    foundEstimate.approvalFromAdminAsPO = true
     foundEstimate.Status = "ACTIVE"
   }
   foundEstimate.PO_No = getValueForNextSequence("PO")

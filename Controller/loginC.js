@@ -52,7 +52,7 @@ exports.forgotPassword = async (req, res) => {
                 id: theAgentFound1.data._id.toString(),
                 otp: otp
             })
-            await sendEmail(email, "password change request otp", otp)
+            await sendEmail(email, "password change request otp", otp,{Name:theAgentFound1.data.firstName})
             return res.status(200).send({ data: { phone: theAgentFound1.data.phone }, message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
         }
         // return res.status(400).send({ data: "accounts from phone & email do not match", message: "the retreived accounts for email & phone are not macthed", status: 400 })
@@ -78,7 +78,7 @@ exports.verifyForgotPassword = async (req, res) => {
             console.log(theAgentFound2Update)
             let updatedAgent = await AgentS.updateThisAgent(theAgentFound2Update, "password")
             console.log(updatedAgent)
-            if (updatedAgent) sendEmail(theAgentFound2.data.email, "new Password Created", tempPass)
+            if (updatedAgent) sendEmail(theAgentFound2.data.email, "new Password Created", tempPass,{Name:theAgentFound2.data.firstName})
             res.status(201).send({ message: "the new password creation process is completed, please check your mail for newPassword", status: 201 })
             await OtpS.deleteOnly(phone)
         }

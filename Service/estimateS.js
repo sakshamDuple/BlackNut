@@ -6,6 +6,9 @@ const { error } = require("../Middleware/error");
 const Estimate = require("../Model/Estimate");
 const { dateToDateNowConverter } = require("../Middleware/dateConverter");
 const { getCustomerToShowById } = require("./CustomerS");
+const OtpS = require("../Service/OtpS")
+const verifiedNumberS = require("../Service/verifyNumberS");
+const { sendEmail } = require("../Middleware/emailSend");
 
 exports.create = async (estimate) => {
   let {
@@ -53,6 +56,9 @@ exports.create = async (estimate) => {
       EstimateDateOfPurchase: newDate,
       EstimateNo: nextSeq
     });
+    await sendEmail(foundAgent.data.email, "You Added New Estimate", "", { Name: foundAgent.data.firstName })
+    await sendEmail(foundcustomer.data.email, "Added New Estimate", "", { Name: foundcustomer.data.firstName })
+    // await sendEmail(foundcustomer.data.email, "New Estimate Added", "", { Name: foundcustomer.data.firstName })
     return {
       data: createdEstimate,
       message: "estimate created Successfully",
@@ -192,7 +198,7 @@ exports.getAllPO = async (agentId) => {
     approvalFromAdminAsQuotes: false,
     approvalFromAdminAsPO: true
   }
-  if(agentId) query = {
+  if (agentId) query = {
     approvalFromAdminAsQuotes: false,
     approvalFromAdminAsPO: true,
     agentId
@@ -223,6 +229,14 @@ exports.updateEstimateToQuotation = async (id) => {
   if (!foundEstimate) return { error: "Estimate Not Found", message: "Updation failed", status: 404 };
   let updateThisEstimate = await Estimate.updateOne({ _id: id }, { $set: foundEstimate })
   console.log(updateThisEstimate.nModified)
+  if (updateThisEstimate.nModified > 0) {
+    console.log(foundEstimate)
+    let foundAgent = await AgentS.getCommonById(foundEstimate.agentId)
+    let foundcustomer = await AgentS.getCommonById(foundEstimate.customerId)
+    await sendEmail(foundAgent.data.email, "You Converted Estimate To Quotation", "", { Name: foundAgent.data.firstName })
+    await sendEmail(foundcustomer.data.email, "Added New Estimate", "", { Name: foundcustomer.data.firstName })
+    // await sendEmail(foundcustomer.data.email, "A Quotation is Processed", "", { Name: foundcustomer.data.firstName })
+  }
   try {
     return {
       data: updateThisEstimate.nModified > 0,
@@ -235,18 +249,30 @@ exports.updateEstimateToQuotation = async (id) => {
   }
 }
 
-exports.updateQuotationToPO = async (id, quotation, approval, bool) => {
-  console.log(approval)
+exports.updateQuotationToPO = async (id, quotation, approval, data) => {
   let foundEstimate = await Estimate.findById(id)
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   if (!foundEstimate) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
+  let agentUpdation = true
   if (foundEstimate.approvalFromAdminAsQuotes != true) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
+  if (data) {
+    let { otp, phone } = data
+    let { role } = await verifiedNumberS.findOnly(phone)
+    if (role != "agent") return { error: "agent not found", message: "please provide phone of a valid register agent", status: 404 }
+    let otpRecieved = await OtpS.findOnly(phone)
+    if (otpRecieved == null) return { message: "no otp found on this number", status: 400 }
+    if (otpRecieved.otp != otp) return { message: "otp doesn't match", status: 400 }
+    await OtpS.deleteOnly(phone)
+  }
   if (quotation) {
     let { Products, _id, PurchaseInvoice } = quotation
-    if (_id == foundEstimate._id)
+    if (_id != foundEstimate._id) return { message: "Id did not match Found", status: 409 };
+    if (Products) {
       Products.map((product, i) => {
         if (product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow) foundEstimate.Products[i].ProductEstimatedPrice = product.ProductEstimatedPrice
       })
+      agentUpdation = false
+    }
     if (PurchaseInvoice) {
       foundEstimate.PurchaseInvoice = PurchaseInvoice
       foundEstimate.approvalFromAdminAsQuotes = false
@@ -264,10 +290,17 @@ exports.updateQuotationToPO = async (id, quotation, approval, bool) => {
   foundEstimate.Updates.QuotationToPO = Date.now()
   foundEstimate.PO_Id = "PO_Id" + Date.now().toString()
   let updateThisEstimate = await Estimate.updateOne({ _id: id }, { $set: foundEstimate })
+  if (updateThisEstimate.nModified > 0 && PurchaseInvoice) {
+    let foundAgent = await AgentS.getCommonById(foundEstimate.data.agentId)
+    let foundcustomer = await AgentS.getCommonById(foundEstimate.data.customerId)
+    await sendEmail(foundAgent.data.email, "You Converted Quotation To Order", "", { Name: foundAgent.data.firstName })
+    await sendEmail(foundcustomer.data.email, "Your Machine Is Ordered", "", { Name: foundcustomer.data.firstName })
+    // await sendEmail(foundcustomer.data.email, "An Ordered is Processed", "", { Name: foundcustomer.data.firstName })
+  }
   try {
     return {
       data: updateThisEstimate.nModified > 0,
-      message: updateThisEstimate.nModified > 0 ? approval ? "Updatation Of Quotation To Purchase Order Success" : `Price was Updatated${approval != undefined ? " But Quotation To Purchase Order Request Rejected" : ""}` : "Updation failed",
+      message: updateThisEstimate.nModified > 0 ? approval ? "Updatation Of Quotation To Purchase Order Request Accepted" : `${agentUpdation ? "Quotation To Purchase Order" : "Price"} was Updatated${approval != undefined ? " But Quotation To Purchase Order Request Rejected" : ""}` : "Updation failed",
       status: updateThisEstimate.nModified > 0 ? 200 : 400,
     };
   } catch (e) {

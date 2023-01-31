@@ -103,7 +103,7 @@ exports.customerOtpRecieve = async (req, res) => {
             await sendEmail(email, "OTP request for Existing Customer Verify on Blacknut", otp, {Name:foundAgent.data.firstName})
             return res.status(200).send({ message: `The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,, tempOtp:${otp}`, status: 200 })
         }
-        await sendEmail(email, "OTP request for Customer Creation on Blacknut", otp)
+        await sendEmail(email, "OTP request for Customer Creation on Blacknut", otp, {Name:foundAgent.data.firstName})
         res.status(200).send({ message: `an otp is sent on customer mail, please verifying otp to process customer creation, tempOtp:${otp}`, status: 200 })
     }
     res.status(400).send({error:"Not a valid phone", message:"Please enter a valid phone number", status:400})

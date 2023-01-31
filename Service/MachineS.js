@@ -63,3 +63,13 @@ exports.getAllMachinesDetailed = async () => {
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
     }
 }
+
+exports.deleteThisMachine = async (id) => {
+    let deletedMachine = await Machine.deleteOne({ _id: id })
+    try {
+        return { data: deletedMachine.deletedCount > 0, message: deletedMachine.deletedCount > 0 ? "deletion success" : "deletion failed", status: deletedMachine.deletedCount > 0 ? 200 : 400 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
+    }
+}

@@ -44,7 +44,7 @@ app.use("/agent", agent)
 app.use("/customer", customer)
 app.use("/estimate",estimate)
 app.use("/quotation",quotation)
-// app.use("/purchaseOrder",PO)
+app.use("/purchaseOrder",PO)
 app.use("/upload",upload)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))

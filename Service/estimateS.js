@@ -187,6 +187,32 @@ exports.getAllQuotation = async () => {
   }
 };
 
+exports.getAllPO = async (agentId) => {
+  let query = {
+    approvalFromAdminAsQuotes: false,
+    approvalFromAdminAsPO: true
+  }
+  if(agentId) query = {
+    approvalFromAdminAsQuotes: false,
+    approvalFromAdminAsPO: true,
+    agentId
+  }
+  try {
+    let AllEstimates = await Estimate.find(query);
+    return {
+      data: AllEstimates,
+      message:
+        AllEstimates.length > 0
+          ? "retrieval Success"
+          : "please convert some to PO to view",
+      status: AllEstimates.length > 0 ? 200 : 404,
+    };
+  } catch (e) {
+    console.log(e);
+    return { error: e, message: "we have an error" };
+  }
+};
+
 exports.updateEstimateToQuotation = async (id) => {
   let foundEstimate = await Estimate.findById(id)
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };

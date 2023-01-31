@@ -84,7 +84,7 @@ exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
         let fails = [], successes = []
         if (ProductsToAdd.length > 0) {
             console.log("ProductsToAdd",ProductsToAdd)
-            addedproductres = await addTheseProduct(ProductsToAdd)
+            addedproductres = await addTheseProduct(ProductsToAdd,fails, successes)
             console.log("addedproductres",addedproductres)
             if (addedproductres.status != 201) return addedproductres
         }
@@ -119,10 +119,11 @@ let update = (products, fails, successes) => {
     })
 }
 
-let addTheseProduct = async (products) => {
+let addTheseProduct = async (products,fails, successes) => {
     let e
+    let prdID = []
     e = products.map(element => {
-        // let { Capacity, Model, Price, ProductID, Status, cropId, machineId } = element
+        prdID.push(element.ProductID)
         if (!element.Capacity || element.Capacity == undefined) return error("Capacity", "missing field")
         if (!element.Price || element.Price == undefined) return error("Price", "missing field")
         if (!element.ProductID || element.ProductID == undefined) return error("ProductID", "missing field")
@@ -131,8 +132,12 @@ let addTheseProduct = async (products) => {
         if (!element.machineId || element.machineId == undefined) return error("machineId", "missing field")
         return e = "continue"
     });
-    if(e != "continue") return e[0]
-    console.log("element,element.cropId == undefined")
+    if(e != "continue") {
+        fails = prdID
+        return e[0]
+    } else {
+        successes = [prdID]
+    }
     return { data: await product.insertMany(products), message: "created products Successfully", status: 201 }
 }
 

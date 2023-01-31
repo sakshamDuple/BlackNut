@@ -20,6 +20,16 @@ exports.getAllQuotation = async (req, res) => {
     }
 }
 
+exports.getAllPO = async (req, res) => {
+    let agentId = req.query.agentId
+    let AllEstimates = await EstimateS.getAllPO(agentId)
+    if (AllEstimates.status == 200) {
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+    } else {
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+    }
+}
+
 exports.getQuotationById = async (req, res) => {
     let AllEstimates = await EstimateS.getQuotationById(req.query.id)
     if (AllEstimates.status == 200) {

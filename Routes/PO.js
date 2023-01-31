@@ -1,5 +1,7 @@
-// const router = require("express").Router()
+const router = require("express").Router()
 
-// const estimateC = require("../Controller/estimateC")
+const estimateC = require("../Controller/estimateC")
 
-// router.post("/", estimateC.getAll);
+router.get("/", estimateC.getAllPO);
+
+module.exports = router;

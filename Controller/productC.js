@@ -271,12 +271,27 @@ exports.generateListOfCropsMachines = async (req, res) => {
 
 exports.updateOneProduct = async (req, res) => {
   let { Capacity, Model, Price, _id, ProductID, Status } = req.body
-  let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID },Status)
+  let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID }, Status)
   res.status(updateProduct.status).send({ data: updateProduct.data, message: updateProduct.message, status: updateProduct.status })
 }
 
 exports.deleteOneProduct = async (req, res) => {
   let id = req.query.id
   let deleted = await ProductS.deleteOnly(id)
+  res.status(deleted.status).send(deleted)
+}
+
+exports.deleteOneMachine = async (req, res) => {
+  let id = req.query.id
+  console.log(id)
+  let deleted = { status: 400, message: "nothing was deleted" }
+  let productsInThisMachine = await ProductS.findProductsForMachineId(id)
+  let idsToDelete = []
+  if (productsInThisMachine.data == null) return res.status(productsInThisMachine.status).send(productsInThisMachine)
+  productsInThisMachine.data.forEach(element => {
+    idsToDelete.push(element._id)
+  });
+  let deletedProducts = await ProductS.deleteMutliProducts(idsToDelete)
+  if (deletedProducts.status == 200) { deleted = await MachineS.deleteThisMachine(id) }
   res.status(deleted.status).send(deleted)
 }

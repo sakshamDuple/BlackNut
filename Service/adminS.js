@@ -1,3 +1,4 @@
+const { sendEmail } = require("../Middleware/emailSend");
 const { hashPassword } = require("../Middleware/salt");
 const Admin = require("../Model/Admin");
 const VerifiedNumberS = require("../Service/verifyNumberS")
@@ -14,6 +15,7 @@ exports.create = async (admin) => {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
         let createdAdmin = await Admin.create(admin)
+        sendEmail(admin.email,"Your Admin Account is Registered","",{Name:admin.firstName})
         // let doMobileRegistration = await VerifiedNumberS.create({ role: admin.role, number: admin.phone, id: createdAgent.id })
         return { AdminId: createdAdmin._id, message: "admin successfully created", status: 201 }
     } catch (e) {

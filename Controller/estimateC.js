@@ -1,6 +1,10 @@
 const Estimate = require("../Model/Estimate")
 const { getCommonById } = require("../Service/AgentS")
 const EstimateS = require("../Service/estimateS")
+const OtpS = require("../Service/OtpS")
+const { findOnly } = require("../Service/verifyNumberS")
+const { generateOtp } = require("../Middleware/genOtp")
+const { sendEmail } = require("../Middleware/emailSend")
 
 exports.getAll = async (req, res) => {
     let AllEstimates = await EstimateS.getAllEstimates()
@@ -94,11 +98,38 @@ exports.updateEstimateToQuotation = async (req, res) => {
     }
 }
 
+exports.customerOtpRecieve = async (req, res) => {
+    let phone = req.query.phone
+    let Nphone = parseInt(phone)
+    console.log(10000000000 > Nphone && Nphone >= 1000000000)
+    if (10000000000 > Nphone && Nphone >= 1000000000) {
+        let email = req.query.email
+        let agentid = req.query.agentid
+        if (!phone && !email && !agentid) return res.status(400).send({ Message: "fields missing", status: 400 })
+        let foundAgent = await getCommonById(agentid)
+        if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
+        let mobileExists = await findOnly(phone)
+        // if (mobileExists != null) return res.status(409).send({ Message: "requested phone is already registered", status: 409 })
+        let otp = generateOtp()
+        await OtpS.deleteOnly(foundAgent.data.phone)
+        await OtpS.create({
+            number: foundAgent.data.phone,
+            id: agentid,
+            otp: otp
+        })
+        if (mobileExists == null) return res.status(404).send({ message: "No such mobile found", status: 404 })
+        await sendEmail(email, "OTP request for File Upload & Updation Of quotation To Purchase Order", otp, { Name: foundAgent.data.firstName })
+        res.status(200).send({ message: `an otp is sent on customer mail, please verify otp to process to complete process file upload process, tempOtp:${otp}`, status: 200 })
+    }
+    res.status(400).send({ error: "Not a valid phone", message: "Please enter a valid phone number", status: 400 })
+}
+
 exports.updateQuotationToPO = async (req, res) => {
     let id = req.query.id
     let quotation = req.body.Quotation
     let approval = req.body.approval
-    let Quotation = await EstimateS.updateQuotationToPO(id, quotation, approval)
+    let data = req.body.data
+    let Quotation = await EstimateS.updateQuotationToPO(id, quotation, approval, data)
     if (Quotation.status == 200) {
         res.status(Quotation.status).send({ data: Quotation.data, Message: Quotation.message, status: Quotation.status })
     } else {

@@ -1,3 +1,4 @@
+const { sendEmail } = require("../Middleware/emailSend");
 const { hashPassword } = require("../Middleware/salt");
 const Agent = require("../Model/Agent");
 const VerifiedNumberS = require("../Service/verifyNumberS")
@@ -30,6 +31,7 @@ exports.create = async (customer) => {
         }
         let createdAgent = await Agent.create(newcustomer)
         let doMobileRegistration = await VerifiedNumberS.create({ role: customer.role, number: customer.phone, id: createdAgent.id })
+        await sendEmail(customer.email,"Your Customer Account is Registered","",{Name:admin.firstName})
         return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "customer successfully created", status: 201 }
     } catch (e) {
         console.log(e)

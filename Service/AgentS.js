@@ -1,3 +1,4 @@
+const { sendEmail } = require("../Middleware/emailSend");
 const { hashPassword } = require("../Middleware/salt");
 const Agent = require("../Model/Agent");
 const VerifiedNumberS = require("../Service/verifyNumberS")
@@ -26,6 +27,7 @@ exports.create = async (agent) => {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", {Name:newagent.firstName})
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, message: "agent successfully created", status: 201 }
     } catch (e) {
@@ -138,7 +140,6 @@ exports.updateThisAgent = async (agent, field) => {
         if (GST_Number) newAgent.GST_Number = GST_Number
         if (PAN_Company) newAgent.PAN_Company = PAN_Company
         if (PAN_Agent) newAgent.PAN_Agent = PAN_Agent
-        if (Address) newAgent.Address = Address
         if (Address) newAgent.Address = Address
         if (DocumentFile) newAgent.DocumentFile = DocumentFile
         if (status) newAgent.status = status

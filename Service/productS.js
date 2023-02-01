@@ -159,6 +159,16 @@ exports.deleteOnly = async (id) => {
     }
 }
 
+exports.deleteMutliProducts = async (ids) => {
+    try {
+        let deleted = await product.deleteMany({ _id: {$in:ids} })
+        return { data: deleted.deletedCount > 0, message: deleted.deletedCount > 0 ? "deletion of multiple product success" : "deletion failed", status: deleted.deletedCount > 0 ? 200 : 400 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "deletion failed", status: 400 }
+    }
+}
+
 exports.updateProductById = async ({ Capacity, Model, Price, _id }, Status) => {
     let query = { Capacity, Model, Price }
     if (Status) query = { Capacity, Model, Price, Status }

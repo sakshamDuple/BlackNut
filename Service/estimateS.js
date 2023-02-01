@@ -157,7 +157,7 @@ exports.getAllEstimates = async (id, field) => {
     } else {
       AllEstimates = await Estimate.find({
         approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false
-      });
+      }); 
     }
     return {
       data: AllEstimates, 
@@ -172,7 +172,7 @@ exports.getAllEstimates = async (id, field) => {
     return { error: e, message: "we have an error" };
   }
 };
-
+ 
 exports.getAllQuotation = async () => {
   try {
     let AllEstimates = await Estimate.find({

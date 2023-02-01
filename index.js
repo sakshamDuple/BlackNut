@@ -38,14 +38,14 @@ const port = process.env.PORT || 8000;
 
 // app.use("/", (req,res)=>{
 //     res.send("hii")
-// });
+// }); 
 app.use("/login", login)
 app.use("/signUp", signUp)
-app.use("/product", product)
+app.use("/product", product)  
 app.use("/agent", agent)
-app.use("/customer", customer)
-app.use("/estimate",estimate)
-app.use("/quotation",quotation)
+app.use("/customer", customer) 
+app.use("/estimate",estimate) 
+app.use("/quotation",quotation)   
 app.use("/purchaseOrder",PO)
 app.use("/upload",upload)
 app.use("/dashboard",dashboard)

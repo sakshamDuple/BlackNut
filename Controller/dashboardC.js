@@ -33,20 +33,20 @@ exports.getRecentPO = async (req, res) => {
 exports.getTotalCount = async (req, res) => {
     let details = []
     let EstimateCount = await dashboardS.getEstimateCount()
-    if (EstimateCount) {
+    
         details.push({ Name: "Estimates", count: EstimateCount })
-    }
+ 
 
     let QuoteCount = await dashboardS.getQuoteCount()
-    if (QuoteCount) {
+
         details.push({ Name: "Quotations", count: QuoteCount })
-    }
+  
 
 
     let PoCount = await dashboardS.getPoCount()
-    if (PoCount) {
+  
         details.push({ Name: "Purchase Orders", count: PoCount })
-    }
+  
     console.log(details, "eee")
 
     res.send(details)
@@ -102,20 +102,20 @@ exports.getTotalCountAgent=async(req,res)=>{
     let id = req.query.id
     let details = []
     let EstimateCount = await dashboardS.getEstimateCountOfAgent(id)
-    if (EstimateCount) {
+
         details.push({ Name: "Estimates", count: EstimateCount })
-    }
+  
 
     let QuoteCount = await dashboardS.getQuoteCountOfAgent(id)
-    if (QuoteCount) {
+   
         details.push({ Name: "Quotations", count: QuoteCount })
-    }
+ 
 
 
     let PoCount = await dashboardS.getPoCountOfAgent(id)
-    if (PoCount) {
+ 
         details.push({ Name: "Purchase Orders", count: PoCount })
-    }
+
     console.log(details, "eee")
 
     res.send(details)

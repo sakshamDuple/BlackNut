@@ -7,9 +7,11 @@ const OtpS = require("../Service/OtpS")
 const { findOnly } = require("../Service/verifyNumberS")
 
 exports.getActiveCustomers = async (req, res) => {
-    let theCustomers = await CustomerS.getAllCustomer(true)
+    let page = req.query.page
+    let limit = req.query.limit
+    let theCustomers = await CustomerS.getAllCustomer(true,page,limit)
     if (theCustomers.status == 200) {
-        res.status(theCustomers.status).send({ data: theCustomers.data, Message: theCustomers.message, status: theCustomers.status })
+        res.status(theCustomers.status).send(theCustomers)
     } else {
         res.status(theCustomers.status).send({ error: theCustomers.error, Message: theCustomers.message, status: theCustomers.status }).status(theCustomers.status)
     }
@@ -51,12 +53,14 @@ exports.getThisCustomer = async (req,res) => {
 }
 
 exports.getAllCustomers = async (req, res) => {
-    let theCustomers = await CustomerS.getAllCustomer()
+    let page = req.query.page
+    let limit = req.query.limit
+    let theCustomers = await CustomerS.getAllCustomer(false,page,limit)
     console.log(theCustomers)
     if (theCustomers.status == 200) {
-        res.status(theCustomers.status).send({ data: theCustomers.data, Message: theCustomers.message, status: theCustomers.status }).status(theCustomers.status)
+        res.status(theCustomers.status).send(theCustomers)
     } else {
-        res.status(theCustomers.status).send({ error: theCustomers.error, Message: theCustomers.message, status: theCustomers.status }).status(theCustomers.status)
+        res.status(theCustomers.status).send({ error: theCustomers.error, Message: theCustomers.message, status: theCustomers.status })
     }
 }
 

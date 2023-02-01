@@ -27,7 +27,7 @@ exports.create = async (agent) => {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
-        await sendEmail(newagent.email, "Your Agent Account is Registered", "", {Name:newagent.firstName})
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, message: "agent successfully created", status: 201 }
     } catch (e) {
@@ -51,12 +51,19 @@ async function getValueForNextSequence() {
     return findMax[0].MaxEstimateNo + 1;
 }
 
-exports.getAllAgents = async (bool) => {
+exports.getAllAgents = async (bool, page, limit) => {
     try {
-        let allAgents
-        if (bool) allAgents = await Agent.find({ role: "agent", status: "Active" })
-        allAgents = await Agent.find({ role: "agent" })
-        return { data: allAgents, message: allAgents.length > 0 ? "retrieval Success" : "please upload some agents to view", status: allAgents.length > 0 ? 200 : 404 }
+        let allAgents, query, totalCount
+        query = { role: "agent" }
+        if (bool) query = { role: "agent", status: "ACTIVE" }
+        totalCount = await Agent.count(query)
+        if (page && limit) {
+            start = limit * (page - 1)
+            allAgents = await Agent.find(query).skip(start).limit(parseInt(limit))
+        } else {
+            allAgents = await Agent.find(query)
+        }
+        return { data: allAgents, totalCount, message: allAgents.length > 0 ? "retrieval Success" : "please upload some agents to view", status: allAgents.length > 0 ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

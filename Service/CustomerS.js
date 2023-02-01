@@ -24,14 +24,14 @@ exports.create = async (customer) => {
             newcustomer.password = await hashPassword(customer.password)
             newcustomer.AgentNo = await getValueForNextSequence()
             console.log(newcustomer.AgentNo)
-            newcustomer.CustomerID = "C_"+newcustomer.AgentNo
+            newcustomer.CustomerID = "C_" + newcustomer.AgentNo
             // process.env.DATABASE_URL
         } else {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
         let createdAgent = await Agent.create(newcustomer)
         let doMobileRegistration = await VerifiedNumberS.create({ role: customer.role, number: customer.phone, id: createdAgent.id })
-        await sendEmail(customer.email,"Your Customer Account is Registered","",{Name:admin.firstName})
+        await sendEmail(customer.email, "Your Customer Account is Registered", "", { Name: admin.firstName })
         return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "customer successfully created", status: 201 }
     } catch (e) {
         console.log(e)
@@ -54,13 +54,20 @@ async function getValueForNextSequence() {
     return findMax[0].MaxEstimateNo + 1;
 }
 
-exports.getAllCustomer = async (bool) => {
+exports.getAllCustomer = async (bool, page, limit) => {
     try {
-        let allCustomers
-        if (bool) allCustomers = await Agent.find({ role: "customer", status: "Active" })
-        allCustomers = await Agent.find({ role: "customer" })
-        console.log("allCustomers", allCustomers.length > 0)
-        return { data: allCustomers, message: allCustomers.length > 0 ? "retrieval Success" : "please upload some customer to view", status: allCustomers.length > 0 ? 200 : 404 }
+        let allCustomers, query
+        query = { role: "customer" }
+        if (bool) query = { role: "customer", status: "ACTIVE" }
+        totalCount = await Agent.count(query)
+        console.log(page,limit,totalCount)
+        if (page && limit) {
+            start = limit * (page - 1)
+            allCustomers = await Agent.find(query).skip(start).limit(parseInt(limit))
+        } else {
+            allCustomers = await Agent.find(query)
+        } //.skip(1).limit(2)
+        return { data: allCustomers, totalCount, message: allCustomers.length > 0 ? "retrieval Success" : "please upload some customer to view", status: allCustomers.length > 0 ? 200 : 404 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error", status: 400 }
@@ -72,8 +79,8 @@ exports.getCustomerToShowById = async (id, bool) => {
         let theCustomer
         theCustomer = await Agent.findOne({ _id: id, role: "customer" })
         if (bool) theCustomer = await Agent.findOne({ _id: id, role: "customer", status: "Active" })
-        let {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address} = theCustomer
-        let customerToShow = {role,firstName,lastName,phone,email,createdAt,Company_Name,GST_Number,PAN_Company,PAN_Agent,Address}
+        let { role, firstName, lastName, phone, email, createdAt, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address } = theCustomer
+        let customerToShow = { role, firstName, lastName, phone, email, createdAt, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address }
         return { data: customerToShow, message: "retrieval Success", status: 201 }
     } catch (e) {
         console.log(e)
@@ -123,7 +130,7 @@ exports.updateThisCustomer = async (customer) => {
         let prevCustomer = await Agent.findOne(customer._id) //to Check For Future Conditions
         let newCustomer = { ...customer }
         let updateThisCustomer = await Agent.updateOne({ _id: customer._id, role: "customer" }, { $set: newCustomer })
-        return { data: updateThisCustomer.nModified > 0, message: updateThisCustomer.nModified > 0?"updated Successfully":"failed", status: updateThisCustomer.nModified > 0?200:400 }
+        return { data: updateThisCustomer.nModified > 0, message: updateThisCustomer.nModified > 0 ? "updated Successfully" : "failed", status: updateThisCustomer.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

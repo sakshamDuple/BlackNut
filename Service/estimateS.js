@@ -146,21 +146,29 @@ async function getValueForNextSequence(val) {
   return findMax[0].MaxEstimateNo + 1;
 }
 
-exports.getAllEstimates = async (id, field) => {
+exports.getAllEstimates = async (id, field, page, limit) => {
   try {
-    let agentId, AllEstimates
+    let agentId, AllEstimates, query
     if (field == "agent") {
       agentId = id
-      AllEstimates = await Estimate.find({
+      query = {
         approvalFromAdminAsQuotes: false, agentId, approvalFromAdminAsPO: false
-      });
+      };
     } else {
-      AllEstimates = await Estimate.find({
+      query = {
         approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false
-      });
+      };
+    }
+    totalCount = await Estimate.count(query)
+    if (page && limit) {
+      start = limit * (page - 1)
+      AllEstimates = await Estimate.find(query).skip(start).limit(parseInt(limit))
+    } else {
+      AllEstimates = await Estimate.find(query)
     }
     return {
       data: AllEstimates,
+      totalCount,
       message:
         AllEstimates.length > 0
           ? "retrieval Success"
@@ -173,14 +181,32 @@ exports.getAllEstimates = async (id, field) => {
   }
 };
 
-exports.getAllQuotation = async () => {
+exports.getAllQuotation = async (id, field, page, limit) => {
   try {
-    let AllEstimates = await Estimate.find({
-      approvalFromAdminAsQuotes: true,
-      approvalFromAdminAsPO: false
-    });
+    let AllEstimates, query
+    if (field == "agent") {
+      agentId = id
+      query = {
+        approvalFromAdminAsQuotes: true,
+        agentId: id,
+        approvalFromAdminAsPO: false
+      };
+    } else {
+      query = {
+        approvalFromAdminAsQuotes: true,
+        approvalFromAdminAsPO: false
+      };
+    }
+    totalCount = await Estimate.count(query)
+    if (page && limit) {
+      start = limit * (page - 1)
+      AllEstimates = await Estimate.find(query).skip(start).limit(parseInt(limit))
+    } else {
+      AllEstimates = await Estimate.find(query)
+    }
     return {
       data: AllEstimates,
+      totalCount,
       message:
         AllEstimates.length > 0
           ? "retrieval Success"
@@ -193,20 +219,27 @@ exports.getAllQuotation = async () => {
   }
 };
 
-exports.getAllPO = async (agentId) => {
+exports.getAllPO = async (id, field, page, limit) => {
   let query = {
     approvalFromAdminAsQuotes: false,
     approvalFromAdminAsPO: true
   }
-  if (agentId) query = {
+  if (id) query = {
     approvalFromAdminAsQuotes: false,
     approvalFromAdminAsPO: true,
-    agentId
+    agentId: id
   }
   try {
-    let AllEstimates = await Estimate.find(query);
+    let AllEstimates
+    let totalCount = await Estimate.count(query)
+    if (page && limit) {
+      AllEstimates = await Estimate.find(query).skip(start).limit(parseInt(limit));
+    } else {
+      AllEstimates = await Estimate.find(query);
+    }
     return {
       data: AllEstimates,
+      totalCount,
       message:
         AllEstimates.length > 0
           ? "retrieval Success"

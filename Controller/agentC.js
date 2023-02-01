@@ -3,20 +3,41 @@ const { generateOtp } = require("../Middleware/genOtp")
 const AgentS = require("../Service/AgentS")
 const verifiedNumberS = require("../Service/verifyNumberS")
 const OtpS = require("../Service/OtpS")
+const { searchGlobal } = require("../Service/searchS")
 
 exports.getActiveAgents = async (req, res) => {
-    let theAgents = await AgentS.getAllAgents(true)
-    if (theAgents.status == 201) {
-        res.status(theAgents.status).send({ data: theAgents.data, Message: theAgents.message, status: theAgents.status })
+    let page = req.query.page
+    let limit = req.query.limit
+    let search = req.query.search
+    let fieldForSearch = req.query.fieldForSearch
+    console.log("page,limit", page, limit)
+    let theAgents = await AgentS.getAllAgents(true, page, limit)
+    if (theAgents.status == 200) {
+        res.status(theAgents.status).send(theAgents)
     } else {
         res.status(theAgents.status).send({ error: theAgents.error, Message: theAgents.message, status: theAgents.status })
     }
 }
 
+exports.searchGlobal = async (req,res) => {
+    let search = req.query.search
+    let fieldForSearch = req.query.fieldForSearch
+    let searchQty = req.query.searchQty?parseInt(req.query.searchQty):10
+    let collection = req.query.collection
+    let type = req.query.type
+    let Response
+    if(collection != "Admin" && collection != "Agent" && collection != "Crop" && collection != "Estimate" && collection != "Machine" && collection != "Product") return res.status(400).json({error: "No Such Collection Exists", Message: "No Such Collection Exists", status: 400})
+    Response = await searchGlobal(search,fieldForSearch,searchQty,collection,type)
+    res.status(Response.status).json(Response)
+}
+
 exports.getAllAgents = async (req, res) => {
-    let theAgents = await AgentS.getAllAgents()
+    let page = req.query.page
+    let limit = req.query.limit
+    console.log("page,limit", page, limit)
+    let theAgents = await AgentS.getAllAgents(false, page, limit)
     if (theAgents.status == 200) {
-        res.status(theAgents.status).send({ data: theAgents.data, Message: theAgents.message, status: theAgents.status })
+        res.status(theAgents.status).send(theAgents)
     } else {
         res.status(theAgents.status).send({ error: theAgents.error, Message: theAgents.message, status: theAgents.status })
     }
@@ -59,8 +80,8 @@ exports.getOtpForUpdateDocument = async (req, res) => {
     if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
     let foundAgent = await AgentS.getCommonById(id)
     let otp = generateOtp()
-    console.log(foundAgent.data.email,otp)
-    await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp, {Name:foundAgent.data.firstName})
+    console.log(foundAgent.data.email, otp)
+    await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp, { Name: foundAgent.data.firstName })
     await OtpS.create({
         number: foundAgent.data.phone,
         id: id,
@@ -73,17 +94,17 @@ exports.getOtpForUpdateDocument = async (req, res) => {
     }
 }
 
-exports.getAgrFileToVerifyUpdate = async (req,res) => {
-    let {otp,phone,file} = req.body
+exports.getAgrFileToVerifyUpdate = async (req, res) => {
+    let { otp, phone, file } = req.body
     let { role, id } = await verifiedNumberS.findOnly(phone)
     if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
     let otpRecieved = await OtpS.findOnly(phone)
-    if(otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
+    if (otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
     await OtpS.deleteOnly(phone)
     let DocumentFile = file
-    let Agent ={
+    let Agent = {
         DocumentFile,
-        _id:id
+        _id: id
     }
     let updatedAgent = await AgentS.updateThisAgent(Agent)
     if (updatedAgent.status == 200) {

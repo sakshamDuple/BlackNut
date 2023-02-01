@@ -80,13 +80,13 @@ let allProducts = (products, fails, successes) => {
             fails.push(ProductId);
           } else {
             successes.push(ProductId)
-          }
+          } 
           resolve({ products, fail, success })
         })
-      })
+      }) 
     ).then((data) => {
       resolve(data)
-    })
+    }) 
   })
 }
 
@@ -154,7 +154,7 @@ exports.getAllEstimates = async (id, field) => {
       });
     }
     return {
-      data: AllEstimates,
+      data: AllEstimates, 
       message:
         AllEstimates.length > 0
           ? "retrieval Success"
@@ -202,7 +202,7 @@ exports.getAllPO = async (agentId) => {
     return {
       data: AllEstimates,
       message:
-        AllEstimates.length > 0
+        AllEstimates.length > 0  
           ? "retrieval Success"
           : "please convert some to PO to view",
       status: AllEstimates.length > 0 ? 200 : 404,

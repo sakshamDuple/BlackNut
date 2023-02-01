@@ -63,23 +63,23 @@ exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
     let thisMachine = await MachineS.findMachineById(MachineId)
     let addProduct = false
     let ProductsToAdd = []
-    let addedproductres = { status: 201 }
-    console.log(thisMachine.data.Product_name,thisMachine)
+    let addedproductres = { status: 201 } 
+    console.log(thisMachine)
     if (thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name) {
         console.log("hii", MachineId, PrevProduct[0], Updates);
         Updates.productDetail.map((element, i) => {
             if (PrevProduct[i] != undefined) {
-                PrevProduct[i].Capacity = element.Capacity
+                PrevProduct[i].Capacity = element.Capacity 
                 PrevProduct[i].Model = element.Model
                 PrevProduct[i].Price = element.Price
-                PrevProduct[i].ProductID = element.ProductID
+                PrevProduct[i].ProductID = element.ProductID 
                 PrevProduct[i].Status = element.Status
-            } else {
-                addProduct = true
+            } else {  
+                addProduct = true 
                 element.cropId = thisMachine.data.cropId
                 element.machineId = MachineId
                 ProductsToAdd.push(element)
-            }
+            } 
         });
         let fails = [], successes = []
         if (ProductsToAdd.length > 0) {
@@ -131,7 +131,7 @@ let addTheseProduct = async (products,fails, successes) => {
         if (!element.cropId || element.cropId == undefined) return error("cropId", "missing field")
         if (!element.machineId || element.machineId == undefined) return error("machineId", "missing field")
         return e = "continue"
-    });
+    });  
     if(e != "continue") {
         fails = prdID
         return e[0]

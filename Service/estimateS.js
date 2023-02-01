@@ -86,13 +86,13 @@ let allProducts = (products, fails, successes) => {
             fails.push(ProductId);
           } else {
             successes.push(ProductId)
-          }
+          } 
           resolve({ products, fail, success })
         })
-      })
+      }) 
     ).then((data) => {
       resolve(data)
-    })
+    }) 
   })
 }
 
@@ -241,7 +241,7 @@ exports.getAllPO = async (id, field, page, limit) => {
       data: AllEstimates,
       totalCount,
       message:
-        AllEstimates.length > 0
+        AllEstimates.length > 0  
           ? "retrieval Success"
           : "please convert some to PO to view",
       status: AllEstimates.length > 0 ? 200 : 404,

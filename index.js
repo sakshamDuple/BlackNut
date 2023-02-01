@@ -12,9 +12,11 @@ const agent = require("./Routes/agent")
 const customer = require("./Routes/customer")
 const estimate = require("./Routes/estimate")
 const quotation = require("./Routes/quotation")
-const upload = require("./Routes/Upload")
+
 const PO = require("./Routes/PO")
 const agentC = require("./Controller/agentC")
+const upload = require("./Routes/Upload")
+const dashboard = require("./Routes/dashboard")
 const cors = require("cors")
 
 let app = express()
@@ -37,17 +39,18 @@ const port = process.env.PORT || 8000;
 
 // app.use("/", (req,res)=>{
 //     res.send("hii")
-// });
+// }); 
 app.use("/login", login)
 app.use("/signUp", signUp)
-app.use("/product", product)
+app.use("/product", product)  
 app.use("/agent", agent)
-app.use("/customer", customer)
-app.use("/estimate",estimate)
-app.use("/quotation",quotation)
+app.use("/customer", customer) 
+app.use("/estimate",estimate) 
+app.use("/quotation",quotation)   
 app.use("/purchaseOrder",PO)
 app.use("/upload",upload)
 app.use("/search",agentC.searchGlobal)
+app.use("/dashboard",dashboard)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)

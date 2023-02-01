@@ -27,6 +27,7 @@ exports.findMachine = async (data) => {
 }
 
 exports.findMachineById = async (id) => {
+    console.log(id,"ii")
     try {
         let foundMachine = await Machine.findById(id)
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
@@ -41,7 +42,7 @@ exports.findMachineByCropId = async (cropId) => {
         let foundMachine = await Machine.find({cropId:cropId})
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
-        console.log(e)
+        console.log(e) 
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
     }
 }

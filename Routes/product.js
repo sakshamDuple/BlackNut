@@ -23,15 +23,15 @@ router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
-router.put("/updateOneProduct", productC.updateOneProduct)
-router.delete("/deleteOneProduct", productC.deleteOneProduct)
+router.put("/updateOneProduct", productC.updateOneProduct) 
+router.delete("/deleteOneProduct", productC.deleteOneProduct) 
 router.delete("/deleteOneMachine", productC.deleteOneMachine)
 router.put("/bulkProductPriceUpdateOfOneMachine", upload.single("file"), async (req, res) => {
     let file = req.file;
     let products = await csvtojson().fromFile(file.path);
     var fails = []
     var successes = []
-    let data = await update(products, fails, successes)
+    let data = await update(products, fails, successes) 
     let failure = fails.length == products.length
     let success = fails.length == 0
     return res.send({ status: failure ? 400 : 200, message: failure ? "Nothing was updated" : success ? "Success, all data were updated successfully" : "Partial Success", data: { fails, successes } });

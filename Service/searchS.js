@@ -5,8 +5,10 @@ const Crop = require('../Model/Crop')
 const Estimate = require("../Model/Estimate");
 const Product = require("../Model/Product");
 
-exports.searchGlobal = async (search, fieldForSearch, searchQty, collection, type) => {
-    let { Collection, queryS, query } = this.generateCollectionAndQuerySearch(collection, fieldForSearch, search, type)
+exports.searchGlobal = async (search, fieldForSearch, searchQty, collection, type, sortBy, sortVal) => {
+    if(!sortBy) sortBy = "createdAt"
+    if(!sortVal) sortBy = 1
+    let { Collection, queryS, query, querySort } = this.generateCollectionAndQuerySearch(collection, fieldForSearch, search, type, sortBy, sortVal)
     if (type) {
         agg = [
             {
@@ -34,15 +36,15 @@ exports.searchGlobal = async (search, fieldForSearch, searchQty, collection, typ
             }, {
                 '$limit': searchQty
             }, {
-                '$sort': { "createdAt": -1 },
+                '$sort': querySort,
             }
         ]
     }
     let result = await Collection.aggregate(agg)
     return { result, status: result.length > 0 ? 200 : 404, message: result.length > 0 ? "response generated" : "not found" }
 }
-exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, type) => {
-    let Collection, queryS, query
+exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, type, sortBy, sortVal) => {
+    let Collection, queryS, query, querySort
     switch (collection) {
         case "Admin":
             Collection = Admin
@@ -103,6 +105,7 @@ exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, 
             queryS = {
                 "CustomerID": new RegExp(search, 'i')
             }
+            break;
         case "crop":
             queryS = {
                 "crop": new RegExp(search, 'i')
@@ -117,6 +120,7 @@ exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, 
             queryS = {
                 "QuotationId": new RegExp(search, 'i')
             }
+            break;
         case "PO_Id":
             queryS = {
                 "PO_Id": new RegExp(search, 'i')
@@ -131,6 +135,7 @@ exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, 
             queryS = {
                 "customerId": new RegExp(search, 'i')
             }
+            break;
         case "Agent_Code":
             queryS = {
                 "Agent_Code": new RegExp(search, 'i')
@@ -145,11 +150,66 @@ exports.generateCollectionAndQuerySearch = (collection, fieldForSearch, search, 
             queryS = {
                 "Product_name": new RegExp(search, 'i')
             }
+            break;
         case "ProductID":
             queryS = {
                 "ProductID": new RegExp(search, 'i')
             }
             break;
     }
-    return { Collection, queryS, query }
+    switch (sortBy) {
+        case "firstName":
+            querySort = { "firstName": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "lastName":
+            querySort = { "lastName": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "email":
+            querySort = { "email": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "phone":
+            querySort = { "phone": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "AgentID":
+            querySort = { "AgentID": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "CustomerID":
+            querySort = { "CustomerID": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "crop":
+            querySort = { "crop": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "EstimateId":
+            querySort = { "EstimateId": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "QuotationId":
+            querySort = { "QuotationId": parseInt(sortVal)==1?1:-1 }
+        case "PO_Id":
+            querySort = { "PO_Id": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "agentId":
+            querySort = { "agentId": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "customerId":
+            querySort = { "customerId": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "Agent_Code":
+            querySort = { "Agent_Code": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "Machine_name":
+            querySort = { "Machine_name": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "Product_name":
+            querySort = { "Product_name": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "ProductID":
+            querySort = { "ProductID": parseInt(sortVal)==1?1:-1 }
+            break;
+        case "createAt": 
+            querySort = { "createdAt": parseInt(sortVal)==1?1:-1 }
+            break;
+        default:
+            querySort = { "createdAt": -1 }
+    }
+    return { Collection, queryS, query, querySort }
 }

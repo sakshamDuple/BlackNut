@@ -17,6 +17,8 @@ const PO = require("./Routes/PO")
 const agentC = require("./Controller/agentC")
 const upload = require("./Routes/Upload")
 const dashboard = require("./Routes/dashboard")
+const admin = require("./Routes/admin")
+
 const cors = require("cors")
 
 let app = express()
@@ -51,6 +53,7 @@ app.use("/purchaseOrder",PO)
 app.use("/upload",upload)
 app.use("/search",agentC.searchGlobal)
 app.use("/dashboard",dashboard)
+app.use("/admin",admin)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)

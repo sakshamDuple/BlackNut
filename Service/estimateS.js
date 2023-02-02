@@ -40,10 +40,10 @@ exports.create = async (estimate) => {
   if (EstimateDateOfPurchase)
     newDate = await dateToDateNowConverter(EstimateDateOfPurchase);
   let nextSeq = await getValueForNextSequence("Estimate");
-  console.log("foundcustomer", foundcustomer)
   let customerName = foundcustomer.data.firstName + " " + foundcustomer.data.lastName
   let agentName = foundAgent.data.firstName + " " + foundAgent.data.lastName
   let Agent_Code = foundAgent.data.AgentID
+  let state = foundAgent.data.Address.state
   try {
     let createdEstimate = await Estimate.create({
       Products: data[0].products,
@@ -54,7 +54,8 @@ exports.create = async (estimate) => {
       agentName,
       approvalFromAdminAsQuotes,
       EstimateDateOfPurchase: newDate,
-      EstimateNo: nextSeq
+      EstimateNo: nextSeq,
+      state
     });
     await sendEmail(foundAgent.data.email, "You Added New Estimate", "", { Name: foundAgent.data.firstName })
     await sendEmail(foundcustomer.data.email, "Added New Estimate", "", { Name: foundcustomer.data.firstName })
@@ -86,13 +87,13 @@ let allProducts = (products, fails, successes) => {
             fails.push(ProductId);
           } else {
             successes.push(ProductId)
-          } 
+          }
           resolve({ products, fail, success })
         })
-      }) 
+      })
     ).then((data) => {
       resolve(data)
-    }) 
+    })
   })
 }
 
@@ -146,17 +147,19 @@ async function getValueForNextSequence(val) {
   return findMax[0].MaxEstimateNo + 1;
 }
 
-exports.getAllEstimates = async (id, field, page, limit) => {
+exports.getAllEstimates = async (id, field, page, limit, state) => {
   try {
     let agentId, AllEstimates, query
+    console.log(state)
+    if (state) state = { $regex: `(?i)${state}(?-i)` }
     if (field == "agent") {
       agentId = id
       query = {
-        approvalFromAdminAsQuotes: false, agentId, approvalFromAdminAsPO: false
+        approvalFromAdminAsQuotes: false, agentId, approvalFromAdminAsPO: false, state
       };
     } else {
       query = {
-        approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false
+        approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false, state
       };
     }
     totalCount = await Estimate.count(query)
@@ -181,20 +184,22 @@ exports.getAllEstimates = async (id, field, page, limit) => {
   }
 };
 
-exports.getAllQuotation = async (id, field, page, limit) => {
+exports.getAllQuotation = async (id, field, page, limit, state) => {
   try {
-    let AllEstimates, query
+    let AllEstimates, query, start
+    if (state) state = { $regex: `(?i)${state}(?-i)` }
     if (field == "agent") {
       agentId = id
       query = {
         approvalFromAdminAsQuotes: true,
-        agentId: id,
+        agentId: id, state,
         approvalFromAdminAsPO: false
       };
     } else {
       query = {
         approvalFromAdminAsQuotes: true,
-        approvalFromAdminAsPO: false
+        approvalFromAdminAsPO: false,
+        state
       };
     }
     totalCount = await Estimate.count(query)
@@ -219,18 +224,21 @@ exports.getAllQuotation = async (id, field, page, limit) => {
   }
 };
 
-exports.getAllPO = async (id, field, page, limit) => {
+exports.getAllPO = async (id, field, page, limit, state) => {
+  if (state) state = { $regex: `(?i)${state}(?-i)` }
   let query = {
     approvalFromAdminAsQuotes: false,
-    approvalFromAdminAsPO: true
+    approvalFromAdminAsPO: true,
+    state
   }
   if (id) query = {
     approvalFromAdminAsQuotes: false,
     approvalFromAdminAsPO: true,
-    agentId: id
+    agentId: id,
+    state
   }
   try {
-    let AllEstimates
+    let AllEstimates, start
     let totalCount = await Estimate.count(query)
     if (page && limit) {
       AllEstimates = await Estimate.find(query).skip(start).limit(parseInt(limit));
@@ -241,7 +249,7 @@ exports.getAllPO = async (id, field, page, limit) => {
       data: AllEstimates,
       totalCount,
       message:
-        AllEstimates.length > 0  
+        AllEstimates.length > 0
           ? "retrieval Success"
           : "please convert some to PO to view",
       status: AllEstimates.length > 0 ? 200 : 404,

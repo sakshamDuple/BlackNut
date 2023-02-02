@@ -99,14 +99,25 @@ const Estimate = new mongoose.Schema({
 
     Updates: Updates,
 
-    customerName: String,
+    customerName: {
+        type: String,
+        required: true
+    },
 
-    agentName: String,
+    agentName: {
+        type: String,
+        required: true
+    },
 
     PurchaseInvoice: String,
 
     Status: String,
-    Agent_Code: String
+    Agent_Code: String,
+
+    state: {
+        type: String,
+        required: true
+    }
 
 });
 

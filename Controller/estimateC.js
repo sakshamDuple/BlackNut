@@ -9,7 +9,8 @@ const { sendEmail } = require("../Middleware/emailSend")
 exports.getAll = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
-    let AllEstimates = await EstimateS.getAllEstimates("","",page,limit)
+    let state = req.query.state
+    let AllEstimates = await EstimateS.getAllEstimates("", "", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -20,8 +21,9 @@ exports.getAll = async (req, res) => {
 exports.getAllQuotation = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
-    let agentId = req.query.agentId?req.query.agentId:""
-    let AllEstimates = await EstimateS.getAllQuotation(agentId,agentId==""?"":"agent",page,limit)
+    let state = req.query.state
+    let agentId = req.query.agentId ? req.query.agentId : ""
+    let AllEstimates = await EstimateS.getAllQuotation(agentId, agentId == "" ? "" : "agent", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -32,8 +34,9 @@ exports.getAllQuotation = async (req, res) => {
 exports.getAllPO = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
-    let agentId = req.query.agentId?req.query.agentId:""
-    let AllEstimates = await EstimateS.getAllPO(agentId,agentId==""?"":"agent",page,limit)
+    let state = req.query.state
+    let agentId = req.query.agentId ? req.query.agentId : ""
+    let AllEstimates = await EstimateS.getAllPO(agentId, agentId == "" ? "" : "agent", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -87,7 +90,8 @@ exports.getDetailedEstimateById = async (req, res) => {
 
 exports.getEstimatesByAgentId = async (req, res) => {
     let id = req.query.id
-    let AllEstimates = await EstimateS.getAllEstimates(id, "agent")
+    let state = req.query.state
+    let AllEstimates = await EstimateS.getAllEstimates(id, "agent", "", "", state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -263,6 +267,8 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             Estimate: 0,
             Quotation: 0,
             PurchaseOrder: 0,
+            EstimatePrice: 0,
+            QuotationPrice: 0,
             ProductOrderPrice: 0
         }]
         foundEstimates.map((estimate) => {
@@ -274,18 +280,25 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                 }
                 if (Report.length == 1 && Report[0].Agent_Code == "") {
                     Report[0].Agent_Id = estimate.agentId
-                    Report[0].Agent_Name = estimate.Agent_Name
+                    Report[0].Agent_Name = estimate.agentName
                     Report[0].Agent_Code = estimate.Agent_Code
-                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) Report[0].Estimate += 1
+                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
+                        Report[0].Estimate += 1
+                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                    }
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
+                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        Report[0].QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                         Report[0].PurchaseOrder += 1
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
-                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? product.ProductEstimatedPrice : 0
+                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        Report[0].QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        Report[0].ProductOrderPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                     }
                 } else {
                     let m
@@ -301,37 +314,53 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                     if (foundreport) {
                         if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
                         foundreport.Agent_Id = estimate.agentId
-                        foundreport.Agent_Name = estimate.Agent_Name
+                        foundreport.Agent_Name = estimate.agentName
                         foundreport.Agent_Code = estimate.Agent_Code
                         console.log(foundreport)
                         console.log(foundreport.ProductOrderPrice)
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
+                            foundreport.Estimate += 1
+                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        }
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             foundreport.Quotation += 1
                             foundreport.Estimate += 1
+                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                            foundreport.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                         }
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                             foundreport.PurchaseOrder += 1
                             foundreport.Quotation += 1
                             foundreport.Estimate += 1
+                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                            foundreport.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                             foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
                         }
                         NewReport.push(foundreport)
                         Report = NewReport
                     } else {
                         report.Agent_Id = estimate.agentId
-                        report.Agent_Name = estimate.Agent_Name
+                        report.Agent_Name = estimate.agentName
                         report.Agent_Code = estimate.Agent_Code
                         report.ProductOrderPrice = 0
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) report.Estimate += 1
+                        report.EstimatePrice = 0
+                        report.QuotationPrice = 0
+                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
+                            report.Estimate += 1
+                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        }
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             report.Quotation += 1
                             report.Estimate += 1
+                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                            report.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                         }
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                             report.PurchaseOrder += 1
                             report.Quotation += 1
                             report.Estimate += 1
+                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                            report.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
                             report.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
                         }
                         Report.push(report)

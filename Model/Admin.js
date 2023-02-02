@@ -3,6 +3,23 @@ const crypto = require("crypto");
 const { stringify } = require("querystring");
 
 // User Schema
+const Address = {
+    city: {
+        type: String,
+    },
+    state: {
+        type: String,
+        required: true
+    },
+    mainAddressText: {
+        type: String,
+        required: true
+    },
+    pincode: {
+        type: Number,
+    },
+}
+
 const Admin = new mongoose.Schema({
 
     firstName:{
@@ -27,7 +44,7 @@ const Admin = new mongoose.Schema({
 
     role: {
         type:String,
-        default: () => "role"
+        default: () => "admin"
     },
 
     password: {
@@ -44,6 +61,8 @@ const Admin = new mongoose.Schema({
         type: [Date],
         default: () => [Date.now()]
     },
+
+    Address: Address,
 
     createdAt: {
         type: Date,

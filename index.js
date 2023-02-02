@@ -43,18 +43,18 @@ app.use("/login", login)
 app.use("/signUp", signUp)
 app.use("/product", product)  
 app.use("/agent", agent)
-app.use("/customer", customer)  
-app.use("/estimate",estimate)   
-app.use("/quotation",quotation)    
-app.use("/purchaseOrder",PO)  
-app.use("/upload",upload)
+app.use("/customer", customer)   
+app.use("/estimate",estimate)     
+app.use("/quotation",quotation)      
+app.use("/purchaseOrder",PO)    
+app.use("/upload",upload) 
 app.use("/dashboard",dashboard)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)
 io.on('connection', (socket) => {
     console.log("Connected Socked Id: ", socket.id)
-    socket.on("chatMessage", chatData => {
+    socket.on("chatMessage", chatData => {  
         console.log(chatData);
     })
 })

@@ -289,6 +289,7 @@ try {
                     "_id": 1,
                     "agentId": 1,
                     "createdAt": 1,
+                    "customerName":1,
                     "TotalCost": {
                         "$sum": "$Products.ProductEstimatedPrice"
                     }
@@ -332,6 +333,7 @@ try {
                     "_id": 1,
                     "agentId": 1,
                     "createdAt": 1,
+                    "customerName":1,
                     "TotalCost": {
                         "$sum": "$Products.ProductEstimatedPrice"
                     }
@@ -377,6 +379,7 @@ try {
                     "_id": 1,
                     "agentId": 1,
                     "createdAt": 1,
+                    "customerName":1,
                     "TotalCost": {
                         "$sum": "$Products.ProductEstimatedPrice"
                     }

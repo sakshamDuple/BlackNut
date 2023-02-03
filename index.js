@@ -57,9 +57,9 @@ app.use("/admin",admin)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)
-io.on('connection', (socket) => {
+io.on('connection', (socket) => { 
     console.log("Connected Socked Id: ", socket.id)
-    socket.on("chatMessage", chatData => {
-        console.log(chatData);
-    })
+    socket.on("chatMessage", chatData => {  
+        console.log(chatData);  
+    })  
 })

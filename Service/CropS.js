@@ -30,6 +30,16 @@ exports.findCropById = async (id) => {
     }
 }
 
+exports.findCropByIdAndUpdate = async (id,cropName) => {
+    try {
+        let updateCrop = await Crop.updateOne({_id:id},{crop:cropName})
+        return { data: updateCrop.nModified>0, message: updateCrop.nModified>0?"crop was updated":"crop was not updated", status: updateCrop.nModified>0? 200:400 }
+    } catch (e) {
+        console.log(e)
+        return { error:e,message: "crop can't be retrieved, got in some issue", status: 400 }
+    }
+}
+
 exports.getAllCrops = async () => {
     try {
         return { data: await Crop.find(), message: "crops retrieved successfully", status: 200 }

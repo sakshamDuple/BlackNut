@@ -9,8 +9,9 @@ const { sendEmail } = require("../Middleware/emailSend")
 exports.getAll = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
+    let agentId = req.query.agentId?req.query.agentId:""
     let state = req.query.state
-    let AllEstimates = await EstimateS.getAllEstimates("", "", page, limit, state)
+    let AllEstimates = await EstimateS.getAllEstimates(agentId, agentId!=""?"agent":"", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -23,6 +24,7 @@ exports.getAllQuotation = async (req, res) => {
     let limit = req.query.limit
     let state = req.query.state
     let agentId = req.query.agentId ? req.query.agentId : ""
+    console.log(agentId)
     let AllEstimates = await EstimateS.getAllQuotation(agentId, agentId == "" ? "" : "agent", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
@@ -140,6 +142,7 @@ exports.updateQuotationToPO = async (req, res) => {
     let quotation = req.body.Quotation
     let approval = req.body.approval
     let data = req.body.data
+    console.log(id, quotation, approval, data)
     let Quotation = await EstimateS.updateQuotationToPO(id, quotation, approval, data)
     if (Quotation.status == 200) {
         res.status(Quotation.status).send({ data: Quotation.data, Message: Quotation.message, status: Quotation.status })
@@ -159,6 +162,9 @@ exports.updateQuotationToPI = async (req, res) => {
 }
 
 exports.getReportsFromEstimates = async (req, res) => {
+    let page = req.query.page?req.query.page:1
+    let limit = req.query.limit?req.query.limit:10
+    let start = (parseInt(page)-1)*parseInt(limit)
     try {
         let agentId = req.query.id
         let foundEstimates = await Estimate.find()
@@ -246,8 +252,10 @@ exports.getReportsFromEstimates = async (req, res) => {
                 }
             })
         })
+        let totalCount= Report.length
         return res.status(200).send({
-            data: Report,
+            data: Report.splice(start,limit),
+            totalCount,
             message: "reports made",
             status: 200,
         });
@@ -258,6 +266,9 @@ exports.getReportsFromEstimates = async (req, res) => {
 }
 
 exports.getAgentReportsFromEstimates = async (req, res) => {
+    let page = req.query.page?req.query.page:1
+    let limit = req.query.limit?req.query.limit:10
+    let start = (parseInt(page)-1)*parseInt(limit)
     try {
         let foundEstimates = await Estimate.find()
         let Report = [{
@@ -368,8 +379,10 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                 }
             })
         })
+        let totalCount= Report.length
         return res.status(200).send({
-            data: Report,
+            data: Report.splice(start,limit),
+            totalCount,
             message: "reports made",
             status: 200,
         });

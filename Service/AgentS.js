@@ -12,10 +12,10 @@ exports.create = async (agent) => {
         let agentExistsWithSuchEmail = await Agent.findOne({ email: agent.email })
         let phoneAlreadyRegistered = await VerifiedNumberS.findOnly(agent.phone)
         if (agentExistsWithSuchEmail) {
-            return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
+            return { error: "id already exists", message: "Agent / Customer is already registered with this Email Address !", status: 409 }
         }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "given phone is already registered with some id, please provide some other phone", status: 409 }
+            return { error: "mobile already registered", message: "Agent / Customer is already registered with this mobile number !", status: 409 }
         }
         if (agent.password == agent.confirmPassword) {
             delete newagent.confirmPassword
@@ -24,12 +24,15 @@ exports.create = async (agent) => {
             console.log(newagent.AgentNo)
             newagent.AgentID = "AG_" + newagent.AgentNo
         } else {
-            return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
+            return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
         await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
-        return { Agent_ID: createdAgent._id, message: "agent successfully created", status: 201 }
+        return { Agent_ID: createdAgent._id, 
+                 message: `Agent successfully registered. Agent's agreement is sent to your registered email. 
+                           You may Download the agreement.`, 
+                 status: 201 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }
@@ -121,11 +124,12 @@ exports.getCommonByPhone = async (phone, bool) => {
     }
 }
 
-exports.deleteAgentById = async (id) => {
+exports.deleteAgentById = async (agentId) => {
     try {
-        let theAgent = await Agent.findOne({ _id: id, role: "agent" })
+        let theAgent = await Agent.findOne({ _id: agentId})
+        console.log("theAgent",theAgent)
         let theNumberToDelete = parseInt(theAgent.phone)
-        let theAgentToDelete = await Agent.deleteOne(id)
+        let theAgentToDelete = await Agent.deleteOne({_id:agentId})
         deleteOnly(theNumberToDelete)
         return { data: theAgentToDelete, message: "deleted Successfully", status: 202 }
     } catch (e) {

@@ -111,7 +111,10 @@ const Estimate = new mongoose.Schema({
 
     PurchaseInvoice: String,
 
-    Status: String,
+    Status: {
+        type: String,
+        default: () => "PENDING"
+    },
     Agent_Code: String,
 
     state: {

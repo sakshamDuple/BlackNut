@@ -47,11 +47,8 @@ exports.getAllCrops = async (req, res) => {
 };
 
 exports.getAllMachines = async (req, res) => {
-  res.status(200).send({
-    data: (await MachineS.getAllMachines()).data,
-    Message: "All Machines",
-    status: 200,
-  });
+  let all_machine = await MachineS.getAllMachines()
+  res.status(all_machine.status).send(all_machine);
 };
 
 exports.getAllProducts = async (req, res) => {
@@ -202,33 +199,76 @@ exports.generateCsvOfOneMachine = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;
   let agg = [
-    {
-      $match: {
-        machineId: id,
-      },
-    },
-    //   {
-    //       '$addFields': {
-    //           'newUnitId': {
-    //               '$toObjectId': '$UnitId'
-    //           }
-    //       }
-    //   }, {
-    //       '$lookup': {
-    //           'from': 'unitmanages',
-    //           'localField': 'newUnitId',
-    //           'foreignField': '_id',
-    //           'as': 'result'
-    //       }
+    // {
+    //   $match: {
+    //     machineId: id,
     //   },
+    // },
+    {
+      '$lookup': {
+        'from': 'crops',
+        'let': {
+          'cropId': {
+            '$toObjectId': '$cropId'
+          }
+        },
+        'pipeline': [
+          {
+            '$match': {
+              '$expr': {
+                '$eq': [
+                  '$_id', '$$cropId'
+                ]
+              }
+            }
+          }, {
+            '$project': {
+              '_id': 0,
+              'crop': 1
+            }
+          }
+        ],
+        'as': 'result1'
+      }
+    }, {
+      '$lookup': {
+        'from': 'machines',
+        'let': {
+          'machineId': {
+            '$toObjectId': '$machineId'
+          }
+        },
+        'pipeline': [
+          {
+            '$match': {
+              '$expr': {
+                '$eq': [
+                  '$_id', '$$machineId'
+                ]
+              }
+            }
+          }, {
+            '$project': {
+              '_id': 0,
+              'Product_name': 1,
+              'Machine_name': 1
+            }
+          }
+        ],
+        'as': 'result2'
+      }
+    },
     {
       $project: {
         Model: 1,
         Price: 1,
         ProductID: 1,
-        createdAt: 1,
+        // createdAt: 1,
         Capacity: 1,
-        updateAt: 1,
+        // updateAt: 1,
+        crop: { $arrayElemAt: ["$result1.crop", 0] },
+        Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
+        Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
       },
     },
   ];
@@ -273,6 +313,12 @@ exports.updateOneProduct = async (req, res) => {
   let { Capacity, Model, Price, _id, ProductID, Status } = req.body
   let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID }, Status)
   res.status(updateProduct.status).send({ data: updateProduct.data, message: updateProduct.message, status: updateProduct.status })
+}
+
+exports.findCropByIdAndUpdate = async (req,res) => {
+  let {cropName, id} = req.body
+  let updateCrop = await CropS.findCropByIdAndUpdate(id, cropName)
+  res.status(updateCrop.status).send(updateCrop)
 }
 
 exports.deleteOneProduct = async (req, res) => {

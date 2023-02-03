@@ -49,7 +49,9 @@ exports.findMachineByCropId = async (cropId) => {
 
 exports.getAllMachines = async () => {
     try {
-        return { data: await Machine.find(), message: "retrieval Success", status: 200 }
+        let allMachine = await Machine.find()
+        let totalCount = await Machine.count()
+        return { data: allMachine, totalCount, message: "retrieval Success", status: 200 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }

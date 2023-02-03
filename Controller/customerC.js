@@ -25,6 +25,7 @@ exports.addCustomer = async (req, res) => {
     let foundAgent = await getCommonById(agentId)
     if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
     let otpRecieved = await OtpS.findOnly(foundAgent.data.phone)
+    if(!otpRecieved) return res.status(400).send({ Message: "otp not recieved", status: 400 })
     if(otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
     Customer.password = Customer.confirmPassword = "Pa$$w0rd!"
     if(!Customer.Address.city) return res.status(400).send({ error: "city field is empty", Message: "city field can't be empty", status: 400 })

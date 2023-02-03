@@ -66,7 +66,7 @@ const Agent = new mongoose.Schema({
 
     status: {
         type: String,
-        default: () => "ACTIVE"
+        default: () => "PENDING"
     },
 
     loginTime: {

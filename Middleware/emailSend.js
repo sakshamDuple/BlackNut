@@ -13,7 +13,7 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"User", Name:details.Name}
                 break;
             case "password change request otp":
-                message = `Your Request For BlackNut Forgot Password is recived, Your Otp is ${text}`
+                message = `Your Request For BlackNut Forgot Password is recieved, Your Otp is ${text}`
                 data = {type:"User", Name:details.Name}
                 break;
             case "OTP request for Customer Creation on Blacknut":

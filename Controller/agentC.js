@@ -57,7 +57,7 @@ exports.getCommonById = async (req, res) => {
 }
 
 exports.deleteTheAgent = async (req, res) => {
-    let agentId = req.body.id
+    let agentId = req.query.id
     let deleteAgent = await AgentS.deleteAgentById(agentId)
     if (deleteAgent.status == 202) {
         res.status(deleteAgent.status).send({ data: deleteAgent.data, Message: deleteAgent.message, status: deleteAgent.status })
@@ -91,7 +91,7 @@ exports.getOtpForUpdateDocument = async (req, res) => {
         otp: otp
     })
     if (foundAgent.status == 200) {
-        res.status(foundAgent.status).send({ Message: "An Otp is sent on your email, please verify to complete the process", status: foundAgent.status })
+        res.status(foundAgent.status).send({ Message: "OTP is sent to Agent's mobile number for verification !", status: foundAgent.status })
     } else {
         res.status(foundAgent.status).send({ error: foundAgent.error, Message: foundAgent.message, status: foundAgent.status })
     }

@@ -150,7 +150,6 @@ async function getValueForNextSequence(val) {
 exports.getAllEstimates = async (id, field, page, limit, state) => {
   try {
     let agentId, AllEstimates, query
-    console.log(state)
     if (state) state = { $regex: `(?i)${state}(?-i)` }
     if (field == "agent") {
       agentId = id
@@ -162,6 +161,7 @@ exports.getAllEstimates = async (id, field, page, limit, state) => {
         approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false, state
       };
     }
+    console.log(query)
     totalCount = await Estimate.count(query)
     if (page && limit) {
       start = limit * (page - 1)
@@ -202,6 +202,7 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
         state
       };
     }
+    console.log(query)
     totalCount = await Estimate.count(query)
     if (page && limit) {
       start = limit * (page - 1)
@@ -305,6 +306,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     if (otpRecieved.otp != otp) return { message: "otp doesn't match", status: 400 }
     await OtpS.deleteOnly(phone)
   }
+  let PurchaseInvoice1
   if (quotation) {
     let { Products, _id, PurchaseInvoice } = quotation
     if (_id != foundEstimate._id) return { message: "Id did not match Found", status: 409 };
@@ -319,6 +321,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
       foundEstimate.approvalFromAdminAsQuotes = false
       foundEstimate.approvalFromAdminAsPO = true
     }
+    PurchaseInvoice1 =PurchaseInvoice
   }
   if (approval == true) {
     foundEstimate.Status = "ACTIVE"
@@ -331,7 +334,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
   foundEstimate.Updates.QuotationToPO = Date.now()
   foundEstimate.PO_Id = "PO_Id" + Date.now().toString()
   let updateThisEstimate = await Estimate.updateOne({ _id: id }, { $set: foundEstimate })
-  if (updateThisEstimate.nModified > 0 && PurchaseInvoice) {
+  if (updateThisEstimate.nModified > 0 && PurchaseInvoice1) {
     let foundAgent = await AgentS.getCommonById(foundEstimate.data.agentId)
     let foundcustomer = await AgentS.getCommonById(foundEstimate.data.customerId)
     await sendEmail(foundAgent.data.email, "You Converted Quotation To Order", "", { Name: foundAgent.data.firstName })

@@ -11,7 +11,7 @@ exports.findUnit = async (unitName, field) => {
 }
 
 exports.findUnitById = async (id) => {
-    return await Unit.findById(id)
+    return await Unit.findById(id) 
 }
 
 exports.getAll = async () => {

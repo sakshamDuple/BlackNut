@@ -6,6 +6,7 @@ const Estimate = require("../Model/Estimate");
 const Product = require("../Model/Product");
 
 exports.searchGlobal = async (search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch) => {
+    console.log(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch,"paraaaams")
     if (!sortBy) sortBy = "createdAt"
     if (!sortVal) sortBy = 1
     let matchSearch
@@ -14,7 +15,7 @@ exports.searchGlobal = async (search, fieldForSearch, searchQty, collection, typ
         console.log(querySearchsort)
         matchSearch = querySearchsort
     } else {
-        matchSearch = [queryS]
+        matchSearch = [queryS] 
     }
     if (type) {
         agg = [

@@ -186,6 +186,7 @@ exports.getAllEstimates = async (id, field, page, limit, state) => {
 
 exports.getAllQuotation = async (id, field, page, limit, state) => {
   try {
+    console.log(id, field, page, limit, state,"looog")
     let AllEstimates, query, start
     if (state) state = { $regex: `(?i)${state}(?-i)` }
     if (field == "agent") {
@@ -196,6 +197,12 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
         approvalFromAdminAsPO: false
       };
     } else {
+      state==undefined?
+      query = {
+        approvalFromAdminAsQuotes: true,
+        approvalFromAdminAsPO: false,
+       
+      }:
       query = {
         approvalFromAdminAsQuotes: true,
         approvalFromAdminAsPO: false,
@@ -265,7 +272,7 @@ exports.updateEstimateToQuotation = async (id) => {
   let foundEstimate = await Estimate.findById(id)
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   foundEstimate.approvalFromAdminAsQuotes = true
-  foundEstimate.QuotationNo = getValueForNextSequence("Quotation")
+  foundEstimate.QuotationNo = getValueForNextSequence("Quotation") 
   foundEstimate.Updates.EstimateToQuotation = Date.now()
   foundEstimate.QuotationId = "Q_Id" + Date.now().toString()
   if (!foundEstimate) return { error: "Estimate Not Found", message: "Updation failed", status: 404 };

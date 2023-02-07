@@ -23,13 +23,13 @@ const productDetail = new mongoose.Schema({
     },
     ProductID: {
         type: String,
-        default: () => "PId" + Date.now().toString()
+        default: () => "PId"
     },
     createdAt: {
         type: Date,
         default: () => Date.now()
     },
-    cropId: {
+    cropId: { 
         type: String,
         required:true
     },

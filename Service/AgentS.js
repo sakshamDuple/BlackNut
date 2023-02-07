@@ -62,9 +62,9 @@ exports.getAllAgents = async (bool, page, limit) => {
         totalCount = await Agent.count(query)
         if (page && limit) {
             start = limit * (page - 1)
-            allAgents = await Agent.find(query).skip(start).limit(parseInt(limit))
+            allAgents = await Agent.find(query).skip(start).limit(parseInt(limit)).sort({createdAt:-1})
         } else {
-            allAgents = await Agent.find(query)
+            allAgents = await Agent.find(query).sort({createdAt:-1})
         }
         return { data: allAgents, totalCount, message: allAgents.length > 0 ? "retrieval Success" : "please upload some agents to view", status: allAgents.length > 0 ? 200 : 404 }
     } catch (e) {

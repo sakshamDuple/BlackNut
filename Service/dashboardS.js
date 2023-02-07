@@ -287,7 +287,7 @@ exports.getRecentEstimatesOfAgent = async (id) => {
         {
             "$match": {
                 "approvalFromAdminAsQuotes": false,
-                "approvalFromAdminAsPO": true,
+                "approvalFromAdminAsPO": false,
                 "agentId": agentId
             }
         },

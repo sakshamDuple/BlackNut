@@ -199,7 +199,7 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
       query = {
         approvalFromAdminAsQuotes: true,
         approvalFromAdminAsPO: false,
-        state
+       
       };
     }
     console.log(query)
@@ -217,7 +217,7 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
         AllEstimates.length > 0
           ? "retrieval Success"
           : "please create some estimates to view",
-      status: AllEstimates.length > 0 ? 200 : 404,
+      status: AllEstimates.length > 0 ? 200 : 400,
     };
   } catch (e) {
     console.log(e);
@@ -293,7 +293,7 @@ exports.updateEstimateToQuotation = async (id) => {
 
 exports.updateQuotationToPO = async (id, quotation, approval, data) => {
   let foundEstimate = await Estimate.findById(id)
-  if (!foundEstimate) return { message: "Id Not Found", status: 404 };
+  if (!foundEstimate) return { message: "Id Not Found", status: 400 };
   if (!foundEstimate) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };
   let agentUpdation = true
   if (foundEstimate.approvalFromAdminAsQuotes != true) return { error: "Quotation Not Found", message: "Updation failed", status: 404 };

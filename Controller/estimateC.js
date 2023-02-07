@@ -10,7 +10,7 @@ exports.getAll = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
     let agentId = req.query.agentId?req.query.agentId:""
-    let state = req.query.state
+    // let state = req.query.state
     let AllEstimates = await EstimateS.getAllEstimates(agentId, agentId!=""?"agent":"", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)

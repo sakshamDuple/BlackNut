@@ -23,6 +23,7 @@ router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
+router.get("/generateCsvOfAll", productC.generateCsvOfAll);
 router.put("/updateOneProduct", productC.updateOneProduct)
 router.patch("/findCropByIdAndUpdate", productC.findCropByIdAndUpdate)
 router.delete("/deleteOneProduct", productC.deleteOneProduct)

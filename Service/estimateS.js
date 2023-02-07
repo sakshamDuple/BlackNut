@@ -276,11 +276,11 @@ exports.getAllPO = async (id, field, page, limit, state) => {
     ? (query = {
         approvalFromAdminAsQuotes: false,
         approvalFromAdminAsPO: true,
-        state,
       })
     : (query = {
         approvalFromAdminAsQuotes: false,
         approvalFromAdminAsPO: true,
+        state,
       });
   if (id) {
     state == undefined

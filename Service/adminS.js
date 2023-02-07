@@ -58,7 +58,7 @@ exports.findAdmins = async (page, limit) => {
     }
 }
 
-exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText }) => {
+exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText },feild) => {
     try {
         let thisAdmin = await Admin.findById(_id)
         if (!thisAdmin) return { message: "No Admin Found", status: 404 }
@@ -66,6 +66,7 @@ exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText })
         if (firstName) thisAdmin.firstName = firstName
         if (lastName) thisAdmin.lastName = lastName
         if (phone) thisAdmin.phone = phone
+        if(feild == "login") thisAdmin.login = [Date.now()]
         let updateAdmin = await Admin.updateOne({ _id }, { $set: thisAdmin })
         return { update: updateAdmin.nModified > 0, message: updateAdmin.nModified > 0 ? "Updation Done" : "Updation Failed", status: updateAdmin.nModified > 0 ? 200 : 304 }
     } catch (e) {

@@ -195,6 +195,98 @@ exports.productUpdateForASelectMachine = async (req, res) => {
   res.status(updateProcess.status).json(updateProcess);
 };
 
+exports.generateCsvOfAll = async (req, res) => {
+  var filename = "products.csv";
+  let id = req.query.id;
+  let agg = [
+    // {
+    //   $match: {
+    //     machineId: id,
+    //   },
+    // },
+    {
+      '$lookup': {
+        'from': 'crops',
+        'let': {
+          'cropId': {
+            '$toObjectId': '$cropId'
+          }
+        },
+        'pipeline': [
+          {
+            '$match': {
+              '$expr': {
+                '$eq': [
+                  '$_id', '$$cropId'
+                ]
+              }
+            }
+          }, {
+            '$project': {
+              '_id': 0,
+              'crop': 1
+            }
+          }
+        ],
+        'as': 'result1'
+      }
+    }, {
+      '$lookup': {
+        'from': 'machines',
+        'let': {
+          'machineId': {
+            '$toObjectId': '$machineId'
+          }
+        },
+        'pipeline': [
+          {
+            '$match': {
+              '$expr': {
+                '$eq': [
+                  '$_id', '$$machineId'
+                ]
+              }
+            }
+          }, {
+            '$project': {
+              '_id': 0,
+              'Product_name': 1,
+              'Machine_name': 1
+            }
+          }
+        ],
+        'as': 'result2'
+      }
+    },
+    {
+      $project: {
+        Model: 1,
+        Price: 1,
+        ProductID: 1,
+        // createdAt: 1,
+        Capacity: 1,
+        // updateAt: 1,
+        crop: { $arrayElemAt: ["$result1.crop", 0] },
+        Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
+        Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
+      },
+    },
+  ];
+  let productRes = await product.aggregate(agg);
+  //   let productRes = await product.find({machineId: id});
+  console.log(productRes);
+  // let productC = []
+  //   productRes.map((element) => {
+  //     element.Unit = element.result[0].Unit;
+  //     delete element.result;
+  //   });
+  console.log(productRes);
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", "attachment; filename=" + filename);
+  res.csv(productRes, true);
+};
+
 exports.generateCsvOfOneMachine = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;

@@ -261,7 +261,7 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
         AllEstimates.length > 0
           ? "retrieval Success"
           : "please create some estimates to view",
-      status: AllEstimates.length > 0 ? 200 : 404,
+      status: AllEstimates.length > 0 ? 200 : 400,
     };
   } catch (e) {
     console.log(e);

@@ -370,90 +370,89 @@ exports.updateEstimateToQuotation = async (id) => {
 };
 
 exports.updateQuotationToPO = async (id, quotation, approval, data) => {
-  let foundEstimate = await Estimate.findById(id);
-  if (!foundEstimate) return { message: "Id Not Found", status: 404 };
-  if (!foundEstimate)
-    return {
-      error: "Quotation Not Found",
-      message: "Updation failed",
-      status: 404,
-    };
-  let agentUpdation = true;
-  if (foundEstimate.approvalFromAdminAsQuotes != true)
-    return {
-      error: "Quotation Not Found",
-      message: "Updation failed",
-      status: 404,
-    };
-  if (data) {
-    let { otp, phone } = data;
-    let { role } = await verifiedNumberS.findOnly(phone);
-    if (role != "agent")
+  try {
+    let foundEstimate = await Estimate.findById(id);
+    if (!foundEstimate)
       return {
-        error: "agent not found",
-        message: "please provide phone of a valid register agent",
+        error: "Quotation Not Found",
+        message: "Updation failed",
         status: 404,
       };
-    let otpRecieved = await OtpS.findOnly(phone);
-    if (otpRecieved == null)
-      return { message: "no otp found on this number", status: 400 };
-    if (otpRecieved.otp != otp)
-      return { message: "otp doesn't match", status: 400 };
-    await OtpS.deleteOnly(phone);
-  }
-  let PurchaseInvoice1;
-  if (quotation) {
-    let { Products, _id, PurchaseInvoice } = quotation;
-    if (_id != foundEstimate._id)
-      return { message: "Id did not match Found", status: 409 };
-    if (Products) {
-      Products.map((product, i) => {
-        if (
-          product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow
-        )
-          foundEstimate.Products[i].ProductEstimatedPrice =
-            product.ProductEstimatedPrice;
+    let agentUpdation = true;
+    if (foundEstimate.approvalFromAdminAsQuotes != true)
+      return {
+        error: "Quotation Not Found",
+        message: "Updation failed",
+        status: 404,
+      };
+    if (data) {
+      let { otp, phone } = data;
+      let { role } = await verifiedNumberS.findOnly(phone);
+      if (role != "agent")
+        return {
+          error: "agent not found",
+          message: "please provide phone of a valid register agent",
+          status: 404,
+        };
+      let otpRecieved = await OtpS.findOnly(phone);
+      if (otpRecieved == null)
+        return { message: "no otp found on this number", status: 400 };
+      if (otpRecieved.otp != otp)
+        return { message: "otp doesn't match", status: 400 };
+      await OtpS.deleteOnly(phone);
+    }
+    let PurchaseInvoice1;
+    if (quotation) {
+      let { Products, _id, PurchaseInvoice } = quotation;
+      if (_id != foundEstimate._id)
+        return { message: "Id did not match Found", status: 409 };
+      if (Products) {
+        Products.map((product, i) => {
+          if (
+            product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow
+          )
+            foundEstimate.Products[i].ProductEstimatedPrice =
+              product.ProductEstimatedPrice;
+        });
+        agentUpdation = false;
+      }
+      if (PurchaseInvoice) {
+        foundEstimate.PurchaseInvoice = PurchaseInvoice;
+        foundEstimate.approvalFromAdminAsQuotes = false;
+        foundEstimate.approvalFromAdminAsPO = true;
+      }
+      PurchaseInvoice1 = PurchaseInvoice;
+    }
+    if (approval == true) {
+      foundEstimate.Status = "ACTIVE";
+    } else if (approval == false) {
+      foundEstimate.Status = "INACTIVE";
+    } else {
+      foundEstimate.Status = "ACTIVE";
+    }
+    foundEstimate.PO_No = getValueForNextSequence("PO");
+    foundEstimate.Updates.QuotationToPO = Date.now();
+    foundEstimate.PO_Id = "PO_Id" + Date.now().toString();
+    let updateThisEstimate = await Estimate.updateOne(
+      { _id: id },
+      { $set: foundEstimate }
+    );
+    if (updateThisEstimate.nModified > 0 && PurchaseInvoice1) {
+      let foundAgent = await AgentS.getCommonById(foundEstimate.agentId);
+      let foundcustomer = await AgentS.getCommonById(
+        foundEstimate.customerId
+      );
+      await sendEmail(
+        foundAgent.data.email,
+        "You Converted Quotation To Order",
+        "",
+        { Name: foundAgent.data.firstName }
+      );
+      await sendEmail(foundcustomer.data.email, "Your Machine Is Ordered", "", {
+        Name: foundcustomer.data.firstName,
       });
-      agentUpdation = false;
+      // await sendEmail(foundcustomer.data.email, "An Ordered is Processed", "", { Name: foundcustomer.data.firstName })
     }
-    if (PurchaseInvoice) {
-      foundEstimate.PurchaseInvoice = PurchaseInvoice;
-      foundEstimate.approvalFromAdminAsQuotes = false;
-      foundEstimate.approvalFromAdminAsPO = true;
-    }
-    PurchaseInvoice1 = PurchaseInvoice;
-  }
-  if (approval == true) {
-    foundEstimate.Status = "ACTIVE";
-  } else if (approval == false) {
-    foundEstimate.Status = "INACTIVE";
-  } else {
-    foundEstimate.Status = "ACTIVE";
-  }
-  foundEstimate.PO_No = getValueForNextSequence("PO");
-  foundEstimate.Updates.QuotationToPO = Date.now();
-  foundEstimate.PO_Id = "PO_Id" + Date.now().toString();
-  let updateThisEstimate = await Estimate.updateOne(
-    { _id: id },
-    { $set: foundEstimate }
-  );
-  if (updateThisEstimate.nModified > 0 && PurchaseInvoice1) {
-    let foundAgent = await AgentS.getCommonById(foundEstimate.data.agentId);
-    let foundcustomer = await AgentS.getCommonById(
-      foundEstimate.data.customerId
-    );
-    await sendEmail(
-      foundAgent.data.email,
-      "You Converted Quotation To Order",
-      "",
-      { Name: foundAgent.data.firstName }
-    );
-    await sendEmail(foundcustomer.data.email, "Your Machine Is Ordered", "", {
-      Name: foundcustomer.data.firstName,
-    });
-    // await sendEmail(foundcustomer.data.email, "An Ordered is Processed", "", { Name: foundcustomer.data.firstName })
-  }
-  try {
     return {
       data: updateThisEstimate.nModified > 0,
       message:
@@ -461,7 +460,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
           ? approval
             ? "Updatation Of Quotation To Purchase Order Request Accepted"
             : `${
-                agentUpdation ? "Quotation To Purchase Order" : "Price"
+                updateThisEstimate.nModified > 0 && PurchaseInvoice1 ? "Quotation To Purchase Order" : "Price"
               } was Updatated${
                 approval != undefined
                   ? " But Quotation To Purchase Order Request Rejected"

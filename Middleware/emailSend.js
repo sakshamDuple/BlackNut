@@ -6,7 +6,6 @@ exports.sendEmail = async (email, subject, text, details) => {
         // let HTML = EmailHTML(subject, text)
         let message
         let data
-        console.log(email, subject, text)
         switch (subject) {
             case "new Password Created":
                 message = `Your Request For New BlackNut Password Creation is processed, Your new Password is ${text}`

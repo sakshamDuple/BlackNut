@@ -14,7 +14,7 @@ exports.uploadFiles = async function (req, res) {
         await filesUpload(Key, "BlackNut", req.file.buffer, req.file.mimetype);
     } catch (Ex) {
         console.log("Exception: ", Ex.message);
-        return handleError(Ex, res);
+        return handleError(Ex, res); 
     }
     res.status(200).send({
         statusCode: 200,

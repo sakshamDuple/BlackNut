@@ -153,13 +153,23 @@ exports.getAllEstimates = async (id, field, page, limit, state) => {
     if (state) state = { $regex: `(?i)${state}(?-i)` }
     if (field == "agent") {
       agentId = id
+      state==undefined?
+      query = {
+        approvalFromAdminAsQuotes: false, agentId, approvalFromAdminAsPO: false
+      }:
       query = {
         approvalFromAdminAsQuotes: false, agentId, approvalFromAdminAsPO: false, state
-      };
+      }
+    
     } else {
+      state==undefined?
+      query = {
+        approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false, 
+      }:
       query = {
         approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false, state
-      };
+      }
+
     }
     console.log(query)
     totalCount = await Estimate.count(query)
@@ -192,7 +202,7 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
     if (field == "agent") {
       agentId = id
       query = {
-        approvalFromAdminAsQuotes: true,
+        approvalFromAdminAsQuotes: true,   
         agentId: id, state,
         approvalFromAdminAsPO: false
       };
@@ -239,12 +249,24 @@ exports.getAllPO = async (id, field, page, limit, state) => {
     approvalFromAdminAsPO: true,
     state
   }
-  if (id) query = {
-    approvalFromAdminAsQuotes: false,
-    approvalFromAdminAsPO: true,
-    agentId: id,
-    state
-  }
+  if (id){
+    state==undefined?
+    query = {
+ 
+      approvalFromAdminAsQuotes: false,
+      approvalFromAdminAsPO: true,
+      agentId: id,
+
+    }:
+    query = {
+ 
+      approvalFromAdminAsQuotes: false,
+      approvalFromAdminAsPO: true,
+      agentId: id,
+      state 
+    } 
+
+  } 
   try {
     let AllEstimates, start
     let totalCount = await Estimate.count(query)

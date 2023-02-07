@@ -28,9 +28,10 @@ exports.searchGlobal = async (req, res) => {
     let sortBy = req.query.sortBy
     let sortVal = req.query.sortVal
     let multiFieldSearch = req.query.multiFieldSearch
+    let agentId = req.query.agentId
     let Response
     if (collection != "Admin" && collection != "Agent" && collection != "Crop" && collection != "Estimate" && collection != "Machine" && collection != "Product") return res.status(400).json({ error: "No Such Collection Exists", Message: "No Such Collection Exists", status: 400 })
-    Response = await searchGlobal(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch)
+    Response = await searchGlobal(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch, agentId)
     res.status(Response.status).json(Response)
 }
 

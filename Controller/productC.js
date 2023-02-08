@@ -50,6 +50,11 @@ exports.getAllMachines = async (req, res) => {
   let all_machine = await MachineS.getAllMachines()
   res.status(all_machine.status).send(all_machine);
 };
+exports.getAllMachinesAlphabets = async (req, res) => {
+  let number = req.query.number;
+  let all_machine = await MachineS.getAllMachinesAlphabers(number)
+  res.status(all_machine.status).send(all_machine);
+};
 
 exports.getAllProducts = async (req, res) => {
   res.status(200).send({

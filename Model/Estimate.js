@@ -55,17 +55,11 @@ const Estimate = new mongoose.Schema({
         type: Number
     },
 
-    EstimateId: {
-        type: String,
-    },
+    EstimateId: String,
 
-    QuotationId: {
-        type: String,
-    },
+    QuotationId: String,
 
-    PO_Id: {
-        type: String,
-    },
+    PO_Id: String,
 
     approvalFromAdminAsQuotes: {
         type: Boolean,
@@ -110,6 +104,7 @@ const Estimate = new mongoose.Schema({
     },
 
     PurchaseInvoice: String,
+    customerPhone:String,
 
     Status: {
         type: String,
@@ -120,6 +115,11 @@ const Estimate = new mongoose.Schema({
     state: {
         type: String,
         required: true
+    },
+
+    GSTperc: {
+        type: Number,
+        default: () => 18
     }
 
 });

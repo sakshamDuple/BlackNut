@@ -40,6 +40,10 @@ exports.findAdmin = async ({ data, field }) => {
     if (field == "phone") return await Admin.findOne({ phone: data })
 }
 
+exports.findAdminById = async (id) => {
+    return await Admin.findById(id)
+}
+
 exports.findAdmins = async (page, limit) => {
     try {
         let totalCount = await Admin.count({ role: "admin" })
@@ -58,7 +62,7 @@ exports.findAdmins = async (page, limit) => {
     }
 }
 
-exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText },feild) => {
+exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText, password },feild) => {
     try {
         let thisAdmin = await Admin.findById(_id)
         if (!thisAdmin) return { message: "No Admin Found", status: 404 }
@@ -67,6 +71,7 @@ exports.editAdmin = async (_id, { firstName, lastName, phone, mainAddressText },
         if (lastName) thisAdmin.lastName = lastName
         if (phone) thisAdmin.phone = phone
         if(feild == "login") thisAdmin.login = [Date.now()]
+        if(feild == "password") thisAdmin.password = password
         let updateAdmin = await Admin.updateOne({ _id }, { $set: thisAdmin })
         return { update: updateAdmin.nModified > 0, message: updateAdmin.nModified > 0 ? "Updation Done" : "Updation Failed", status: updateAdmin.nModified > 0 ? 200 : 304 }
     } catch (e) {

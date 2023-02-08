@@ -46,9 +46,14 @@ exports.create = async (estimate) => {
   let nextSeq = await getValueForNextSequence("Estimate");
   let customerName =
     foundcustomer.data.firstName + " " + foundcustomer.data.lastName;
+  let customerPhone = foundcustomer.data.phone
   let agentName = foundAgent.data.firstName + " " + foundAgent.data.lastName;
   let Agent_Code = foundAgent.data.AgentID;
   let state = foundAgent.data.Address.state;
+  let dates = new Date()
+  let month = dates.getMonth()<10?'0'+(dates.getMonth()+1):(dates.getMonth()+1)
+  let year = dates.getYear() - 100
+  let EstimateId = `${year}-${month}-${nextSeq<1000?nextSeq<100?nextSeq<10?"000"+nextSeq:"00"+nextSeq:"0"+nextSeq:nextSeq}`
   try {
     let createdEstimate = await Estimate.create({
       Products: data[0].products,
@@ -61,6 +66,8 @@ exports.create = async (estimate) => {
       EstimateDateOfPurchase: newDate,
       EstimateNo: nextSeq,
       state,
+      customerPhone,
+      EstimateId
     });
     await sendEmail(foundAgent.data.email, "You Added New Estimate", "", {
       Name: foundAgent.data.firstName,
@@ -133,20 +140,32 @@ let allProductsDetailed = (products, fails, successes) => {
 };
 
 async function getValueForNextSequence(val) {
-  let MaxEstimateNo;
+  let MaxEstimateNo,query;
   switch (val) {
     case "Estimate":
       MaxEstimateNo = { $max: "$EstimateNo" };
+      query = {
+        approvalFromAdminAsQuotes:false,
+        approvalFromAdminAsPO:false
+      }
       break;
     case "Quotation":
       MaxEstimateNo = { $max: "$QuotationNo" };
+      query = {
+        approvalFromAdminAsQuotes:true,
+        approvalFromAdminAsPO:false
+      }
       break;
     case "PO":
       MaxEstimateNo = { $max: "$PO_No" };
+      query = {
+        approvalFromAdminAsQuotes:false,
+        approvalFromAdminAsPO:true
+      }
       break;
   }
-  let foundEstimates = await Estimate.find();
-  if (foundEstimates.length == 0) return 1;
+  let foundEstimates = await Estimate.count(query);
+  if (foundEstimates == 0) return 1;
   let agg = [
     {
       $group: {
@@ -298,6 +317,7 @@ exports.getAllPO = async (id, field, page, limit, state) => {
   }
   try {
     let AllEstimates, start;
+    start = limit * (page - 1);
     let totalCount = await Estimate.count(query);
     if (page && limit) {
       AllEstimates = await Estimate.find(query)
@@ -325,9 +345,14 @@ exports.updateEstimateToQuotation = async (id) => {
   let foundEstimate = await Estimate.findById(id);
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   foundEstimate.approvalFromAdminAsQuotes = true;
-  foundEstimate.QuotationNo = getValueForNextSequence("Quotation");
+  foundEstimate.QuotationNo = await getValueForNextSequence("Quotation");
+  console.log("foundEstimate.QuotationNo",foundEstimate.QuotationNo)
   foundEstimate.Updates.EstimateToQuotation = Date.now();
-  foundEstimate.QuotationId = "Q_Id" + Date.now().toString();
+  // foundEstimate.QuotationId = "Q_Id" + Date.now().toString();
+  let dates = new Date()
+  let month = dates.getMonth()<10?'0'+(dates.getMonth()+1):(dates.getMonth()+1)
+  let year = dates.getYear() - 100
+  foundEstimate.QuotationId = `${year}-${month}-${foundEstimate.QuotationNo<1000?foundEstimate.QuotationNo<100?foundEstimate.QuotationNo<10?"000"+foundEstimate.QuotationNo:"00"+foundEstimate.QuotationNo:"0"+foundEstimate.QuotationNo:foundEstimate.QuotationNo}`
   if (!foundEstimate)
     return {
       error: "Estimate Not Found",
@@ -430,9 +455,13 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     } else {
       foundEstimate.Status = "ACTIVE";
     }
-    foundEstimate.PO_No = getValueForNextSequence("PO");
+    foundEstimate.PO_No = await getValueForNextSequence("PO");
     foundEstimate.Updates.QuotationToPO = Date.now();
-    foundEstimate.PO_Id = "PO_Id" + Date.now().toString();
+    // foundEstimate.PO_Id = "PO_Id" + Date.now().toString();
+    let dates = new Date()
+    let month = dates.getMonth()<10?'0'+(dates.getMonth()+1):(dates.getMonth()+1)
+    let year = dates.getYear() - 100
+    foundEstimate.PO_Id = `${year}-${month}-${foundEstimate.PO_No<1000?foundEstimate.PO_No<100?foundEstimate.PO_No<10?"000"+foundEstimate.PO_No:"00"+foundEstimate.PO_No:"0"+foundEstimate.PO_No:foundEstimate.PO_No}`
     let updateThisEstimate = await Estimate.updateOne(
       { _id: id },
       { $set: foundEstimate }

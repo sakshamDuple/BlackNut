@@ -164,10 +164,19 @@ exports.updateQuotationToPI = async (req, res) => {
 exports.getReportsFromEstimates = async (req, res) => {
     let page = req.query.page?req.query.page:1
     let limit = req.query.limit?req.query.limit:10
+    let query = {}
+    let startDate = req.query.startDate
+    let endDate = req.query.endDate
+    if(startDate && endDate) {
+        query = {
+            $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}}]
+          }
+        }
+        console.log(query)
     let start = (parseInt(page)-1)*parseInt(limit)
     try {
         let agentId = req.query.id
-        let foundEstimates = await Estimate.find()
+        let foundEstimates = await Estimate.find(query)
         let Report = [{
             ProductID: "",
             Estimate: 0,
@@ -216,7 +225,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                     if (foundreport) {
                         if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
                         foundreport.ProductID = product.ProductIDToShow
-                        foundreport.ProductName = estimate.ProductName
+                        foundreport.ProductName = product.ProductName
                         console.log(foundreport)
                         console.log(foundreport.ProductOrderPrice)
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
@@ -234,7 +243,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                         Report = NewReport
                     } else {
                         report.ProductID = product.ProductIDToShow
-                        report.ProductName = estimate.ProductName
+                        report.ProductName = product.ProductName
                         report.ProductOrderPrice = 0
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) report.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
@@ -269,8 +278,17 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
     let page = req.query.page?req.query.page:1
     let limit = req.query.limit?req.query.limit:10
     let start = (parseInt(page)-1)*parseInt(limit)
+    let query = {}
+    let startDate = req.query.startDate
+    let endDate = req.query.endDate
+    if(startDate && endDate) {
+        query = {
+            $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}}]
+          }
+        }
+        console.log(query)
     try {
-        let foundEstimates = await Estimate.find()
+        let foundEstimates = await Estimate.find(query)
         let Report = [{
             Agent_Code: "",
             Agent_Id: "",

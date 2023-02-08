@@ -184,9 +184,9 @@ exports.generateCollectionAndQuerySearch = (
     case "EstimateId":
       querySort = { EstimateId: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
-    case "EstimateNo":
-      querySort = { EstimateNo: parseInt(sortVal) == 1 ? 1 : -1 };
-      break;
+    // case "EstimateNo":
+    //   querySort = { EstimateNo: parseInt(sortVal) == 1 ? 1 : -1 };
+    //   break;
     case "QuotationId":
       querySort = { QuotationId: parseInt(sortVal) == 1 ? 1 : -1 };
     case "PO_Id":
@@ -270,18 +270,24 @@ exports.generateCollectionAndQuerySearch = (
       if (element == "EstimateId")
         querySearchsort.push({
           EstimateId: new RegExp(search, "i"),
+          approvalFromAdminAsPO:false,
+          approvalFromAdminAsQuotes:false
         });
-      if (element == "EstimateNo")
-        querySearchsort.push({
-          EstimateNo: parseInt(search)
-        });
+      // if (element == "EstimateNo")
+      //   querySearchsort.push({
+      //     EstimateNo: parseInt(search),
+      //   });
       if (element == "QuotationId")
         querySearchsort.push({
           QuotationId: new RegExp(search, "i"),
+          approvalFromAdminAsPO:false,
+          approvalFromAdminAsQuotes:true
         });
       if (element == "PO_Id")
         querySearchsort.push({
           PO_Id: new RegExp(search, "i"),
+          approvalFromAdminAsPO:true,
+          approvalFromAdminAsQuotes:false
         });
       if (element == "agentId")
         querySearchsort.push({
@@ -350,15 +356,21 @@ exports.generateCollectionAndQuerySearch = (
           },
           {
             EstimateId: new RegExp(search, "i"),
+            approvalFromAdminAsPO:false,
+            approvalFromAdminAsQuotes:false
           },
-          {
-            EstimateNo: parseInt(search),
-          },
+          // {
+          //   EstimateNo: parseInt(search),
+          // },
           {
             QuotationId: new RegExp(search, "i"),
+            approvalFromAdminAsPO:false,
+            approvalFromAdminAsQuotes:true
           },
           {
             PO_Id: new RegExp(search, "i"),
+            approvalFromAdminAsPO:true,
+            approvalFromAdminAsQuotes:false
           },
           {
             agentId: new RegExp(search, "i"),
@@ -432,11 +444,11 @@ exports.generateCollectionAndQuerySearch = (
           EstimateId: new RegExp(search, "i"),
         };
         break;
-      case "EstimateNo":
-        queryS = {
-          EstimateNo: parseInt(search),
-        };
-        break;
+      // case "EstimateNo":
+      //   queryS = {
+      //     EstimateNo: parseInt(search),
+      //   };
+      //   break;
       case "QuotationId":
         queryS = {
           QuotationId: new RegExp(search, "i"),

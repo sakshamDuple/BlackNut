@@ -23,7 +23,8 @@ const productDetail = new mongoose.Schema({
     },
     ProductID: {
         type: String,
-     },
+        default: () => "PId" + Date.now()
+    },
     createdAt: {
         type: Date,
         default: () => Date.now()

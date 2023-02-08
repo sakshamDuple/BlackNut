@@ -4,6 +4,8 @@ const CropS = require('./CropS')
 const MachineS = require('./MachineS')
 
 exports.create = async (data) => {
+    console.log(data.products[0].productDetail,'sudev');
+
     try {
         let foundCrop
         let foundMachine

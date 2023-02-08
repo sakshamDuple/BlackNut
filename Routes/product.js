@@ -21,6 +21,7 @@ router.put("/productUpdateForASelectMachine", productC.productUpdateForASelectMa
 router.get("/getAllUnit", productC.getAllProductUnits);
 router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);
+router.get('/getAllMachinesAlphabet',productC.getAllMachinesAlphabets)
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
 router.get("/generateCsvOfAll", productC.generateCsvOfAll);

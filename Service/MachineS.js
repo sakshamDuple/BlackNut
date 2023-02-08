@@ -57,6 +57,16 @@ exports.getAllMachines = async () => {
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
     }
 }
+exports.getAllMachinesAlphabers = async (number) => {
+    try {
+        let allMachine = await Machine.find().sort({Product_name:number})
+        let totalCount = await Machine.count()
+        return { data: allMachine, totalCount, message: "retrieval Success", status: 200 }
+    } catch (e) {
+        console.log(e)
+        return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
+    }
+}
 
 exports.getAllMachinesDetailed = async () => {
     try {

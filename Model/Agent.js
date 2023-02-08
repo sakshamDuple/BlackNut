@@ -11,6 +11,7 @@ const Address = {
         type: String,
         required: true
     },
+    stateCode:String,
     mainAddressText: {
         type: String,
         required: true

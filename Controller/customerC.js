@@ -113,3 +113,34 @@ exports.customerOtpRecieve = async (req, res) => {
     }
     res.status(400).send({error:"Not a valid phone", message:"Please enter a valid phone number", status:400})
 }
+
+exports.DefaultPhoneOtpRecieve = async (req, res) => {
+    let phone = req.query.phone
+    let Nphone = parseInt(phone)
+    console.log(10000000000>Nphone && Nphone>=1000000000)
+    if(10000000000>Nphone && Nphone>=1000000000){
+        if (!phone) return res.status(400).send({ Message: "fields missing", status: 400 })
+        let otp = generateOtp()
+        await OtpS.deleteOnly(phone)
+        await OtpS.create({
+            number: phone,
+            otp: otp
+        })
+        // otp for phone here
+        res.status(200).send({ message: `an otp is sent on your phone, please verify otp to continue, tempOtp:${otp}`, status: 200 })
+    }
+    res.status(400).send({error:"Not a valid phone", message:"Please enter a valid phone number", status:400})
+}
+
+exports.DefaultEmailOtpRecieve = async (req, res) => {
+        let email = req.query.email
+        if (!email) return res.status(400).send({ Message: "fields missing", status: 400 })
+        let otp = generateOtp()
+        await OtpS.deleteOnly(email)
+        await OtpS.create({
+            number: email,
+            otp: otp
+        })
+        await sendEmail(email, "OTP request for Existing Customer Verify on Blacknut", otp)
+        res.status(200).send({ message: `an otp is sent on email, please verifying otp to continue, tempOtp:${otp}`, status: 200 })
+}

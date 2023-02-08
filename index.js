@@ -18,6 +18,7 @@ const agentC = require("./Controller/agentC")
 const upload = require("./Routes/Upload")
 const dashboard = require("./Routes/dashboard")
 const admin = require("./Routes/admin")
+const notification = require("./Routes/notification")
 
 const cors = require("cors")
 
@@ -54,6 +55,7 @@ app.use("/upload",upload)
 app.use("/search",agentC.searchGlobal)
 app.use("/dashboard",dashboard)
 app.use("/admin",admin)
+app.use("/notification",notification)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)

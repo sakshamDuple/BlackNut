@@ -24,6 +24,10 @@ const Products = {
         type: String,
         required: true
     },
+    GSTperc: {
+        type: Number,
+        default: () => 18
+    }
 }
 
 const Updates = {
@@ -116,11 +120,6 @@ const Estimate = new mongoose.Schema({
         type: String,
         required: true
     },
-
-    GSTperc: {
-        type: Number,
-        default: () => 18
-    }
 
 });
 

@@ -1,6 +1,7 @@
 const AgentS = require("../Service/AgentS")
 const CustomerS = require("../Service/CustomerS")
 const AdminS = require("../Service/adminS")
+const { SuperAdminEmail } = require("../Middleware/emailSend")
 
 exports.signUpAgent = async (req, res) => {
     let { role, firstName, lastName, phone, email, password, confirmPassword, status, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, PAN_A_File, PAN_C_File } = req.body
@@ -23,7 +24,7 @@ exports.signUpCustomer = async (req, res) => {
 }
 
 exports.createDefaultSuperAdmin = async (req, res) => {
-    let email = "blacknut.2023@gmail.com"
+    let email = SuperAdminEmail
     let phone = 1111111111
     let firstName = "admin"
     let lastName = "admin"

@@ -2,6 +2,9 @@ const nodemailer = require("nodemailer");
 const { create } = require("../Service/NotificationS");
 const { EmailHTML } = require("./html");
 
+exports.SuperAdminEmail = "blacknut.2023@gmail.com"
+exports.SuperAdminPass = "mjmzjaoouytjvscv"
+
 exports.sendEmail = async (email, subject, text, details) => {
     console.log(email, subject, text, details)
     try {
@@ -89,6 +92,10 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Agent
                 await create(message)
                 break;
+            case 'A New Agent Account is Registered':
+                message = `Cheers, A New Agent Is Added, look forward to Preview all their Documents and Agreements. Enable the Agent if all Documents are correct.`
+                data = {type:"", Name} //Super Admin
+                break;
             default:
                 break;
         }
@@ -96,12 +103,12 @@ exports.sendEmail = async (email, subject, text, details) => {
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: '587',
-            auth: { user: "blacknut.2023@gmail.com", pass: "mjmzjaoouytjvscv" }, // todo in process.env //ocqetthgfvshotmy //flfcxkpnpymbcaju
+            auth: { user: this.SuperAdminEmail, pass: this.SuperAdminPass }, // todo in process.env //ocqetthgfvshotmy //flfcxkpnpymbcaju
             secure: false,
             logger: true
         });
         await transporter.sendMail({
-            from: "blacknut.2023@gmail.com",
+            from: this.SuperAdminEmail,
             to: email,
             subject: subject,
             html: EmailHTML(subject,message,data)

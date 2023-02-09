@@ -1,4 +1,4 @@
-const { sendEmail } = require("../Middleware/emailSend");
+const { sendEmail, SuperAdminEmail } = require("../Middleware/emailSend");
 const { hashPassword } = require("../Middleware/salt");
 const Agent = require("../Model/Agent");
 const VerifiedNumberS = require("../Service/verifyNumberS");
@@ -30,6 +30,7 @@ exports.create = async (agent) => {
         }
         let createdAgent = await Agent.create(newagent)
         await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName })
+        await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, 
                  message: `Agent successfully registered. Agent's agreement is sent to your registered email. 

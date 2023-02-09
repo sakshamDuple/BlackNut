@@ -20,7 +20,7 @@ const productDetail = new mongoose.Schema({
     },
     Gst: {
         type: Number,
-        required: true
+        default: () => 5
     },
     UnitId: {
         type: String

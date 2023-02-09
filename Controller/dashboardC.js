@@ -6,27 +6,27 @@ const dashboardS = require("../Service/dashboardS")
 exports.getRecentEstimates = async (req, res) => {
     let RecentEstimates = await dashboardS.getRecentEstimates()
     if (RecentEstimates.status == 200) {
-        res.status(RecentEstimates.status).send({ data: RecentEstimates.data, Message: RecentEstimates.message, status: RecentEstimates.status })
+        res.status(RecentEstimates.status).send({ data: RecentEstimates.data, message: RecentEstimates.message, status: RecentEstimates.status })
     } else {
-        res.status(RecentEstimates.status).send({ error: RecentEstimates.error, Message: RecentEstimates.message, status: RecentEstimates.status })
+        res.status(RecentEstimates.status).send({ error: RecentEstimates.error, message: RecentEstimates.message, status: RecentEstimates.status })
     }
 }
 
 exports.getRecentQuotation = async (req, res) => {
     let AllEstimates = await dashboardS.getRecentQuotation()
     if (AllEstimates.status == 200) {
-        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, message: AllEstimates.message, status: AllEstimates.status })
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 exports.getRecentPO = async (req, res) => {
 
     let AllEstimates = await dashboardS.getAllRecentPO()
     if (AllEstimates.status == 200) {
-        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, message: AllEstimates.message, status: AllEstimates.status })
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
@@ -98,26 +98,16 @@ exports.getRecentPOOfSingleAgent = async (req,res) => {
     }
 }
 exports.getTotalCountAgent=async(req,res)=>{
-
     let id = req.query.id
     let details = []
     let EstimateCount = await dashboardS.getEstimateCountOfAgent(id)
-
-        details.push({ Name: "Estimates", count: EstimateCount })
-  
-
+    let EstimatePrice = await dashboardS.getTotalEstimateForAgent(id)
+        details.push({ Name: "Estimates", count: EstimateCount, price: EstimatePrice })
     let QuoteCount = await dashboardS.getQuoteCountOfAgent(id)
-   
-        details.push({ Name: "Quotations", count: QuoteCount })
- 
-
-
+    let QuotePrice = await dashboardS.getTotalQuotationForAgent(id)
+        details.push({ Name: "Quotations", count: QuoteCount, price: QuotePrice })
     let PoCount = await dashboardS.getPoCountOfAgent(id)
- 
-        details.push({ Name: "Purchase Orders", count: PoCount })
-
-    console.log(details, "eee")
-
+    let PoPrice = await dashboardS.getTotalPOForAgent(id)
+        details.push({ Name: "Purchase Orders", count: PoCount, price: PoPrice })
     res.send(details)
-
 }

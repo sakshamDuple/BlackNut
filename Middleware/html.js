@@ -472,7 +472,7 @@ div > .ftr-call:last-child {
                                                                                     <td class="textContent" valign="top" align="left">
 
                                                                                         <div class="paddingMobile0 paddingBtmMobile50" style="padding: 10px 20px;">
-                                                                                            <h2 style="text-align:left;font-weight: 600;font-family:Helvetica,Arial,sans-serif;font-size:28px;color: #6259ca;line-height:36px;margin:0;">Hi ${data.type} ${data.Name},</h2>
+                                                                                            <h2 style="text-align:left;font-weight: 600;font-family:Helvetica,Arial,sans-serif;font-size:28px;color: #6259ca;line-height:36px;margin:0;">Hi ${data.type} ${data.Name.trim()},</h2>
                                                                                             <div class="space20" style="height: 20px;"></div>
                                                                                             <p style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#000000;line-height:26px;">${message}</p>
 

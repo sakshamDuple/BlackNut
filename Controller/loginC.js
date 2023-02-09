@@ -16,8 +16,8 @@ const OtpS = require("../Service/OtpS")
 exports.commonlogin = async (req, res) => {
     let { phone, email, password } = req.body
     let theAgentFound
-    if (!password) return res.status(404).send({ error: "password field can't be empty", Message: "please provide password to login", status: 400 })
-    if (!email && !phone) return res.status(404).send({ error: "email or phone field can't be empty", Message: "please provide either email or phone to login", status: 400 })
+    if (!password) return res.status(404).send({ error: "password field can't be empty", message: "please provide password to login", status: 400 })
+    if (!email && !phone) return res.status(404).send({ error: "email or phone field can't be empty", message: "please provide either email or phone to login", status: 400 })
     if (email && password) {
         theAgentFound = await AgentS.getCommonByEmail(email)
         if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE"){
@@ -111,7 +111,7 @@ exports.resetPassword = async (req, res) => {
     if (updatedAgent.data) {
         return res.status(updatedAgent.status).send({ message: "password updated successfully", status: updatedAgent.status })
     } else {
-        return res.status(updatedAgent.status).send({ error: updatedAgent.error, Message: updatedAgent.message, status: updatedAgent.status })
+        return res.status(updatedAgent.status).send({ error: updatedAgent.error, message: updatedAgent.message, status: updatedAgent.status })
     }
 }
 
@@ -130,9 +130,9 @@ exports.adminLogin = async (req, res) => {
         await AdminS.editAdmin(adminFound.data._id,{},"login")
         let accessToken = generateAccessToken({ role: adminFound.data.role, firstName: adminFound.data.firstName, lastName: adminFound.data.lastName, phone: adminFound.data.phone, email: adminFound.data.email, id: adminFound.data._id })
         res.setHeader("Authorization", accessToken)
-        res.status(adminFound.status).send({ Authorization:accessToken, Message: adminFound.message, status: adminFound.status })
+        res.status(adminFound.status).send({ Authorization:accessToken, message: adminFound.message, status: adminFound.status })
     }
-    return res.status(match ? adminFound.status : 400).send({ error: adminFound.error, Message: match ? adminFound.message : "Your Password is Invalid", status: match ? adminFound.status : 400 })
+    return res.status(match ? adminFound.status : 400).send({ error: adminFound.error, message: match ? adminFound.message : "Your Password is Invalid", status: match ? adminFound.status : 400 })
 }
 
 exports.resetPasswordAdmin = async (req, res) => {
@@ -149,7 +149,7 @@ exports.resetPasswordAdmin = async (req, res) => {
     if (updatedAdmin.update) {
         return res.status(updatedAdmin.status).send({ message: "password updated successfully", status: updatedAdmin.status })
     } else {
-        return res.status(updatedAdmin.status).send({ error: updatedAdmin.error, Message: updatedAdmin.message, status: updatedAdmin.status })
+        return res.status(updatedAdmin.status).send({ error: updatedAdmin.error, message: updatedAdmin.message, status: updatedAdmin.status })
     }
 }
 

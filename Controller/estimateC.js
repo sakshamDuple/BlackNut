@@ -15,7 +15,7 @@ exports.getAll = async (req, res) => {
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
@@ -29,7 +29,7 @@ exports.getAllQuotation = async (req, res) => {
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
@@ -42,41 +42,41 @@ exports.getAllPO = async (req, res) => {
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
 exports.getQuotationById = async (req, res) => {
     let AllEstimates = await EstimateS.getQuotationById(req.query.id)
     if (AllEstimates.status == 200) {
-        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, message: AllEstimates.message, status: AllEstimates.status })
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
 exports.getByAgentId = async (req, res) => {
     let AllEstimates = await EstimateS.getByAgentId(req.query.id)
     if (AllEstimates.status == 200) {
-        res.status(AllEstimates.status).send({ data: AllEstimates.data, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ data: AllEstimates.data, message: AllEstimates.message, status: AllEstimates.status })
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
 exports.create = async (req, res) => {
     let estimate = req.body
     let createdEstimate = await EstimateS.create(estimate)
-    res.status(createdEstimate.status).send({ data: createdEstimate.data, error: createdEstimate.error, Message: createdEstimate.message, status: createdEstimate.status })
+    res.status(createdEstimate.status).send({ data: createdEstimate.data, error: createdEstimate.error, message: createdEstimate.message, status: createdEstimate.status })
 }
 
 exports.getById = async (req, res) => {
     let id = req.query.id
     let Estimate = await EstimateS.getEstimateById(id)
     if (Estimate.status == 200) {
-        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ data: Estimate.data, message: Estimate.message, status: Estimate.status })
     } else {
-        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ error: Estimate.error, message: Estimate.message, status: Estimate.status })
     }
 }
 
@@ -84,9 +84,9 @@ exports.getDetailedEstimateById = async (req, res) => {
     let id = req.query.id
     let Estimate = await EstimateS.getDetailEstimateById(id)
     if (Estimate.status == 200) {
-        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ data: Estimate.data, message: Estimate.message, status: Estimate.status })
     } else {
-        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ error: Estimate.error, message: Estimate.message, status: Estimate.status })
     }
 }
 
@@ -97,7 +97,7 @@ exports.getEstimatesByAgentId = async (req, res) => {
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
-        res.status(AllEstimates.status).send({ error: AllEstimates.error, Message: AllEstimates.message, status: AllEstimates.status })
+        res.status(AllEstimates.status).send({ error: AllEstimates.error, message: AllEstimates.message, status: AllEstimates.status })
     }
 }
 
@@ -105,9 +105,9 @@ exports.updateEstimateToQuotation = async (req, res) => {
     let id = req.query.id
     let Estimate = await EstimateS.updateEstimateToQuotation(id)
     if (Estimate.status == 200) {
-        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ data: Estimate.data, message: Estimate.message, status: Estimate.status })
     } else {
-        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ error: Estimate.error, message: Estimate.message, status: Estimate.status })
     }
 }
 
@@ -118,11 +118,11 @@ exports.customerOtpRecieve = async (req, res) => {
     if (10000000000 > Nphone && Nphone >= 1000000000) {
         let email = req.query.email
         let agentid = req.query.agentid
-        if (!phone && !email && !agentid) return res.status(400).send({ Message: "fields missing", status: 400 })
+        if (!phone && !email && !agentid) return res.status(400).send({ message: "fields missing", status: 400 })
         let foundAgent = await getCommonById(agentid)
-        if (!foundAgent.data) return res.status(foundAgent.status).send({ Message: foundAgent.message, status: foundAgent.status })
+        if (!foundAgent.data) return res.status(foundAgent.status).send({ message: foundAgent.message, status: foundAgent.status })
         let mobileExists = await findOnly(phone)
-        // if (mobileExists != null) return res.status(409).send({ Message: "requested phone is already registered", status: 409 })
+        // if (mobileExists != null) return res.status(409).send({ message: "requested phone is already registered", status: 409 })
         let otp = generateOtp()
         await OtpS.deleteOnly(foundAgent.data.phone)
         await OtpS.create({
@@ -145,9 +145,9 @@ exports.updateQuotationToPO = async (req, res) => {
     console.log(id, quotation, approval, data)
     let Quotation = await EstimateS.updateQuotationToPO(id, quotation, approval, data)
     if (Quotation.status == 200) {
-        res.status(Quotation.status).send({ data: Quotation.data, Message: Quotation.message, status: Quotation.status })
+        res.status(Quotation.status).send({ data: Quotation.data, message: Quotation.message, status: Quotation.status })
     } else {
-        res.status(Quotation.status).send({ error: Quotation.error, Message: Quotation.message, status: Quotation.status })
+        res.status(Quotation.status).send({ error: Quotation.error, message: Quotation.message, status: Quotation.status })
     }
 }
 
@@ -155,9 +155,9 @@ exports.updateQuotationToPI = async (req, res) => {
     let id = req.query.id
     let Estimate = await EstimateS.updateEstimateToQuotation(id)
     if (Estimate.status == 200) {
-        res.status(Estimate.status).send({ data: Estimate.data, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ data: Estimate.data, message: Estimate.message, status: Estimate.status })
     } else {
-        res.status(Estimate.status).send({ error: Estimate.error, Message: Estimate.message, status: Estimate.status })
+        res.status(Estimate.status).send({ error: Estimate.error, message: Estimate.message, status: Estimate.status })
     }
 }
 

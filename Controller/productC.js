@@ -14,7 +14,7 @@ exports.productCreate = async (req, res) => {
   console.log(createTheProduct);
   res.status(createTheProduct.status).send({
     data: createTheProduct.data,
-    Message: createTheProduct.message,
+    message: createTheProduct.message,
     status: createTheProduct.status,
   });
 };
@@ -35,13 +35,13 @@ async function manageUnit(Unit) {
 exports.getAllProductUnits = async (req, res) => {
   res
     .status(200)
-    .send({ data: await UnitS.getAll(), Message: "All Units", status: 200 });
+    .send({ data: await UnitS.getAll(), message: "All Units", status: 200 });
 };
 
 exports.getAllCrops = async (req, res) => {
   res.status(200).send({
     data: (await CropS.getAllCrops()).data,
-    Message: "All Crops",
+    message: "All Crops",
     status: 200,
   });
 };
@@ -59,7 +59,7 @@ exports.getAllMachinesAlphabets = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   res.status(200).send({
     data: await ProductS.getAllProducts(),
-    Message: "All Products",
+    message: "All Products",
     status: 200,
   });
 };
@@ -68,7 +68,7 @@ exports.getAllProductsForSelectCropId = async (req, res) => {
   let products = await ProductS.findByCropId(req.query.id)
   res.status(200).send({
     data: products,
-    Message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
+    message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
     status: products.length > 0 ? 200 : 404,
   });
 };
@@ -77,7 +77,7 @@ exports.getAllProductsForSelectCropName = async (req, res) => {
   let products = await ProductS.findByCropName(req.query.name)
   res.status(200).send({
     data: products,
-    Message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
+    message: products.length > 0 ? "All Products For Select Crop" : "no products for this crop",
     status: products.length > 0 ? 200 : 404,
   });
 };
@@ -119,7 +119,7 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
   // let {data2} = await MachineS.findCrop(machineId)
   res.status(200).send({
     data: DetailedProduct,
-    Message: "get Full Detail View Of Product",
+    message: "get Full Detail View Of Product",
     status: 200,
   });
 };

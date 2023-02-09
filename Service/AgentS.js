@@ -1,12 +1,15 @@
 const { sendEmail } = require("../Middleware/emailSend");
 const { hashPassword } = require("../Middleware/salt");
 const Agent = require("../Model/Agent");
-const VerifiedNumberS = require("../Service/verifyNumberS")
+const VerifiedNumberS = require("../Service/verifyNumberS");
+const { create } = require("./NotificationS");
 require('dotenv').config();
 
 exports.create = async (agent) => {
     agent.role = (agent.role=="dealer")?"dealer":"agent"
     let codeForAgent = agent.role=="dealer"?"DR":"AG"
+    delete agent.role
+    agent.role = "agent"
     let newagent = { ...agent }
     try {
         let agentExistsWithSuchEmail = await Agent.findOne({ email: agent.email })
@@ -155,6 +158,7 @@ exports.updateThisAgent = async (agent, field) => {
         if (status) newAgent.status = status
         if(field == "login") newAgent.loginTime = [Date.now()]
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
+        if(DocumentFile && updateThisAgent.nModified > 0){await create(`Agreement File Updated For Agent: ${prevAgent.AgentID}, Please review & update agent status`)}
         return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)

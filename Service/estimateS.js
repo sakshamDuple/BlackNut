@@ -413,7 +413,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     if (data) {
       let { otp, phone } = data;
       let { role } = await verifiedNumberS.findOnly(phone);
-      if (role != "agent")
+      if ((role != "agent" && role != "dealer") || role == null)
         return {
           error: "agent not found",
           message: "please provide phone of a valid register agent",

@@ -15,7 +15,7 @@ exports.getActiveAgents = async (req, res) => {
     if (theAgents.status == 200) {
         res.status(theAgents.status).send(theAgents)
     } else {
-        res.status(theAgents.status).send({ error: theAgents.error, Message: theAgents.message, status: theAgents.status })
+        res.status(theAgents.status).send({ error: theAgents.error, message: theAgents.message, status: theAgents.status })
     }
 }
 
@@ -30,7 +30,7 @@ exports.searchGlobal = async (req, res) => {
     let multiFieldSearch = req.query.multiFieldSearch
     let agentId = req.query.agentId
     let Response
-    if (collection != "Admin" && collection != "Agent" && collection != "Crop" && collection != "Estimate" && collection != "Machine" && collection != "Product") return res.status(400).json({ error: "No Such Collection Exists", Message: "No Such Collection Exists", status: 400 })
+    if (collection != "Admin" && collection != "Agent" && collection != "Crop" && collection != "Estimate" && collection != "Machine" && collection != "Product") return res.status(400).json({ error: "No Such Collection Exists", message: "No Such Collection Exists", status: 400 })
     Response = await searchGlobal(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch, agentId)
     res.status(Response.status).json(Response)
 }
@@ -43,7 +43,7 @@ exports.getAllAgents = async (req, res) => {
     if (theAgents.status == 200) {
         res.status(theAgents.status).send(theAgents)
     } else {
-        res.status(theAgents.status).send({ error: theAgents.error, Message: theAgents.message, status: theAgents.status })
+        res.status(theAgents.status).send({ error: theAgents.error, message: theAgents.message, status: theAgents.status })
     }
 }
 
@@ -51,9 +51,9 @@ exports.getCommonById = async (req, res) => {
     let id = req.query.id
     let theAgents = await AgentS.getCommonById(id)
     if (theAgents.status == 200) {
-        res.status(theAgents.status).send({ data: theAgents.data, Message: theAgents.message, status: theAgents.status })
+        res.status(theAgents.status).send({ data: theAgents.data, message: theAgents.message, status: theAgents.status })
     } else {
-        res.status(theAgents.status).send({ error: theAgents.error, Message: theAgents.message, status: theAgents.status })
+        res.status(theAgents.status).send({ error: theAgents.error, message: theAgents.message, status: theAgents.status })
     }
 }
 
@@ -61,9 +61,9 @@ exports.deleteTheAgent = async (req, res) => {
     let agentId = req.query.id
     let deleteAgent = await AgentS.deleteAgentById(agentId)
     if (deleteAgent.status == 202) {
-        res.status(deleteAgent.status).send({ data: deleteAgent.data, Message: deleteAgent.message, status: deleteAgent.status })
+        res.status(deleteAgent.status).send({ data: deleteAgent.data, message: deleteAgent.message, status: deleteAgent.status })
     } else {
-        res.status(deleteAgent.status).send({ error: deleteAgent.error, Message: deleteAgent.message, status: deleteAgent.status })
+        res.status(deleteAgent.status).send({ error: deleteAgent.error, message: deleteAgent.message, status: deleteAgent.status })
     }
 }
 
@@ -71,9 +71,9 @@ exports.updateAgentById = async (req, res) => {
     let Agent = req.body.agent
     let updatedAgent = await AgentS.updateThisAgent(Agent)
     if (updatedAgent.status == 200) {
-        res.status(updatedAgent.status).send({ data: updatedAgent.data, Message: updatedAgent.message, status: updatedAgent.status })
+        res.status(updatedAgent.status).send({ data: updatedAgent.data, message: updatedAgent.message, status: updatedAgent.status })
     } else {
-        res.status(updatedAgent.status).send({ error: updatedAgent.error, Message: updatedAgent.message, status: updatedAgent.status })
+        res.status(updatedAgent.status).send({ error: updatedAgent.error, message: updatedAgent.message, status: updatedAgent.status })
     }
 }
 
@@ -81,7 +81,7 @@ exports.getOtpForUpdateDocument = async (req, res) => {
     let phone = req.query.phone
     console.log(phone)
     let { role, id } = await verifiedNumberS.findOnly(phone)
-    if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
+    if ((role != "agent" && role != "dealer") || role == null) return res.status(404).send({ error: "agent not found", message: "please provide phone of a valid register agent", status: 404 })
     let foundAgent = await AgentS.getCommonById(id)
     let otp = generateOtp()
     console.log(foundAgent.data.email, otp)
@@ -93,18 +93,18 @@ exports.getOtpForUpdateDocument = async (req, res) => {
         otp: otp
     })
     if (foundAgent.status == 200) {
-        res.status(foundAgent.status).send({ Message: "OTP is sent to Agent's mobile number for verification !" + otp, status: foundAgent.status })
+        res.status(foundAgent.status).send({ message: "OTP is sent to Agent's mobile number for verification !" + otp, status: foundAgent.status })
     } else {
-        res.status(foundAgent.status).send({ error: foundAgent.error, Message: foundAgent.message, status: foundAgent.status })
+        res.status(foundAgent.status).send({ error: foundAgent.error, message: foundAgent.message, status: foundAgent.status })
     }
 }
 
 exports.getAgrFileToVerifyUpdate = async (req, res) => {
     let { otp, phone, file } = req.body
     let { role, id } = await verifiedNumberS.findOnly(phone)
-    if (role != "agent") return res.status(404).send({ error: "agent not found", Message: "please provide phone of a valid register agent", status: 404 })
+    if ((role != "agent" && role != "dealer") || role == null) return res.status(404).send({ error: "agent not found", message: "please provide phone of a valid register agent", status: 404 })
     let otpRecieved = await OtpS.findOnly(phone)
-    if (otpRecieved.otp != otp) return res.status(400).send({ Message: "otp doesn't match", status: 400 })
+    if (otpRecieved.otp != otp) return res.status(400).send({ message: "otp doesn't match", status: 400 })
     await OtpS.deleteOnly(phone)
     let DocumentFile = file
     let Agent = {
@@ -113,8 +113,8 @@ exports.getAgrFileToVerifyUpdate = async (req, res) => {
     }
     let updatedAgent = await AgentS.updateThisAgent(Agent)
     if (updatedAgent.status == 200) {
-        res.status(updatedAgent.status).send({ data: updatedAgent.data, Message: "Agreement File Successfully Updated", status: updatedAgent.status })
+        res.status(updatedAgent.status).send({ data: updatedAgent.data, message: "Agreement File Successfully Updated", status: updatedAgent.status })
     } else {
-        res.status(updatedAgent.status).send({ error: updatedAgent.error, Message: updatedAgent.message, status: updatedAgent.status })
+        res.status(updatedAgent.status).send({ error: updatedAgent.error, message: updatedAgent.message, status: updatedAgent.status })
     }
 }

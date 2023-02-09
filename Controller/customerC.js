@@ -17,7 +17,7 @@ exports.getActiveCustomers = async (req, res) => {
       .status(theCustomers.status)
       .send({
         error: theCustomers.error,
-        Message: theCustomers.message,
+        message: theCustomers.message,
         status: theCustomers.status,
       })
       .status(theCustomers.status);
@@ -32,26 +32,26 @@ exports.addCustomer = async (req, res) => {
     return res
       .status(400)
       .send({
-        Message: "can't add custffffffffffffffffffffomer without agentId",
+        message: "can't add custffffffffffffffffffffomer without agentId",
         status: 400,
       });
   let foundAgent = await getCommonById(agentId);
   if (!foundAgent.data)
     return res
       .status(foundAgent.status)
-      .send({ Message: foundAgent.message, status: foundAgent.status });
+      .send({ message: foundAgent.message, status: foundAgent.status });
   let otpRecieved = await OtpS.findOnly(foundAgent.data.phone);
   if (!otpRecieved)
-    return res.status(400).send({ Message: "otp not recieved", status: 400 });
+    return res.status(400).send({ message: "otp not recieved", status: 400 });
   if (otpRecieved.otp != otp)
-    return res.status(400).send({ Message: "otp doesn't match", status: 400 });
+    return res.status(400).send({ message: "otp doesn't match", status: 400 });
   Customer.password = Customer.confirmPassword = "Pa$$w0rd!";
   if (!Customer.Address.city)
     return res
       .status(400)
       .send({
         error: "city field is empty",
-        Message: "city field can't be empty",
+        message: "city field can't be empty",
         status: 400,
       });
   if (!Customer.Address.state)
@@ -59,7 +59,7 @@ exports.addCustomer = async (req, res) => {
       .status(400)
       .send({
         error: "state field is empty",
-        Message: "state field can't be empty",
+        message: "state field can't be empty",
         status: 400,
       });
   if (!Customer.Address.mainAddressText)
@@ -67,7 +67,7 @@ exports.addCustomer = async (req, res) => {
       .status(400)
       .send({
         error: "mainAddressText field is empty",
-        Message: "mainAddressText field can't be empty",
+        message: "mainAddressText field can't be empty",
         status: 400,
       });
   if (!Customer.Address.pincode)
@@ -75,7 +75,7 @@ exports.addCustomer = async (req, res) => {
       .status(400)
       .send({
         error: "pincode field is empty",
-        Message: "pincode field can't be empty",
+        message: "pincode field can't be empty",
         status: 400,
       });
   const newCustomer = await CustomerS.create(Customer);
@@ -94,7 +94,7 @@ exports.addCustomer = async (req, res) => {
       .status(newCustomer.status)
       .send({
         data: newCustomer.Agent_ID,
-        Message: newCustomer.message,
+        message: newCustomer.message,
         status: newCustomer.status,
       });
   } else {
@@ -102,7 +102,7 @@ exports.addCustomer = async (req, res) => {
       .status(newCustomer.status)
       .send({
         error: newCustomer.error,
-        Message: newCustomer.message,
+        message: newCustomer.message,
         status: newCustomer.status,
       });
   }
@@ -125,7 +125,7 @@ exports.getAllCustomers = async (req, res) => {
       .status(theCustomers.status)
       .send({
         error: theCustomers.error,
-        Message: theCustomers.message,
+        message: theCustomers.message,
         status: theCustomers.status,
       });
   }
@@ -139,7 +139,7 @@ exports.deleteTheCustomer = async (req, res) => {
       .status(deleteCustomer.status)
       .send({
         data: deleteCustomer.data,
-        Message: deleteCustomer.message,
+        message: deleteCustomer.message,
         status: deleteCustomer.status,
       });
   } else {
@@ -147,7 +147,7 @@ exports.deleteTheCustomer = async (req, res) => {
       .status(deleteCustomer.status)
       .send({
         error: deleteCustomer.error,
-        Message: deleteCustomer.message,
+        message: deleteCustomer.message,
         status: deleteCustomer.status,
       });
   }
@@ -161,7 +161,7 @@ exports.updateCustomerById = async (req, res) => {
       .status(updatedCustomer.status)
       .send({
         data: updatedCustomer.data,
-        Message: updatedCustomer.message,
+        message: updatedCustomer.message,
         status: updatedCustomer.status,
       });
   } else {
@@ -169,7 +169,7 @@ exports.updateCustomerById = async (req, res) => {
       .status(updatedCustomer.status)
       .send({
         error: updatedCustomer.error,
-        Message: updatedCustomer.message,
+        message: updatedCustomer.message,
         status: updatedCustomer.status,
       });
   }
@@ -183,14 +183,14 @@ exports.customerOtpRecieve = async (req, res) => {
     let email = req.query.email;
     let agentid = req.query.agentid;
     if (!phone && !email && !agentid)
-      return res.status(400).send({ Message: "fields missing", status: 400 });
+      return res.status(400).send({ message: "fields missing", status: 400 });
     let foundAgent = await getCommonById(agentid);
     if (!foundAgent.data)
       return res
         .status(foundAgent.status)
-        .send({ Message: foundAgent.message, status: foundAgent.status });
+        .send({ message: foundAgent.message, status: foundAgent.status });
     let mobileExists = await findOnly(phone);
-    // if (mobileExists != null) return res.status(409).send({ Message: "requested phone is already registered", status: 409 })
+    // if (mobileExists != null) return res.status(409).send({ message: "requested phone is already registered", status: 409 })
     let otp = generateOtp();
     await OtpS.deleteOnly(foundAgent.data.phone);
     await OtpS.create({
@@ -240,7 +240,7 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
   console.log(10000000000 > Nphone && Nphone >= 1000000000);
   if (10000000000 > Nphone && Nphone >= 1000000000) {
     if (!phone)
-      return res.status(400).send({ Message: "fields missing", status: 400 });
+      return res.status(400).send({ message: "fields missing", status: 400 });
     let otp = generateOtp();
     await OtpS.deleteOnly(phone);
     await OtpS.create({
@@ -251,7 +251,7 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
     res
       .status(200)
       .send({
-        message: `an otp is sent on your phone, please verify otp to continue, tempOtp:${otp}`,
+        message: `OTP is sent to your mobile number for verification, tempOtp:${otp}`,
         status: 200,
       });
   }
@@ -267,7 +267,7 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
 exports.DefaultEmailOtpRecieve = async (req, res) => {
   let email = req.query.email;
   if (!email)
-    return res.status(400).send({ Message: "fields missing", status: 400 });
+    return res.status(400).send({ message: "fields missing", status: 400 });
   let otp = generateOtp();
   await OtpS.deleteOnly(email);
   await OtpS.create({
@@ -282,7 +282,7 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
   res
     .status(200)
     .send({
-      message: `an otp is sent on email, please verify otp to continue, tempOtp:${otp}`,
+      message: `OTP is sent to your Email Id for verification, tempOtp:${otp}`,
       status: 200,
     });
 };
@@ -296,7 +296,7 @@ exports.otpVerification = async (req,res) => {
       status: 400,
     });
     if(!mobile && !email) return res.status(400).send({
-        message: `Should have atleast one field out of mobile & phone to continue`,
+        message: `Should have atleast one field out of mobile & email to continue`,
         status: 400,
     });
     let data = mobile?mobile:email

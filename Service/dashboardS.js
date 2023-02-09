@@ -432,15 +432,107 @@ exports.getEstimateCountOfAgent = async (id) => {
                 "TotalCost": {
                     "$sum": "$Products.ProductEstimatedPrice"
                 }
-
             }
         },
-
     ]);
     let k = await Estimate.aggregate(agg)
+    console.log(k)
     const count = k.length
-    console.log(count, "couuu")
     return count
+}
+
+exports.getTotalEstimateForAgent = async (id) => {
+    const agg = [
+        {
+            "$match": {
+                "approvalFromAdminAsQuotes": false,
+                "approvalFromAdminAsPO": false,
+                "agentId": id
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "agentId": 1,
+                "createdAt": 1,
+                "TotalCost": {
+                    "$sum": "$Products.ProductEstimatedPrice"
+                }
+            }
+        },{
+            '$group': {
+              '_id': '', 
+              'TotalEstimate': {
+                '$sum': '$TotalCost'
+              }
+            }
+        }
+    ];
+    let k = await Estimate.aggregate(agg)
+    console.log(k)
+    return k[0].TotalEstimate
+}
+
+exports.getTotalQuotationForAgent = async (id) => {
+    const agg = ([
+        {
+            "$match": {
+                "approvalFromAdminAsQuotes": true,
+                "approvalFromAdminAsPO": false,
+                "agentId": id
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "agentId": 1,
+                "createdAt": 1,
+                "TotalCost": {
+                    "$sum": "$Products.ProductEstimatedPrice"
+                }
+            }
+        },{
+            '$group': {
+              '_id': '', 
+              'TotalQuotation': {
+                '$sum': '$TotalCost'
+              }
+            }
+        }
+    ]);
+    let k = await Estimate.aggregate(agg)
+    return k[0].TotalQuotation
+}
+
+exports.getTotalPOForAgent = async (id) => {
+    const agg = ([
+        {
+            "$match": {
+                "approvalFromAdminAsQuotes": false,
+                "approvalFromAdminAsPO": true,
+                "agentId": id
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "agentId": 1,
+                "createdAt": 1,
+                "TotalCost": {
+                    "$sum": "$Products.ProductEstimatedPrice"
+                }
+            }
+        },{
+            '$group': {
+              '_id': '', 
+              'TotalPO': {
+                '$sum': '$TotalCost'
+              }
+            }
+        }
+    ]);
+    let k = await Estimate.aggregate(agg)
+    return k[0].TotalPO
 }
 
 exports.getQuoteCountOfAgent = async (id) => {

@@ -18,6 +18,10 @@ const productDetail = new mongoose.Schema({
         type: String,
         default: () => "INACTIVE"
     },
+    Gst: {
+        type: Number,
+        required: true
+    },
     UnitId: {
         type: String
     },

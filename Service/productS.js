@@ -62,6 +62,7 @@ exports.findProductsForMachineId = async (MachineId) => {
 }
 
 exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
+    console.log(PrevProduct,'s',Updates);
     let thisMachine = await MachineS.findMachineById(MachineId)
     let addProduct = false
     let ProductsToAdd = []
@@ -77,6 +78,8 @@ exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
                     PrevProduct[i].Price = element.Price
                     PrevProduct[i].ProductID = element.ProductID
                     PrevProduct[i].Status = element.Status
+                    PrevProduct[i].Gst = element.Gst
+
                 } else {
                     addProduct = true
                     element.cropId = thisMachine.data.cropId
@@ -115,8 +118,8 @@ let update = (products, fails, successes) => {
             products.map(async element => {
                 return new Promise(async function (resolve, reject) {
                     let fail, success;
-                    let { Capacity, Model, Price, Unit, _id, ProductID, Status } = element
-                    let updateProduct = await updateFunc({ Capacity, Model, Price, _id, ProductID, Status })
+                    let { Capacity, Model, Price, Unit, _id, ProductID, Status,Gst } = element
+                    let updateProduct = await updateFunc({ Capacity, Model, Price, _id, ProductID, Status,Gst })
                     if (!updateProduct.data) {
                         fails.push(ProductID);
                     } else {
@@ -140,6 +143,7 @@ let addTheseProduct = async (products, fails, successes) => {
         if (!element.Price || element.Price == undefined) return error("Price", "missing field")
         if (!element.ProductID || element.ProductID == undefined) return error("ProductID", "missing field")
         if (!element.Status || element.Status == undefined) return error("Status", "missing field")
+        if (!element.Gst || element.Gst == undefined) return error("Gst", "missing field")
         if (!element.cropId || element.cropId == undefined) return error("cropId", "missing field")
         if (!element.machineId || element.machineId == undefined) return error("machineId", "missing field")
         return e = "continue"
@@ -188,7 +192,7 @@ exports.updateProductById = async ({ Capacity, Model, Price, _id }, Status) => {
     return { data: updateThisProductDetail.nModified > 0, message: updateThisProductDetail.nModified > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.nModified > 0 ? 200 : 400 }
 }
 
-let updateFunc = async ({ Capacity, Model, Price, _id, ProductID, Status }) => {
-    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price, Status, ProductID } })
+let updateFunc = async ({ Capacity, Model, Price, _id, ProductID, Status,Gst }) => {
+    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price, Status, ProductID,Gst } })
     return { data: updateThisProductDetail.nModified > 0, message: updateThisProductDetail.nModified > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.nModified > 0 ? 200 : 400 }
 }

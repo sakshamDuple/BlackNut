@@ -192,6 +192,7 @@ exports.productDetailForASelectMachine = async (req, res) => {
 };
 
 exports.productUpdateForASelectMachine = async (req, res) => {
+  console.log(req.body);
   let updateProductsList = req.body
   let machineId = req.query.machineId;
   let products = await ProductS.findProductsForMachineId(machineId);

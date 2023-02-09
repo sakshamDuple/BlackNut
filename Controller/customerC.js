@@ -221,7 +221,7 @@ exports.customerOtpRecieve = async (req, res) => {
     res
       .status(200)
       .send({
-        message: `an otp is sent on customer mail, please verifying otp to process customer creation, tempOtp:${otp}`,
+        message: `an otp is sent on customer mail, please verify otp to process customer creation, tempOtp:${otp}`,
         status: 200,
       });
   }
@@ -282,7 +282,7 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
   res
     .status(200)
     .send({
-      message: `an otp is sent on email, please verifying otp to continue, tempOtp:${otp}`,
+      message: `an otp is sent on email, please verify otp to continue, tempOtp:${otp}`,
       status: 200,
     });
 };

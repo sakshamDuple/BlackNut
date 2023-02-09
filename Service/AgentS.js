@@ -5,8 +5,8 @@ const VerifiedNumberS = require("../Service/verifyNumberS")
 require('dotenv').config();
 
 exports.create = async (agent) => {
-    delete agent.role
-    agent.role = "agent"
+    agent.role = (agent.role=="dealer")?"dealer":"agent"
+    let codeForAgent = agent.role=="dealer"?"DR":"AG"
     let newagent = { ...agent }
     try {
         let agentExistsWithSuchEmail = await Agent.findOne({ email: agent.email })
@@ -21,8 +21,7 @@ exports.create = async (agent) => {
             delete newagent.confirmPassword
             newagent.password = await hashPassword(agent.password)
             newagent.AgentNo = await getValueForNextSequence()
-            console.log(newagent.AgentNo)
-            newagent.AgentID = "AG_" + newagent.AgentNo
+            newagent.AgentID = `${agent.Address.stateCode?agent.Address.stateCode:"IN"}${codeForAgent}${newagent.AgentNo<1000?newagent.AgentNo<100?newagent.AgentNo<10?"000"+newagent.AgentNo:"00"+newagent.AgentNo:"0"+newagent.AgentNo:newagent.AgentNo}`
         } else {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }

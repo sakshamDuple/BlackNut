@@ -24,9 +24,9 @@ const Products = {
         type: String,
         required: true
     },
-    GSTperc: {
+    Gst: {
         type: Number,
-        default: () => 18
+        default: () => 5
     }
 }
 

@@ -86,6 +86,7 @@ exports.getOtpForUpdateDocument = async (req, res) => {
     let otp = generateOtp()
     console.log(foundAgent.data.email, otp)
     await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp, { Name: foundAgent.data.firstName })
+    await OtpS.deleteOnly(foundAgent.data.phone)
     await OtpS.create({
         number: foundAgent.data.phone,
         id: id,

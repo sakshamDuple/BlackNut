@@ -99,15 +99,18 @@ exports.getRecentPOOfSingleAgent = async (req,res) => {
 }
 exports.getTotalCountAgent=async(req,res)=>{
     let id = req.query.id
+    let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
+    let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
+    console.log("startDate,endDate")
     let details = []
-    let EstimateCount = await dashboardS.getEstimateCountOfAgent(id)
-    let EstimatePrice = await dashboardS.getTotalEstimateForAgent(id)
+    let EstimateCount = await dashboardS.getEstimateCountOfAgent(id,startDate,endDate)
+    let EstimatePrice = await dashboardS.getTotalEstimateForAgent(id,startDate,endDate)
         details.push({ Name: "Estimates", count: EstimateCount, price: EstimatePrice })
-    let QuoteCount = await dashboardS.getQuoteCountOfAgent(id)
-    let QuotePrice = await dashboardS.getTotalQuotationForAgent(id)
+    let QuoteCount = await dashboardS.getQuoteCountOfAgent(id,startDate,endDate)
+    let QuotePrice = await dashboardS.getTotalQuotationForAgent(id,startDate,endDate)
         details.push({ Name: "Quotations", count: QuoteCount, price: QuotePrice })
-    let PoCount = await dashboardS.getPoCountOfAgent(id)
-    let PoPrice = await dashboardS.getTotalPOForAgent(id)
+    let PoCount = await dashboardS.getPoCountOfAgent(id,startDate,endDate)
+    let PoPrice = await dashboardS.getTotalPOForAgent(id,startDate,endDate)
         details.push({ Name: "Purchase Orders", count: PoCount, price: PoPrice })
     res.send(details)
 }

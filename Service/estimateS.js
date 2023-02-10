@@ -122,13 +122,13 @@ let allProductsDetailed = (products, fails, successes) => {
       products.map(async (element) => {
         return new Promise(async function (resolve, reject) {
           let fail, success;
-          let { ProductId, quantity } = element;
+          let { ProductId, quantity, Gst } = element;
           console.log(element);
           let Product = await productC.toGetAllDetailsOfProduct(ProductId);
           if (!Product) {
             fails.push(ProductId);
           } else {
-            successes.push({ Product, quantity });
+            successes.push({ Product, quantity, Gst });
           }
           resolve({ fail, success });
         });
@@ -346,9 +346,7 @@ exports.updateEstimateToQuotation = async (id) => {
   if (!foundEstimate) return { message: "Id Not Found", status: 404 };
   foundEstimate.approvalFromAdminAsQuotes = true;
   foundEstimate.QuotationNo = await getValueForNextSequence("Quotation");
-  console.log("foundEstimate.QuotationNo",foundEstimate.QuotationNo)
   foundEstimate.Updates.EstimateToQuotation = Date.now();
-  // foundEstimate.QuotationId = "Q_Id" + Date.now().toString();
   let dates = new Date()
   let month = dates.getMonth()<10?'0'+(dates.getMonth()+1):(dates.getMonth()+1)
   let year = dates.getYear() - 100
@@ -436,8 +434,10 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
           if (
             product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow
           )
-            foundEstimate.Products[i].ProductEstimatedPrice =
-              product.ProductEstimatedPrice;
+            {
+              foundEstimate.Products[i].ProductEstimatedPrice = product.ProductEstimatedPrice
+              foundEstimate.Products[i].Gst = product.Gst
+            }
         });
         agentUpdation = false;
       }

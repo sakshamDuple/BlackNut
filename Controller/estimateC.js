@@ -209,7 +209,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                         Report[0].PurchaseOrder += 1
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
-                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? product.ProductEstimatedPrice : 0
+                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? (product.ProductEstimatedPrice*product.quantity) : 0
                     }
                 } else {
                     let m
@@ -226,8 +226,6 @@ exports.getReportsFromEstimates = async (req, res) => {
                         if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
                         foundreport.ProductID = product.ProductIDToShow
                         foundreport.ProductName = product.ProductName
-                        console.log(foundreport)
-                        console.log(foundreport.ProductOrderPrice)
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             foundreport.Quotation += 1
@@ -237,7 +235,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                             foundreport.PurchaseOrder += 1
                             foundreport.Quotation += 1
                             foundreport.Estimate += 1
-                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
+                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice*product.quantity) : 0
                         }
                         NewReport.push(foundreport)
                         Report = NewReport
@@ -254,7 +252,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                             report.PurchaseOrder += 1
                             report.Quotation += 1
                             report.Estimate += 1
-                            report.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
+                            report.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice*product.quantity) : 0
                         }
                         Report.push(report)
                     }
@@ -286,7 +284,6 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}}]
           }
         }
-        console.log(query)
     try {
         let foundEstimates = await Estimate.find(query)
         let Report = [{
@@ -323,6 +320,7 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                     }
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                         Report[0].PurchaseOrder += 1
+                        console.log(Report[0].PurchaseOrder,"product",product)
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
                         Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
@@ -345,8 +343,6 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                         foundreport.Agent_Id = estimate.agentId
                         foundreport.Agent_Name = estimate.agentName
                         foundreport.Agent_Code = estimate.Agent_Code
-                        console.log(foundreport)
-                        console.log(foundreport.ProductOrderPrice)
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
                             foundreport.Estimate += 1
                             foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
@@ -359,6 +355,7 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                         }
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                             foundreport.PurchaseOrder += 1
+                            console.log(foundreport.PurchaseOrder,"product",product)
                             foundreport.Quotation += 1
                             foundreport.Estimate += 1
                             foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
@@ -386,6 +383,7 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                         }
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                             report.PurchaseOrder += 1
+                            console.log(report.PurchaseOrder,"product",product)
                             report.Quotation += 1
                             report.Estimate += 1
                             report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0

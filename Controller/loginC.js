@@ -55,7 +55,7 @@ exports.forgotPassword = async (req, res) => {
         // console.log(theAgentFound2)
         if (theAgentFound1.data._id.toString()) {
             let otp = generateOtp()
-            await OtpS.deleteOnly(phone)
+            await OtpS.deleteOnly(theAgentFound1.data.phone)
             let genTempOtpOnDB = await OtpS.create({
                 number: theAgentFound1.data.phone,
                 id: theAgentFound1.data._id.toString(),

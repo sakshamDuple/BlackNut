@@ -6,14 +6,6 @@ const { error } = require("../Middleware/error");
 exports.getRecentEstimates = async () => {
     try {
 
-
-        AllEstimates = await Estimate.find({
-            approvalFromAdminAsQuotes: false, approvalFromAdminAsPO: false
-
-        });
-        console.log(AllEstimates, "aa");
-
-
         const agg = ([
             {
                 "$match": {
@@ -49,7 +41,6 @@ exports.getRecentEstimates = async () => {
                     : "please create some estimates to view",
             status: RecentEstimates.length > 0 ? 200 : 404,
         };
-
 
     } catch (e) {
         console.log(e);
@@ -415,8 +406,11 @@ exports.getRecentPOAgent = async (id) => {
 }
 
 
-exports.getEstimateCountOfAgent = async (id) => {
+exports.getEstimateCountOfAgent = async (id,startDate,endDate) => {
     const agg = ([
+        {
+            "$match": getDateQuery(startDate,endDate)
+        },
         {
             "$match": {
                 "approvalFromAdminAsQuotes": false,
@@ -441,8 +435,11 @@ exports.getEstimateCountOfAgent = async (id) => {
     return count
 }
 
-exports.getTotalEstimateForAgent = async (id) => {
+exports.getTotalEstimateForAgent = async (id,startDate,endDate) => {
     const agg = [
+        {
+            "$match": getDateQuery(startDate,endDate)
+        },
         {
             "$match": {
                 "approvalFromAdminAsQuotes": false,
@@ -470,11 +467,14 @@ exports.getTotalEstimateForAgent = async (id) => {
     ];
     let k = await Estimate.aggregate(agg)
     console.log(k)
-    return k[0].TotalEstimate
+    return k[0]?k[0].TotalEstimate:0
 }
 
-exports.getTotalQuotationForAgent = async (id) => {
+exports.getTotalQuotationForAgent = async (id,startDate,endDate) => {
     const agg = ([
+        {
+            "$match": getDateQuery(startDate,endDate)
+        },
         {
             "$match": {
                 "approvalFromAdminAsQuotes": true,
@@ -501,11 +501,14 @@ exports.getTotalQuotationForAgent = async (id) => {
         }
     ]);
     let k = await Estimate.aggregate(agg)
-    return k[0].TotalQuotation
+    return k[0]?k[0].TotalEstimate:0
 }
 
-exports.getTotalPOForAgent = async (id) => {
+exports.getTotalPOForAgent = async (id,startDate,endDate) => {
     const agg = ([
+        {
+            "$match": getDateQuery(startDate,endDate)
+        },
         {
             "$match": {
                 "approvalFromAdminAsQuotes": false,
@@ -532,26 +535,39 @@ exports.getTotalPOForAgent = async (id) => {
         }
     ]);
     let k = await Estimate.aggregate(agg)
-    return k[0].TotalPO
+    return k[0]?k[0].TotalPO:0
 }
 
-exports.getQuoteCountOfAgent = async (id) => {
+const getDateQuery = (startDate,endDate,toAdd) => {
+    if(!toAdd) toAdd = {}
+    console.log("startDate == endDate",startDate == endDate)
+    if(startDate == undefined || startDate == null || startDate == endDate || endDate == undefined || endDate == null) return toAdd
+    return {
+        $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}},toAdd]
+    }
+}
+
+exports.getQuoteCountOfAgent = async (id,startDate,endDate) => {
     const agentId = id
-    const AllQuotation = await Estimate.find({
+    let toAdd = {
         approvalFromAdminAsQuotes: true,
         agentId, approvalFromAdminAsPO: false,
-    })
+    }
+    let query = getDateQuery(startDate,endDate,toAdd)
+    const AllQuotation = await Estimate.find(query)
     const count = AllQuotation.length
-    console.log(count, "couuu")
     return count
 }
-exports.getPoCountOfAgent = async (id) => {
+
+exports.getPoCountOfAgent = async (id,startDate,endDate) => {
     const agentId = id
-    const AllPO = await Estimate.find({
+    let toAdd = {
         approvalFromAdminAsQuotes: false,
         approvalFromAdminAsPO: true, agentId
-    })
+    }
+    let query = getDateQuery(startDate,endDate,toAdd)
+    console.log("query",query)
+    const AllPO = await Estimate.find(query)
     const count = AllPO.length
-    console.log(count, "couuu")
     return count
 }

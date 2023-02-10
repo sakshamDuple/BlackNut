@@ -2,7 +2,9 @@ const { getAllNotify, readTheNotification, getOneNotify } = require("../Service/
 
 exports.getAll = async (req,res) => {
     let read = req.query.read
-    let AllNotifications = await getAllNotify(read)
+    let page = req.query.page?parseInt(req.query.page):1
+    let limit = req.query.limit?parseInt(req.query.limit):10
+    let AllNotifications = await getAllNotify(read,page,limit)
     res.status(AllNotifications.status).send(AllNotifications)
 }
 

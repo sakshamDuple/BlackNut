@@ -69,7 +69,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Converted Estimate To Quotation":
                 message = `Congratulations, An estimate was added by you is now converted to the quotation, to complete the purchase of order of machine, keep track of the quotation`
                 data = {type:"", Name} //Agent
-                await create(message)
+                await create(messageNotification)
                 break;
             case "Your Machine Quotation Processed":
                 message = `Congratulations, We have successful completion of Estimate To Quotation for your order, keep track of the conversion of your orders`

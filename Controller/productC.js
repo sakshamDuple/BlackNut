@@ -135,6 +135,7 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     cropId,
     machineId,
     createdAt,
+    Gst
   } = await ProductS.findOneById(idOfProduct);
   let {
     data: { crop },
@@ -153,6 +154,7 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     Machine_name,
     Product_name,
     crop,
+    Gst
   };
   return DetailedProduct
 }
@@ -192,7 +194,6 @@ exports.productDetailForASelectMachine = async (req, res) => {
 };
 
 exports.productUpdateForASelectMachine = async (req, res) => {
-  console.log(req.body);
   let updateProductsList = req.body
   let machineId = req.query.machineId;
   let products = await ProductS.findProductsForMachineId(machineId);

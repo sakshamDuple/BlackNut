@@ -13,6 +13,7 @@ exports.sendEmail = async (email, subject, text, details) => {
         let data
         let Name = details?details.Name:""
         let agentId = details?details.agentId:""
+        let Link = details?details.Link:""
         switch (subject) {
             case "new Password Created":
                 message = `Your Request For New BlackNut Password Creation is processed, Your new Password is ${text}`
@@ -43,8 +44,8 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Admin
                 break;
             case "Your Agent Account is Registered":
-                message = `Cheers, We gladly invite you to as a new agent, now you will be able to create estimates for several customers in your region`
-                data = {type:"", Name} //Agent
+                message = `Cheers, We gladly invite you to as a new agent, now you will be able to create estimates for several customers in your region, please hit the link below to download the aggrement file.`
+                data = {type:"", Name, Link} //Agent
                 break;
             case "Your Customer Account is Registered":
                 message = `Cheers, We gladly invite you to as a new customer, please keep checking your email for further operation in blacknut`

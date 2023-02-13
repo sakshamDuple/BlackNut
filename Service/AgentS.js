@@ -29,7 +29,7 @@ exports.create = async (agent) => {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
-        await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName })
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" })
         await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, 

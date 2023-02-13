@@ -12,6 +12,7 @@ exports.sendEmail = async (email, subject, text, details) => {
         let message
         let data
         let Name = details?details.Name:""
+        let agentId = details?details.agentId:""
         switch (subject) {
             case "new Password Created":
                 message = `Your Request For New BlackNut Password Creation is processed, Your new Password is ${text}`
@@ -56,7 +57,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Added New Estimate":
                 message = `Cheers, You Added a new estimate, look forward to convert it as Quotations`
                 data = {type:"", Name} //Agent
-                await create(message)
+                await create(`<b>A new Estimate is added by agent: ${agentId},</b><br/>look forward to convert it as Quotations`,"E") // to super admin
                 break;
             case "Added New Estimate":
                 message = `Cheers, An estimate is added on your behalf from admin, look forward to convert it as Quotations`
@@ -69,7 +70,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Converted Estimate To Quotation":
                 message = `Congratulations, An estimate was added by you is now converted to the quotation, to complete the purchase of order of machine, keep track of the quotation`
                 data = {type:"", Name} //Agent
-                await create(messageNotification)
+                await create(`<b>An Estimate is converted to Quotation by Agent:${agentId},</b>The Agent is now waiting for approval of Quotation.<br/>`,"Q" )  // to super admin
                 break;
             case "Your Machine Quotation Processed":
                 message = `Congratulations, We have successful completion of Estimate To Quotation for your order, keep track of the conversion of your orders`
@@ -90,7 +91,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Converted Quotation To Order":
                 message = `Congratulations, Your Customer Place Order is successfully completed, find the details below`
                 data = {type:"", Name} //Agent
-                await create(message)
+                await create(`<b>Cheers, A Quotaion is now converted to purchase order by Agent:${agentId}.</b>`,"PO")
                 break;
             case 'A New Agent Account is Registered':
                 message = `Cheers, A New Agent Is Added, look forward to Preview all their Documents and Agreements. Enable the Agent if all Documents are correct.`

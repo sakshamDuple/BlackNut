@@ -23,6 +23,7 @@ router.get("/getAllCrops", productC.getAllCrops);
 router.get("/getAllMachines", productC.getAllMachines);
 router.get('/getAllMachinesAlphabet',productC.getAllMachinesAlphabets)
 router.get("/getFullDetailOfOneProduct", productC.getFullDetailOfOneProduct);
+router.get("/getMultiProductById", productC.getMultiProductById);
 router.get("/generateCsvOfOneMachine", productC.generateCsvOfOneMachine);
 router.get("/generateCsvOfAll", productC.generateCsvOfAll);
 router.put("/updateOneProduct", productC.updateOneProduct)
@@ -47,8 +48,8 @@ let update = (products, fails, successes) => {
             products.map(async element => {
                 return new Promise(async function (resolve, reject) {
                     let fail, success;
-                    let { Capacity, Model, Price, Unit, _id, ProductID } = element
-                    let updateProduct = await updateProductById({ Capacity, Model, Price, _id, ProductID }, Unit)
+                    let { Capacity, Model, Price, Unit, _id, ProductID, pdfFile } = element
+                    let updateProduct = await updateProductById({ Capacity, Model, Price, _id, ProductID, pdfFile }, Unit)
                     if (!updateProduct.data) {
                         fails.push(ProductID);
                     } else {

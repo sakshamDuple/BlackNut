@@ -1,8 +1,8 @@
 const { filesUpload } = require("../Middleware/UploadFiles");
 
 const FileUrl = "https://blacknut.sgp1.digitaloceanspaces.com/";
+
 exports.uploadFiles = async function (req, res) {
-    //console.log("Upload direct file request: ", req.file);
 
     console.log(req.file)
     const dateString = Date.now();
@@ -24,3 +24,25 @@ exports.uploadFiles = async function (req, res) {
         }
     });
 };
+
+// exports.uploadFiles2 = upload(req, res, function (error) {
+//     if (error) { //instanceof multer.MulterError
+//         res.status(500);
+//         if (error.code == 'LIMIT_FILE_SIZE') {
+//             error.message = 'File Size is too large. Allowed fil size is 200KB';
+//             error.success = false;
+//         }
+//         return res.json(error);
+//     } 
+//     // else {
+//     //     if (!req.file) {
+//     //         res.status(500);
+//     //         res.json('file not found');
+//     //     }
+//     //     res.status(200);
+//     //     res.json({
+//     //         success: true,
+//     //         message: 'File uploaded successfully!'
+//     //     });
+//     // }
+// })

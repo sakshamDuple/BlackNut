@@ -22,6 +22,7 @@ const productDetail = new mongoose.Schema({
         type: Number,
         default: () => 5
     },
+    pdfFile: String,
     UnitId: {
         type: String
     },

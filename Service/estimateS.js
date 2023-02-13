@@ -71,6 +71,7 @@ exports.create = async (estimate) => {
     });
     await sendEmail(foundAgent.data.email, "You Added New Estimate", "", {
       Name: foundAgent.data.firstName,
+      agentId
     });
     await sendEmail(foundcustomer.data.email, "Added New Estimate", "", {
       Name: foundcustomer.data.firstName,
@@ -370,7 +371,7 @@ exports.updateEstimateToQuotation = async (id) => {
       foundAgent.data.email,
       "You Converted Estimate To Quotation",
       "",
-      { Name: foundAgent.data.firstName }
+      { Name: foundAgent.data.firstName, agentId: foundEstimate.agentId }
     );
     await sendEmail(foundcustomer.data.email, "Added New Estimate", "", {
       Name: foundcustomer.data.firstName,
@@ -475,7 +476,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
         foundAgent.data.email,
         "You Converted Quotation To Order",
         "",
-        { Name: foundAgent.data.firstName }
+        { Name: foundAgent.data.firstName, agentId: foundEstimate.agentId }
       );
       await sendEmail(foundcustomer.data.email, "Your Machine Is Ordered", "", {
         Name: foundcustomer.data.firstName,

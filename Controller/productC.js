@@ -409,13 +409,13 @@ exports.generateListOfCropsMachines = async (req, res) => {
 };
 
 exports.updateOneProduct = async (req, res) => {
-  let { Capacity, Model, Price, _id, ProductID, Status } = req.body
-  let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID }, Status)
+  let { Capacity, Model, Price, _id, ProductID, Status, pdfFile } = req.body
+  let updateProduct = await ProductS.updateProductById({ Capacity, Model, Price, _id, ProductID, pdfFile }, Status)
   res.status(updateProduct.status).send({ data: updateProduct.data, message: updateProduct.message, status: updateProduct.status })
 }
 
-exports.findCropByIdAndUpdate = async (req,res) => {
-  let {cropName, id} = req.body
+exports.findCropByIdAndUpdate = async (req, res) => {
+  let { cropName, id } = req.body
   let updateCrop = await CropS.findCropByIdAndUpdate(id, cropName)
   res.status(updateCrop.status).send(updateCrop)
 }
@@ -439,4 +439,12 @@ exports.deleteOneMachine = async (req, res) => {
   let deletedProducts = await ProductS.deleteMutliProducts(idsToDelete)
   if (deletedProducts.status == 200) { deleted = await MachineS.deleteThisMachine(id) }
   res.status(deleted.status).send(deleted)
+}
+
+exports.getMultiProductById = async (req,res) => {
+  let ids = req.query.ids
+  ids = ids.split(",")
+  let products = await ProductS.findMultiDetailedProductById(ids)
+  console.log(products)
+  res.status(products.length>0?200:404).send({products,productFound:products.length,status:products.length>0?200:404})
 }

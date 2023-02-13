@@ -1,10 +1,14 @@
 const Notification = require('../Model/Notification')
 
-exports.create = async (Content) => {
+exports.create = async (Content,navigation) => {
     try {
         let notificationNumber = await getValueForNextSequence()
-        console.log(notificationNumber)
-        let createdNotification = await Notification.create({ notificationNumber, notification:Content })
+        let createdNotification
+        if(navigation != null || navigation != undefined){
+            createdNotification = await Notification.create({ notificationNumber, notification:Content, navigation })
+        } else {
+            createdNotification = await Notification.create({ notificationNumber, notification:Content })
+        }
         console.log("createdNotification",createdNotification)
         return { data: createdNotification, message: "Notification created successfully", status: 201 }
     } catch (e) {

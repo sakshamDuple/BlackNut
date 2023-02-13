@@ -9,9 +9,9 @@ const { sendEmail } = require("../Middleware/emailSend")
 exports.getAll = async (req, res) => {
     let page = req.query.page
     let limit = req.query.limit
-    let agentId = req.query.agentId?req.query.agentId:""
+    let agentId = req.query.agentId ? req.query.agentId : ""
     let state = req.query.state
-    let AllEstimates = await EstimateS.getAllEstimates(agentId, agentId!=""?"agent":"", page, limit, state)
+    let AllEstimates = await EstimateS.getAllEstimates(agentId, agentId != "" ? "agent" : "", page, limit, state)
     if (AllEstimates.status == 200) {
         res.status(AllEstimates.status).send(AllEstimates)
     } else {
@@ -162,18 +162,18 @@ exports.updateQuotationToPI = async (req, res) => {
 }
 
 exports.getReportsFromEstimates = async (req, res) => {
-    let page = req.query.page?req.query.page:1
-    let limit = req.query.limit?req.query.limit:10
+    let page = req.query.page ? req.query.page : 1
+    let limit = req.query.limit ? req.query.limit : 10
     let query = {}
     let startDate = req.query.startDate
     let endDate = req.query.endDate
-    if(startDate && endDate) {
+    if (startDate && endDate) {
         query = {
-            $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}}]
-          }
+            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
         }
-        console.log(query)
-    let start = (parseInt(page)-1)*parseInt(limit)
+    }
+    console.log(query)
+    let start = (parseInt(page) - 1) * parseInt(limit)
     try {
         let agentId = req.query.id
         let foundEstimates = await Estimate.find(query)
@@ -209,7 +209,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                         Report[0].PurchaseOrder += 1
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
-                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? (product.ProductEstimatedPrice*product.quantity) : 0
+                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? (product.ProductEstimatedPrice * product.quantity) : 0
                     }
                 } else {
                     let m
@@ -235,7 +235,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                             foundreport.PurchaseOrder += 1
                             foundreport.Quotation += 1
                             foundreport.Estimate += 1
-                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice*product.quantity) : 0
+                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice * product.quantity) : 0
                         }
                         NewReport.push(foundreport)
                         Report = NewReport
@@ -252,16 +252,16 @@ exports.getReportsFromEstimates = async (req, res) => {
                             report.PurchaseOrder += 1
                             report.Quotation += 1
                             report.Estimate += 1
-                            report.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice*product.quantity) : 0
+                            report.ProductOrderPrice += product.ProductEstimatedPrice ? (product.ProductEstimatedPrice * product.quantity) : 0
                         }
                         Report.push(report)
                     }
                 }
             })
         })
-        let totalCount= Report.length
+        let totalCount = Report.length
         return res.status(200).send({
-            data: Report.splice(start,limit),
+            data: Report.splice(start, limit),
             totalCount,
             message: "reports made",
             status: 200,
@@ -273,19 +273,35 @@ exports.getReportsFromEstimates = async (req, res) => {
 }
 
 exports.getAgentReportsFromEstimates = async (req, res) => {
-    let page = req.query.page?req.query.page:1
-    let limit = req.query.limit?req.query.limit:10
-    let start = (parseInt(page)-1)*parseInt(limit)
+    let page = req.query.page ? req.query.page : 1
+    let limit = req.query.limit ? req.query.limit : 10
+    let start = (parseInt(page) - 1) * parseInt(limit)
     let query = {}
     let startDate = req.query.startDate
     let endDate = req.query.endDate
-    if(startDate && endDate) {
+    if (startDate && endDate) {
         query = {
-            $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}}]
-          }
+            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
         }
+    }
+    let agg = [
+        {
+            '$project': {
+                '_id': 1,
+                'agentId': 1,
+                'createdAt': 1,
+                'TotalCost': {
+                    '$sum': '$Products.ProductEstimatedPrice'
+                },
+                'agentName': 1,
+                'Agent_Code': 1,
+                'approvalFromAdminAsQuotes': 1,
+                'approvalFromAdminAsPO': 1
+            }
+        }
+    ]
     try {
-        let foundEstimates = await Estimate.find(query)
+        let foundEstimates = await Estimate.aggregate(agg)
         let Report = [{
             Agent_Code: "",
             Agent_Id: "",
@@ -298,102 +314,97 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             ProductOrderPrice: 0
         }]
         foundEstimates.map((estimate) => {
-            estimate.Products.map((product) => {
-                let report = {
-                    Estimate: 0,
-                    Quotation: 0,
-                    PurchaseOrder: 0
+            let report = {
+                Estimate: 0,
+                Quotation: 0,
+                PurchaseOrder: 0
+            }
+            if (Report.length == 1 && Report[0].Agent_Code == "") {
+                Report[0].Agent_Id = estimate.agentId
+                Report[0].Agent_Name = estimate.agentName
+                Report[0].Agent_Code = estimate.Agent_Code
+                if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
+                    Report[0].Estimate += 1
+                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
                 }
-                if (Report.length == 1 && Report[0].Agent_Code == "") {
-                    Report[0].Agent_Id = estimate.agentId
-                    Report[0].Agent_Name = estimate.agentName
-                    Report[0].Agent_Code = estimate.Agent_Code
+                if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
+                    Report[0].Quotation += 1
+                    Report[0].Estimate += 1
+                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                }
+                if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
+                    Report[0].PurchaseOrder += 1
+                    Report[0].Quotation += 1
+                    Report[0].Estimate += 1
+                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                }
+            } else {
+                let m
+                let foundreport = Report.find((report, i) => {
+                    if (report.Agent_Id == estimate.agentId) {
+                        m = i
+                        return report
+                    }
+                });
+                let NewReport = Report.filter((report) => {
+                    return report.Agent_Id != estimate.agentId
+                })
+                if (foundreport) {
+                    if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
+                    foundreport.Agent_Id = estimate.agentId
+                    foundreport.Agent_Name = estimate.agentName
+                    foundreport.Agent_Code = estimate.Agent_Code
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
-                        Report[0].Estimate += 1
-                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        foundreport.Estimate += 1
+                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
-                        Report[0].Quotation += 1
-                        Report[0].Estimate += 1
-                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        Report[0].QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        foundreport.Quotation += 1
+                        foundreport.Estimate += 1
+                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
-                        Report[0].PurchaseOrder += 1
-                        console.log(Report[0].PurchaseOrder,"product",product)
-                        Report[0].Quotation += 1
-                        Report[0].Estimate += 1
-                        Report[0].EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        Report[0].QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        Report[0].ProductOrderPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
+                        foundreport.PurchaseOrder += 1
+                        foundreport.Quotation += 1
+                        foundreport.Estimate += 1
+                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
                     }
+                    NewReport.push(foundreport)
+                    Report = NewReport
                 } else {
-                    let m
-                    let foundreport = Report.find((report, i) => {
-                        if (report.Agent_Id == estimate.agentId) {
-                            m = i
-                            return report
-                        }
-                    });
-                    let NewReport = Report.filter((report) => {
-                        return report.Agent_Id != estimate.agentId
-                    })
-                    if (foundreport) {
-                        if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
-                        foundreport.Agent_Id = estimate.agentId
-                        foundreport.Agent_Name = estimate.agentName
-                        foundreport.Agent_Code = estimate.Agent_Code
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
-                            foundreport.Estimate += 1
-                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        }
-                        if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
-                            foundreport.Quotation += 1
-                            foundreport.Estimate += 1
-                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            foundreport.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        }
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
-                            foundreport.PurchaseOrder += 1
-                            console.log(foundreport.PurchaseOrder,"product",product)
-                            foundreport.Quotation += 1
-                            foundreport.Estimate += 1
-                            foundreport.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            foundreport.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            foundreport.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
-                        }
-                        NewReport.push(foundreport)
-                        Report = NewReport
-                    } else {
-                        report.Agent_Id = estimate.agentId
-                        report.Agent_Name = estimate.agentName
-                        report.Agent_Code = estimate.Agent_Code
-                        report.ProductOrderPrice = 0
-                        report.EstimatePrice = 0
-                        report.QuotationPrice = 0
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
-                            report.Estimate += 1
-                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        }
-                        if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
-                            report.Quotation += 1
-                            report.Estimate += 1
-                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            report.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                        }
-                        if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
-                            report.PurchaseOrder += 1
-                            console.log(report.PurchaseOrder,"product",product)
-                            report.Quotation += 1
-                            report.Estimate += 1
-                            report.EstimatePrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            report.QuotationPrice += product.ProductEstimatedPrice ? parseInt(product.ProductEstimatedPrice) : 0
-                            report.ProductOrderPrice += product.ProductEstimatedPrice ? product.ProductEstimatedPrice : 0
-                        }
-                        Report.push(report)
+                    report.Agent_Id = estimate.agentId
+                    report.Agent_Name = estimate.agentName
+                    report.Agent_Code = estimate.Agent_Code
+                    report.ProductOrderPrice = 0
+                    report.EstimatePrice = 0
+                    report.QuotationPrice = 0
+                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
+                        report.Estimate += 1
+                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
                     }
+                    if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
+                        report.Quotation += 1
+                        report.Estimate += 1
+                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    }
+                    if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
+                        report.PurchaseOrder += 1
+                        report.Quotation += 1
+                        report.Estimate += 1
+                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    }
+                    Report.push(report)
                 }
-            })
+            }
         })
         let totalCount= Report.length
         return res.status(200).send({

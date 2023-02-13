@@ -2,10 +2,9 @@ const { error } = require("../Middleware/error");
 const product = require("../Model/Product");
 const CropS = require('./CropS')
 const MachineS = require('./MachineS')
+const { ObjectId } = require('bson')
 
 exports.create = async (data) => {
-    console.log(data.products[0].productDetail,'sudev');
-
     try {
         let foundCrop
         let foundMachine
@@ -51,18 +50,164 @@ exports.findOneById = async (id) => {
     return await product.findById(id)
 }
 
+exports.findMultiDetailedProductById = async (ids) => {
+    console.log(ids)
+    let objectedId = []
+    ids.map((id)=>{
+        objectedId.push(new ObjectId(id))
+    })
+    console.log(objectedId)
+    let agg = [{
+        '$match': { "_id": { "$in": objectedId } }
+    }, {
+        '$lookup': {
+            'from': 'crops',
+            'let': {
+                'cropId': {
+                    '$toObjectId': '$cropId'
+                }
+            },
+            'pipeline': [
+                {
+                    '$match': {
+                        '$expr': {
+                            '$eq': [
+                                '$_id', '$$cropId'
+                            ]
+                        }
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                        'crop': 1
+                    }
+                }
+            ],
+            'as': 'result1'
+        }
+    }, {
+        '$lookup': {
+            'from': 'machines',
+            'let': {
+                'machineId': {
+                    '$toObjectId': '$machineId'
+                }
+            },
+            'pipeline': [
+                {
+                    '$match': {
+                        '$expr': {
+                            '$eq': [
+                                '$_id', '$$machineId'
+                            ]
+                        }
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                        'Product_name': 1,
+                        'Machine_name': 1
+                    }
+                }
+            ],
+            'as': 'result2'
+        }
+    },
+    {
+        $project: {
+            Model: 1,
+            Price: 1,
+            ProductID: 1,
+            Capacity: 1,
+            crop: { $arrayElemAt: ["$result1.crop", 0] },
+            Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
+            Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
+        },
+    }]
+    return await product.aggregate(agg)
+}
+
 exports.findByCropName = async (name) => {
     let foundCrop = await CropS.findCrop({ cropName: name })
     return await product.find({ cropId: foundCrop.data._id })
 }
 
 exports.findProductsForMachineId = async (MachineId) => {
-    let products = await product.find({ machineId: MachineId })
+    let agg = [{
+        '$match': { machineId: MachineId }
+    }, {
+        '$lookup': {
+            'from': 'crops',
+            'let': {
+                'cropId': {
+                    '$toObjectId': '$cropId'
+                }
+            },
+            'pipeline': [
+                {
+                    '$match': {
+                        '$expr': {
+                            '$eq': [
+                                '$_id', '$$cropId'
+                            ]
+                        }
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                        'crop': 1
+                    }
+                }
+            ],
+            'as': 'result1'
+        }
+    }, {
+        '$lookup': {
+            'from': 'machines',
+            'let': {
+                'machineId': {
+                    '$toObjectId': '$machineId'
+                }
+            },
+            'pipeline': [
+                {
+                    '$match': {
+                        '$expr': {
+                            '$eq': [
+                                '$_id', '$$machineId'
+                            ]
+                        }
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                        'Product_name': 1,
+                        'Machine_name': 1
+                    }
+                }
+            ],
+            'as': 'result2'
+        }
+    },
+    {
+        $project: {
+            Model: 1,
+            Price: 1,
+            ProductID: 1,
+            Capacity: 1,
+            crop: { $arrayElemAt: ["$result1.crop", 0] },
+            Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
+            Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
+            cropId:1,
+            machineId:1
+        },
+    }]
+    let products = await product.aggregate(agg)
     return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }
 }
 
 exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
-    console.log(PrevProduct,'s',Updates);
+    console.log(PrevProduct, 's', Updates);
     let thisMachine = await MachineS.findMachineById(MachineId)
     let addProduct = false
     let ProductsToAdd = []
@@ -79,7 +224,7 @@ exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
                     PrevProduct[i].ProductID = element.ProductID
                     PrevProduct[i].Status = element.Status
                     PrevProduct[i].Gst = element.Gst
-
+                    PrevProduct[i].pdfFile = element.pdfFile
                 } else {
                     addProduct = true
                     element.cropId = thisMachine.data.cropId
@@ -118,8 +263,8 @@ let update = (products, fails, successes) => {
             products.map(async element => {
                 return new Promise(async function (resolve, reject) {
                     let fail, success;
-                    let { Capacity, Model, Price, Unit, _id, ProductID, Status,Gst } = element
-                    let updateProduct = await updateFunc({ Capacity, Model, Price, _id, ProductID, Status,Gst })
+                    let { Capacity, Model, Price, _id, ProductID, Status, Gst, pdfFile } = element
+                    let updateProduct = await updateFunc({ Capacity, Model, Price, _id, ProductID, Status, Gst, pdfFile })
                     if (!updateProduct.data) {
                         fails.push(ProductID);
                     } else {
@@ -185,14 +330,14 @@ exports.deleteMutliProducts = async (ids) => {
     }
 }
 
-exports.updateProductById = async ({ Capacity, Model, Price, _id }, Status) => {
-    let query = { Capacity, Model, Price }
-    if (Status) query = { Capacity, Model, Price, Status }
+exports.updateProductById = async ({ Capacity, Model, Price, _id, pdfFile }, Status) => {
+    let query = { Capacity, Model, Price, pdfFile }
+    if (Status) query = { Capacity, Model, Price, Status, pdfFile }
     let updateThisProductDetail = await product.updateOne({ _id }, { $set: query })
     return { data: updateThisProductDetail.nModified > 0, message: updateThisProductDetail.nModified > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.nModified > 0 ? 200 : 400 }
 }
 
-let updateFunc = async ({ Capacity, Model, Price, _id, ProductID, Status,Gst }) => {
-    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price, Status, ProductID,Gst } })
+let updateFunc = async ({ Capacity, Model, Price, _id, ProductID, Status, Gst, pdfFile }) => {
+    let updateThisProductDetail = await product.updateOne({ _id }, { $set: { Capacity, Model, Price, Status, ProductID, Gst, pdfFile } })
     return { data: updateThisProductDetail.nModified > 0, message: updateThisProductDetail.nModified > 0 ? "updated Successfully" : "update Failed", status: updateThisProductDetail.nModified > 0 ? 200 : 400 }
 }

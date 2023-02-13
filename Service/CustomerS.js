@@ -32,7 +32,7 @@ exports.create = async (customer) => {
         let createdAgent = await Agent.create(newcustomer)
         let doMobileRegistration = await VerifiedNumberS.create({ role: customer.role, number: customer.phone, id: createdAgent.id })
         await sendEmail(customer.email, "Your Customer Account is Registered", "", { Name: newcustomer.firstName })
-        return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "customer successfully created", status: 201 }
+        return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "Customer added to Estimate Successfully!", status: 201 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

@@ -20,7 +20,7 @@ const productDetail = new mongoose.Schema({
     },
     Gst: {
         type: Number,
-        default: () => 5
+        default: () => 0
     },
     pdfFile: String,
     UnitId: {

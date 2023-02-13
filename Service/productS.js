@@ -122,6 +122,12 @@ exports.findMultiDetailedProductById = async (ids) => {
             crop: { $arrayElemAt: ["$result1.crop", 0] },
             Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
             Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
+            cropId:1,
+            machineId:1,
+            Gst:1,
+            Status:1,
+            createdAt:1,  
+            updateAt:1
         },
     }]
     return await product.aggregate(agg)
@@ -199,7 +205,11 @@ exports.findProductsForMachineId = async (MachineId) => {
             Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
             Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
             cropId:1,
-            machineId:1
+            machineId:1,
+            Gst:1,
+            Status:1,
+            createdAt:1,
+            updateAt:1
         },
     }]
     let products = await product.aggregate(agg)

@@ -208,7 +208,7 @@ exports.customerOtpRecieve = async (req, res) => {
       return res
         .status(200)
         .send({
-          message: `The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,, tempOtp:${otp}`,
+          message: `OTP is sent on Customer's Mobile Number. tempOtp:${otp}`, //The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,
           status: 200,
         });
     }
@@ -221,7 +221,7 @@ exports.customerOtpRecieve = async (req, res) => {
     res
       .status(200)
       .send({
-        message: `an otp is sent on customer mail, please verify otp to process customer creation, tempOtp:${otp}`,
+        message: `OTP is sent on Customer's Mobile Number! tempOtp:${otp}`, //an otp is sent on customer mail, please verify otp to process customer creation
         status: 200,
       });
   }

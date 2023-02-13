@@ -543,7 +543,7 @@ const getDateQuery = (startDate,endDate,toAdd) => {
     console.log("startDate == endDate",startDate == endDate)
     if(startDate == undefined || startDate == null || startDate == endDate || endDate == undefined || endDate == null) return toAdd
     return {
-        $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}},toAdd]
+        $and:[{createdAt: { $gte : new Date(startDate.toString())}},{createdAt: { $lte : new Date(endDate.toString())}},toAdd]
     }
 }
 

@@ -169,7 +169,7 @@ exports.getReportsFromEstimates = async (req, res) => {
     let endDate = req.query.endDate
     if (startDate && endDate) {
         query = {
-            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
     console.log(query)
@@ -281,7 +281,7 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
     let endDate = req.query.endDate
     if (startDate && endDate) {
         query = {
-            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
     let agg = [

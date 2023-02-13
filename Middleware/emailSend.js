@@ -44,7 +44,7 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Admin
                 break;
             case "Your Agent Account is Registered":
-                message = `Cheers, We gladly invite you to as a new agent, now you will be able to create estimates for several customers in your region, please hit the link below to download the aggrement file.`
+                message = `Cheers, We gladly invite you to as a new agent, now you will be able to create estimates for several customers in your region, please hit the link below to download the agreement file.`
                 data = {type:"", Name, Link} //Agent
                 break;
             case "Your Customer Account is Registered":

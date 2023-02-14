@@ -85,7 +85,7 @@ exports.addCustomer = async (req, res) => {
     });
     newCustomer.Agent_ID = RegisteredCustomerByThisPhone._id;
     newCustomer.status = 200;
-    newCustomer.message = "customer retrieved instead of create";
+    newCustomer.message = "Customer added to Estimate Successfully!";
   }
   console.log(newCustomer);
   await OtpS.deleteOnly(foundAgent.data.phone);

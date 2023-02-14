@@ -183,7 +183,7 @@ async function getValueForNextSequence(val) {
 
 exports.getAllEstimates = async (id, field, page, limit, state) => {
   try {
-    let agentId, AllEstimates, query;
+    let agentId, AllEstimates, query, start;
     if (state) state = { $regex: `(?i)${state}(?-i)` };
     if (field == "agent") {
       agentId = id;
@@ -211,15 +211,19 @@ exports.getAllEstimates = async (id, field, page, limit, state) => {
             state,
           });
     }
+    let agg = []
     console.log(query);
     totalCount = await Estimate.count(query);
     if (page && limit) {
       start = limit * (page - 1);
-      AllEstimates = await Estimate.find(query)
+      // agg = [{
+        
+      // }]
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,
@@ -270,11 +274,11 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
     totalCount = await Estimate.count(query);
     if (page && limit) {
       start = limit * (page - 1);
-      AllEstimates = await Estimate.find(query)
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,
@@ -323,11 +327,11 @@ exports.getAllPO = async (id, field, page, limit, state) => {
     start = limit * (page - 1);
     let totalCount = await Estimate.count(query);
     if (page && limit) {
-      AllEstimates = await Estimate.find(query)
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,

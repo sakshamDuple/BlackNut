@@ -6,7 +6,7 @@ exports.SuperAdminEmail = "blacknut.2023@gmail.com"
 exports.SuperAdminPass = "mjmzjaoouytjvscv"
 
 exports.sendEmail = async (email, subject, text, details) => {
-    console.log(email, subject, text, details)
+    // console.log(email, subject, text, details)
     try {
         // let HTML = EmailHTML(subject, text)
         let message
@@ -101,7 +101,8 @@ exports.sendEmail = async (email, subject, text, details) => {
             default:
                 break;
         }
-        console.log(email, subject, text, details, data, message)
+        // console.log(email, subject, text, details, data, message, "\n\n\n\n",data.Link,"\n\n\n\n")
+        console.log("details",details.Link, data.Link, email)
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: '587',

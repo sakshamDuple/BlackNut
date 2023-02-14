@@ -11,5 +11,6 @@ router.get("/getProductReport", estimateC.getReportsFromEstimates)
 router.get("/getAgentReport", estimateC.getAgentReportsFromEstimates)
 router.put("/updateEstimateToQuotation",estimateC.updateEstimateToQuotation)
 router.get("/otpRecieve", estimateC.customerOtpRecieve);
+router.get("/generateReport", estimateC.getPdfById)
 
 module.exports = router;

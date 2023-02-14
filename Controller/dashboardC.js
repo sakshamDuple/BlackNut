@@ -101,16 +101,27 @@ exports.getTotalCountAgent=async(req,res)=>{
     let id = req.query.id
     let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
     let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
-    console.log("startDate,endDate")
+    let year = parseInt(endDate.split("-")[0])
+    let monthEnd = parseInt(endDate.split("-")[1])
+    let dateEnd = parseInt(endDate.split("-")[2])+1
+    if(dateEnd > 27){
+        dateEnd = 1
+        monthEnd = parseInt(endDate.split("-")[1])+1
+        if(monthEnd>11){
+            monthEnd = 1
+            year = parseInt(endDate.split("-")[0])+1
+        }
+    }
+    let endSearchDate = year + "-" + monthEnd + "-" + dateEnd
     let details = []
-    let EstimateCount = await dashboardS.getEstimateCountOfAgent(id,startDate,endDate)
-    let EstimatePrice = await dashboardS.getTotalEstimateForAgent(id,startDate,endDate)
+    let EstimateCount = await dashboardS.getEstimateCountOfAgent(id,startDate,endSearchDate)
+    let EstimatePrice = await dashboardS.getTotalEstimateForAgent(id,startDate,endSearchDate)
         details.push({ Name: "Estimates", count: EstimateCount, price: EstimatePrice })
-    let QuoteCount = await dashboardS.getQuoteCountOfAgent(id,startDate,endDate)
-    let QuotePrice = await dashboardS.getTotalQuotationForAgent(id,startDate,endDate)
+    let QuoteCount = await dashboardS.getQuoteCountOfAgent(id,startDate,endSearchDate)
+    let QuotePrice = await dashboardS.getTotalQuotationForAgent(id,startDate,endSearchDate)
         details.push({ Name: "Quotations", count: QuoteCount, price: QuotePrice })
-    let PoCount = await dashboardS.getPoCountOfAgent(id,startDate,endDate)
-    let PoPrice = await dashboardS.getTotalPOForAgent(id,startDate,endDate)
+    let PoCount = await dashboardS.getPoCountOfAgent(id,startDate,endSearchDate)
+    let PoPrice = await dashboardS.getTotalPOForAgent(id,startDate,endSearchDate)
         details.push({ Name: "Purchase Orders", count: PoCount, price: PoPrice })
     res.send(details)
 }

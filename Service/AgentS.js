@@ -29,7 +29,9 @@ exports.create = async (agent) => {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
-        await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" })
+        let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" }
+        console.log(detail)
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", detail )
         await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, 
@@ -119,7 +121,7 @@ exports.getCommonByPhone = async (phone, bool) => {
         let theAgent
         if (bool) theAgent = await Agent.findOne({ phone: phone, status: "Active" })
         theAgent = await Agent.findOne({ phone: phone })
-        if (theAgent == null) return { data: theAgent, message: "no such detail found", status: 404 }
+        if (theAgent == null) return { data: theAgent, message: "Account Not Found", status: 404 }
         return { data: theAgent, message: "retrieval Success", status: 200 }
     } catch (e) {
         console.log(e)

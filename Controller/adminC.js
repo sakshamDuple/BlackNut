@@ -1,4 +1,5 @@
 const adminS = require("../Service/adminS")
+const gallaryS = require("../Service/gallaryS")
 
 exports.getAllAdmin = async (req, res) => {
     let page = req.query.page
@@ -17,4 +18,22 @@ exports.deleteAdmin = async (req,res) => {
     let id = req.query.id
     let editedAdmin = await adminS.deleteAdmin(id)
     res.status(editedAdmin.status).send(editedAdmin)
+}
+
+exports.addToGallary = async (req,res) => {
+    let Content = req.body.Content
+    let Title = req.body.Title
+    let addedToGal = await gallaryS.create(Content,Title)
+    res.status(addedToGal.status).send(addedToGal)
+}
+
+exports.getGallary = async (req,res) => {
+    let addedToGal = await gallaryS.getAllContent()
+    res.status(addedToGal.status).send(addedToGal)
+}
+
+exports.deleteGal = async (req,res) => {
+    let id = req.query.id
+    let deletedGal = await gallaryS.deleteById(id)
+    res.status(deletedGal.status).send(deletedGal)
 }

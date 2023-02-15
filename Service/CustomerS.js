@@ -15,7 +15,7 @@ exports.create = async (customer) => {
         //     return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
         // }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "given phone is already registered with some id, please provide some other phone", status: 409 }
+            return { error: "mobile already registered", message: "Customer is already registered with this mobile!", status: 409 }
         }
         if (customer.password == customer.confirmPassword) {
             console.log("Hii")

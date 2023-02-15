@@ -199,6 +199,7 @@ exports.productUpdateForASelectMachine = async (req, res) => {
   let products = await ProductS.findProductsForMachineId(machineId);
   if (!products.data) return res.status(products.status).json(products);
   let updateProcess = await ProductS.updateTheProductByMachine(machineId, products.data, updateProductsList)
+  console.log("updateProcess",updateProcess);
   res.status(updateProcess.status).json(updateProcess);
 };
 

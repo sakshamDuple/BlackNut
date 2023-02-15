@@ -501,7 +501,7 @@ exports.getTotalQuotationForAgent = async (id,startDate,endDate) => {
         }
     ]);
     let k = await Estimate.aggregate(agg)
-    return k[0]?k[0].TotalEstimate:0
+    return k[0]?k[0].TotalQuotation:0
 }
 
 exports.getTotalPOForAgent = async (id,startDate,endDate) => {

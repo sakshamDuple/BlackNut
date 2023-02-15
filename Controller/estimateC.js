@@ -226,7 +226,6 @@ exports.getReportsFromEstimates = async (req, res) => {
             $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
-    console.log(query)
     let start = (parseInt(page) - 1) * parseInt(limit)
     try {
         let agentId = req.query.id

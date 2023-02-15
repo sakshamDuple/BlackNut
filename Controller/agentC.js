@@ -4,6 +4,7 @@ const AgentS = require("../Service/AgentS")
 const verifiedNumberS = require("../Service/verifyNumberS")
 const OtpS = require("../Service/OtpS")
 const { searchGlobal } = require("../Service/searchS")
+const { error } = require("../Middleware/error")
 
 exports.getActiveAgents = async (req, res) => {
     let page = req.query.page
@@ -29,9 +30,10 @@ exports.searchGlobal = async (req, res) => {
     let sortVal = req.query.sortVal
     let multiFieldSearch = req.query.multiFieldSearch
     let agentId = req.query.agentId
+    let typeOfEstimate = req.query.typeOfEstimate
     let Response
     if (collection != "Admin" && collection != "Agent" && collection != "Crop" && collection != "Estimate" && collection != "Machine" && collection != "Product") return res.status(400).json({ error: "No Such Collection Exists", message: "No Such Collection Exists", status: 400 })
-    Response = await searchGlobal(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch, agentId)
+    Response = await searchGlobal(search, fieldForSearch, searchQty, collection, type, sortBy, sortVal, multiFieldSearch, agentId, typeOfEstimate)
     res.status(Response.status).json(Response)
 }
 
@@ -79,8 +81,11 @@ exports.updateAgentById = async (req, res) => {
 
 exports.getOtpForUpdateDocument = async (req, res) => {
     let phone = req.query.phone
-    console.log(phone)
-    let { role, id } = await verifiedNumberS.findOnly(phone)
+    let mobileAccount = await verifiedNumberS.findOnly(phone)
+    let Nerror
+    if(!mobileAccount) Nerror = error("given phone","field not found")
+    if(Nerror) res.status(Nerror.status).send(Nerror)
+    let {role, id} = mobileAccount
     if ((role != "agent" && role != "dealer") || role == null) return res.status(404).send({ error: "agent not found", message: "please provide phone of a valid register agent", status: 404 })
     let foundAgent = await AgentS.getCommonById(id)
     let otp = generateOtp()
@@ -101,7 +106,11 @@ exports.getOtpForUpdateDocument = async (req, res) => {
 
 exports.getAgrFileToVerifyUpdate = async (req, res) => {
     let { otp, phone, file } = req.body
-    let { role, id } = await verifiedNumberS.findOnly(phone)
+    let mobileAccount = await verifiedNumberS.findOnly(phone)
+    let Nerror
+    if(!mobileAccount) Nerror = error("given phone","field not found")
+    if(Nerror) res.status(Nerror.status).send(Nerror)
+    let {role, id} = mobileAccount
     if ((role != "agent" && role != "dealer") || role == null) return res.status(404).send({ error: "agent not found", message: "please provide phone of a valid register agent", status: 404 })
     let otpRecieved = await OtpS.findOnly(phone)
     if (otpRecieved.otp != otp) return res.status(400).send({ message: "otp doesn't match", status: 400 })

@@ -15,10 +15,10 @@ exports.create = async (agent) => {
         let agentExistsWithSuchEmail = await Agent.findOne({ email: agent.email })
         let phoneAlreadyRegistered = await VerifiedNumberS.findOnly(agent.phone)
         if (agentExistsWithSuchEmail) {
-            return { error: "id already exists", message: "Agent / Customer is already registered with this Email Address !", status: 409 }
+            return { error: "id already exists", message: "Agent / Dealer is already registered with this Email Address!", status: 409 }
         }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "Agent / Customer is already registered with this mobile number !", status: 409 }
+            return { error: "mobile already registered", message: "Agent / Dealer is already registered with this mobile number!", status: 409 }
         }
         if (agent.password == agent.confirmPassword) {
             delete newagent.confirmPassword
@@ -139,7 +139,7 @@ exports.deleteAgentById = async (agentId) => {
         return { data: theAgentToDelete, message: "deleted Successfully", status: 202 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error" }
+        return { error: e, message: "we have an error", status:500 }
     }
 }
 
@@ -165,6 +165,6 @@ exports.updateThisAgent = async (agent, field) => {
         return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "Agent Updated Successfully!'" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error" }
+        return { error: e, message: "we have an error", status:500 }
     }
 }

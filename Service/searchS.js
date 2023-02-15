@@ -14,12 +14,14 @@ exports.searchGlobal = async (
   sortBy,
   sortVal,
   multiFieldSearch,
-  agentId
+  agentId,
+  typeOfEstimate
 ) => {
   if (!sortBy) sortBy = "createdAt";
+  console.log("sortBy,sortVal",sortBy,sortVal)
   if (!sortVal) sortBy = 1;
   let matchSearch;
-  let { Collection, queryS, query, querySort, querySearchsort } =
+  let { Collection, queryS, query, querySort, querySearchsort, TOE } =
     this.generateCollectionAndQuerySearch(
       collection,
       fieldForSearch,
@@ -27,7 +29,8 @@ exports.searchGlobal = async (
       type,
       sortBy,
       sortVal,
-      multiFieldSearch
+      multiFieldSearch,
+      typeOfEstimate
     );
   if (multiFieldSearch) {
     matchSearch = querySearchsort;
@@ -38,6 +41,9 @@ exports.searchGlobal = async (
   if (type) {
     agentId != undefined || (agentId != "" && collection == Estimate)
       ? (agg = [
+        {
+          $match: TOE
+        },
         {
           $match: { agentId },
         },
@@ -57,6 +63,9 @@ exports.searchGlobal = async (
         },
       ])
       : (agg = [
+        {
+          $match: TOE
+        },
         {
           $match: query,
         },
@@ -82,6 +91,9 @@ exports.searchGlobal = async (
     agentId != undefined || (agentId != "" && collection == Estimate)
       ? (agg = [
         {
+          $match: TOE
+        },
+        {
           $match: { agentId },
         },
         {
@@ -98,6 +110,9 @@ exports.searchGlobal = async (
       ])
       : (agg = [
         {
+          $match: TOE
+        },
+        {
           $match: {
             $or: matchSearch,
           },
@@ -110,10 +125,10 @@ exports.searchGlobal = async (
         },
       ]);
   }
-  console.log("agg", agg[0].$match.$or[0])
   let result = await Collection.aggregate(agg);
   return {
     result,
+    totalCount: result.length,
     status: result.length > 0 ? 200 : 404,
     message: result.length > 0 ? "response generated" : "not found",
   };
@@ -125,9 +140,11 @@ exports.generateCollectionAndQuerySearch = (
   type,
   sortBy,
   sortVal,
-  multiFieldSearch
+  multiFieldSearch,
+  typeOfEstimate
 ) => {
-  let Collection, queryS, query, querySort;
+  let Collection, queryS, query, querySort
+  let TOE = {};
   let multipleField = [],
     querySearchsort = [];
   switch (collection) {
@@ -155,6 +172,26 @@ exports.generateCollectionAndQuerySearch = (
       break;
     case "Estimate":
       Collection = Estimate;
+      switch (typeOfEstimate) {
+        case 'Estimate':
+          TOE = {
+            approvalFromAdminAsQuotes: false,
+            approvalFromAdminAsPO: false
+          }
+          break;
+        case 'Quotation':
+          TOE = {
+            approvalFromAdminAsQuotes: true,
+            approvalFromAdminAsPO: false
+          }
+          break;
+        case 'PO':
+          TOE = {
+            approvalFromAdminAsQuotes: false,
+            approvalFromAdminAsPO: true
+          }
+          break;
+      }
       break;
     case "Product":
       Collection = Product;
@@ -185,9 +222,6 @@ exports.generateCollectionAndQuerySearch = (
     case "EstimateId":
       querySort = { EstimateId: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
-    // case "EstimateNo":
-    //   querySort = { EstimateNo: parseInt(sortVal) == 1 ? 1 : -1 };
-    //   break;
     case "QuotationId":
       querySort = { QuotationId: parseInt(sortVal) == 1 ? 1 : -1 };
     case "PO_Id":
@@ -283,10 +317,6 @@ exports.generateCollectionAndQuerySearch = (
           approvalFromAdminAsPO: false,
           approvalFromAdminAsQuotes: false
         });
-      // if (element == "EstimateNo")
-      //   querySearchsort.push({
-      //     EstimateNo: parseInt(search),
-      //   });
       if (element == "QuotationId")
         querySearchsort.push({
           QuotationId: new RegExp(search, "i"),
@@ -381,9 +411,6 @@ exports.generateCollectionAndQuerySearch = (
             approvalFromAdminAsPO: false,
             approvalFromAdminAsQuotes: false
           },
-          // {
-          //   EstimateNo: parseInt(search),
-          // },
           {
             QuotationId: new RegExp(search, "i"),
             approvalFromAdminAsPO: false,
@@ -433,7 +460,7 @@ exports.generateCollectionAndQuerySearch = (
         ];
     });
     console.log("querySearchsort", querySearchsort)
-    return { Collection, querySearchsort, query, querySort };
+    return { Collection, querySearchsort, query, querySort, TOE };
   } else {
     switch (fieldForSearch) {
       case "firstName":

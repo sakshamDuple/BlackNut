@@ -119,6 +119,7 @@ exports.findMultiDetailedProductById = async (ids) => {
             Price: 1,
             ProductID: 1,
             Capacity: 1,
+            pdfFile:1,
             crop: { $arrayElemAt: ["$result1.crop", 0] },
             Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
             Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
@@ -201,6 +202,7 @@ exports.findProductsForMachineId = async (MachineId) => {
             Price: 1,
             ProductID: 1,
             Capacity: 1,
+            pdfFile:1,
             crop: { $arrayElemAt: ["$result1.crop", 0] },
             Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
             Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
@@ -217,54 +219,55 @@ exports.findProductsForMachineId = async (MachineId) => {
 }
 
 exports.updateTheProductByMachine = async (MachineId, PrevProduct, Updates) => {
-    console.log(PrevProduct, 's', Updates);
-    let thisMachine = await MachineS.findMachineById(MachineId)
-    let addProduct = false
-    let ProductsToAdd = []
-    let addedproductres = { status: 201 }
-    if (thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name) {
-        // console.log("\nPrevProduct: ", PrevProduct, "\nUpdates: ", Updates);
-        Updates.productDetail.map((element, i) => {
-            if (PrevProduct[i] != undefined) {
-                // console.log(PrevProduct[i], PrevProduct[i]._id == element._id, PrevProduct[i].ProductID, element.ProductID)
-                if (PrevProduct[i]._id == element._id) {
-                    PrevProduct[i].Capacity = element.Capacity
-                    PrevProduct[i].Model = element.Model
-                    PrevProduct[i].Price = element.Price
-                    PrevProduct[i].ProductID = element.ProductID
-                    PrevProduct[i].Status = element.Status
-                    PrevProduct[i].Gst = element.Gst
-                    PrevProduct[i].pdfFile = element.pdfFile
+    try{
+        console.log(PrevProduct, 's', Updates);
+        let thisMachine = await MachineS.findMachineById(MachineId)
+        let addProduct = false
+        let ProductsToAdd = []
+        let addedproductres = { status: 201 }
+        if (thisMachine.data.Product_name == Updates.Product_name && thisMachine.data.Machine_name == Updates.Machine_name) {
+            Updates.productDetail.map((element, i) => {
+                if (PrevProduct[i] != undefined) {
+                    if (PrevProduct[i]._id == element._id) {
+                        PrevProduct[i].Capacity = element.Capacity
+                        PrevProduct[i].Model = element.Model
+                        PrevProduct[i].Price = element.Price
+                        PrevProduct[i].ProductID = element.ProductID
+                        PrevProduct[i].Status = element.Status
+                        PrevProduct[i].Gst = element.Gst
+                        PrevProduct[i].pdfFile = element.pdfFile
+                    } else {
+                        addProduct = true
+                        element.cropId = thisMachine.data.cropId
+                        element.machineId = MachineId
+                        ProductsToAdd.push(element)
+                    }
                 } else {
                     addProduct = true
                     element.cropId = thisMachine.data.cropId
                     element.machineId = MachineId
                     ProductsToAdd.push(element)
                 }
-            } else {
-                addProduct = true
-                element.cropId = thisMachine.data.cropId
-                element.machineId = MachineId
-                ProductsToAdd.push(element)
-            }
-        });
-        let fails = [], successes = []
-        if (ProductsToAdd.length > 0) {
-            addedproductres = await addTheseProduct(ProductsToAdd, fails, successes)
-            // console.log(addedproductres, fails, successes)
-            if (addedproductres.status != 201) return addedproductres
-            addedproductres.data.forEach(element => {
-                successes.push(element.ProductID)
             });
+            let fails = [], successes = []
+            if (ProductsToAdd.length > 0) {
+                addedproductres = await addTheseProduct(ProductsToAdd, fails, successes)
+                if (addedproductres.status != 201) return addedproductres
+                addedproductres.data.forEach(element => {
+                    successes.push(element.ProductID)
+                });
+            }
+            await update(PrevProduct, fails, successes)
+            let failure = fails.length == PrevProduct.length
+            let success = fails.length
+            let partialSuccess = successes.length > 0
+            return { status: failure ? partialSuccess ? 200 : 400 : 200, message: failure ? partialSuccess ? "Partial Success" : "Nothing was updated" : success ? "Success, all data were updated successfully" : "Partial Success", data: { fails, successes } }
+            // return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }
         }
-        await update(PrevProduct, fails, successes)
-        let failure = fails.length == PrevProduct.length
-        let success = fails.length
-        let partialSuccess = successes.length > 0
-        return { status: failure ? partialSuccess ? 200 : 400 : 200, message: failure ? partialSuccess ? "Partial Success" : "Nothing was updated" : success ? "Success, all data were updated successfully" : "Partial Success", data: { fails, successes } }
-        // return { data: products, message: products.length > 0 ? "retrieval Success" : "not products found", status: products.length > 0 ? 200 : 404 }
+        return { message: "Machine not matched with Update details", status: 400 }
+    }catch(e){
+        console.log(e)
     }
-    return { message: "Machine not matched with Update details", status: 400 }
 }
 
 let update = (products, fails, successes) => {
@@ -301,11 +304,17 @@ let addTheseProduct = async (products, fails, successes) => {
         if (!element.Gst || element.Gst == undefined) return error("Gst", "missing field")
         if (!element.cropId || element.cropId == undefined) return error("cropId", "missing field")
         if (!element.machineId || element.machineId == undefined) return error("machineId", "missing field")
-        return e = "continue"
+        return "continue"
     });
-    if (e != "continue") {
+    let enter = "continue"
+    e.forEach(element => {
+        if(element != "continue")
+        enter = "restrict"
+    });
+    console.log("afterContinue", e)
+    if (enter != "continue") {
         fails = prdID
-        return e[0]
+        return e[e.length-1]
     } else {
         successes = [prdID]
     }

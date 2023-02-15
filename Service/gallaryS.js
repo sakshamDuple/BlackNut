@@ -8,9 +8,11 @@ exports.create = async(Content,Title) => {
     return { data: GallaryCreated, message: "Gallary created successfully", status: 201 }
 }
 
-exports.getAllContent = async() => {
-    let findGal = await Gallary.find()
-    return { data: findGal, totalCount:findGal.length, message: "Gallary retrieved successfully", status: 200 }
+exports.getAllContent = async(page,limit) => {
+    let start = (page-1)*limit
+    let totalCount = await Gallary.count()
+    let findGal = await Gallary.find().skip(start).limit(limit).sort({createdAt:-1})
+    return { data: findGal, totalCount, message: "Gallary retrieved successfully", status: 200 }
 }
 
 exports.deleteById = async(id) => {

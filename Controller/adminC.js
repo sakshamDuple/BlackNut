@@ -28,7 +28,9 @@ exports.addToGallary = async (req,res) => {
 }
 
 exports.getGallary = async (req,res) => {
-    let addedToGal = await gallaryS.getAllContent()
+    let page = req.query.page?parseInt(req.query.page):1
+    let limit = req.query.limit?parseInt(req.query.limit):10
+    let addedToGal = await gallaryS.getAllContent(page,limit)
     res.status(addedToGal.status).send(addedToGal)
 }
 

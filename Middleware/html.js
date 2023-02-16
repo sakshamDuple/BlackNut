@@ -1,5 +1,4 @@
 exports.EmailHTML = (subject, message, data) => {
-    console.log("subject, message, text", subject, message, data)
     return (`<html xmlns="https://www.w3.org/1999/xhtml"><head>
             <meta https-equiv="Content-Type" content="text/html; charset=UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -479,6 +478,7 @@ div > .ftr-call:last-child {
                                                                                             <!-- <div class="textCenterMobile" style="font-family:Helvetica,Arial,sans-serif;color:#fff;text-align: center;">
                                                                                                 <a href="#" style="background: #6259ca;color:#fff;width:220px; margin:20px 0px;display: inline-block;line-height:43px;border-radius:40px;font-size: 16px;text-align:center;box-shadow:0 4px 2px rgba(0,0,0,.1)">Estimate</a>
                                                                                             </div> -->
+                                                                                            ${data.Link==undefined ? "":`<a href='${data.Link}' ><button style=" background-color: transparent;outline: 0;border: 0;background: #f2672a;padding: 5px 10px;color: #fff;border-radius: 3px;">Click To Download Agreement File</button></a>`}
                                                                                             <div class="space25" style="height: 25px;"></div>
 
                                                                                             <p class="textCenterMobile" style="font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#000000;line-height:25px;font-style:normal;font-weight:700 !important;">With Regards!</p>

@@ -47,8 +47,16 @@ exports.findMachineByCropId = async (cropId) => {
     }
 }
 exports.findMachineByCropandproductname = async (cropId,productname) => {
+    console.log(cropId,'nammmmmmmme');
     try {
-        let foundMachine = await Machine.find({cropId:cropId,Product_name:productname})
+        let foundCrop = await CropS.findCrop({ cropName: cropId })
+      console.log(foundCrop,'founded');
+      let foundMachine
+      if(foundCrop.data){
+         foundMachine = await Machine.find({cropId:foundCrop.data._id,Product_name:productname})
+
+      }
+
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
         console.log(e) 

@@ -501,7 +501,7 @@ exports.getTotalQuotationForAgent = async (id,startDate,endDate) => {
         }
     ]);
     let k = await Estimate.aggregate(agg)
-    return k[0]?k[0].TotalEstimate:0
+    return k[0]?k[0].TotalQuotation:0
 }
 
 exports.getTotalPOForAgent = async (id,startDate,endDate) => {
@@ -543,7 +543,7 @@ const getDateQuery = (startDate,endDate,toAdd) => {
     console.log("startDate == endDate",startDate == endDate)
     if(startDate == undefined || startDate == null || startDate == endDate || endDate == undefined || endDate == null) return toAdd
     return {
-        $and:[{createdAt: { $gt : new Date(startDate.toString())}},{createdAt: { $lt : new Date(endDate.toString())}},toAdd]
+        $and:[{createdAt: { $gte : new Date(startDate.toString())}},{createdAt: { $lte : new Date(endDate.toString())}},toAdd]
     }
 }
 

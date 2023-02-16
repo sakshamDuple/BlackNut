@@ -14,12 +14,14 @@ exports.searchGlobal = async (
   sortBy,
   sortVal,
   multiFieldSearch,
-  agentId
+  agentId,
+  typeOfEstimate
 ) => {
   if (!sortBy) sortBy = "createdAt";
+  console.log("sortBy,sortVal",sortBy,sortVal)
   if (!sortVal) sortBy = 1;
   let matchSearch;
-  let { Collection, queryS, query, querySort, querySearchsort } =
+  let { Collection, queryS, query, querySort, querySearchsort, TOE } =
     this.generateCollectionAndQuerySearch(
       collection,
       fieldForSearch,
@@ -27,51 +29,58 @@ exports.searchGlobal = async (
       type,
       sortBy,
       sortVal,
-      multiFieldSearch
+      multiFieldSearch,
+      typeOfEstimate
     );
   if (multiFieldSearch) {
-    console.log(querySearchsort);
     matchSearch = querySearchsort;
   } else {
     matchSearch = [queryS];
   }
+  console.log(matchSearch)
   if (type) {
     agentId != undefined || (agentId != "" && collection == Estimate)
       ? (agg = [
-          {
-            $match: { agentId },
+        {
+          $match: TOE
+        },
+        {
+          $match: { agentId },
+        },
+        {
+          $match: query,
+        },
+        {
+          $match: {
+            $or: matchSearch,
           },
-          {
-            $match: query,
-          },
-          {
-            $match: {
-              $or: matchSearch,
-            },
-          },
-          {
-            $limit: searchQty,
-          },
-          {
-            $sort: { createdAt: -1 },
-          },
-        ])
+        },
+        {
+          $limit: searchQty,
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+      ])
       : (agg = [
-          {
-            $match: query,
+        {
+          $match: TOE
+        },
+        {
+          $match: query,
+        },
+        {
+          $match: {
+            $or: matchSearch,
           },
-          {
-            $match: {
-              $or: matchSearch,
-            },
-          },
-          {
-            $limit: searchQty,
-          },
-          {
-            $sort: { createdAt: -1 },
-          },
-        ]);
+        },
+        {
+          $limit: searchQty,
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+      ]);
   } else {
     console.log(
       "matchSearch,searchQty,querySort",
@@ -81,38 +90,45 @@ exports.searchGlobal = async (
     );
     agentId != undefined || (agentId != "" && collection == Estimate)
       ? (agg = [
-          {
-            $match: { agentId },
+        {
+          $match: TOE
+        },
+        {
+          $match: { agentId },
+        },
+        {
+          $match: {
+            $or: matchSearch,
           },
-          {
-            $match: {
-              $or: matchSearch,
-            },
-          },
-          {
-            $limit: searchQty,
-          },
-          {
-            $sort: querySort,
-          },
-        ])
+        },
+        {
+          $limit: searchQty,
+        },
+        {
+          $sort: querySort,
+        },
+      ])
       : (agg = [
-          {
-            $match: {
-              $or: matchSearch,
-            },
+        {
+          $match: TOE
+        },
+        {
+          $match: {
+            $or: matchSearch,
           },
-          {
-            $limit: searchQty,
-          },
-          {
-            $sort: querySort,
-          },
-        ]);
+        },
+        {
+          $limit: searchQty,
+        },
+        {
+          $sort: querySort,
+        },
+      ]);
   }
   let result = await Collection.aggregate(agg);
   return {
     result,
+    totalCount: result.length,
     status: result.length > 0 ? 200 : 404,
     message: result.length > 0 ? "response generated" : "not found",
   };
@@ -124,9 +140,11 @@ exports.generateCollectionAndQuerySearch = (
   type,
   sortBy,
   sortVal,
-  multiFieldSearch
+  multiFieldSearch,
+  typeOfEstimate
 ) => {
-  let Collection, queryS, query, querySort;
+  let Collection, queryS, query, querySort
+  let TOE = {};
   let multipleField = [],
     querySearchsort = [];
   switch (collection) {
@@ -154,6 +172,26 @@ exports.generateCollectionAndQuerySearch = (
       break;
     case "Estimate":
       Collection = Estimate;
+      switch (typeOfEstimate) {
+        case 'Estimate':
+          TOE = {
+            approvalFromAdminAsQuotes: false,
+            approvalFromAdminAsPO: false
+          }
+          break;
+        case 'Quotation':
+          TOE = {
+            approvalFromAdminAsQuotes: true,
+            approvalFromAdminAsPO: false
+          }
+          break;
+        case 'PO':
+          TOE = {
+            approvalFromAdminAsQuotes: false,
+            approvalFromAdminAsPO: true
+          }
+          break;
+      }
       break;
     case "Product":
       Collection = Product;
@@ -184,9 +222,6 @@ exports.generateCollectionAndQuerySearch = (
     case "EstimateId":
       querySort = { EstimateId: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
-    // case "EstimateNo":
-    //   querySort = { EstimateNo: parseInt(sortVal) == 1 ? 1 : -1 };
-    //   break;
     case "QuotationId":
       querySort = { QuotationId: parseInt(sortVal) == 1 ? 1 : -1 };
     case "PO_Id":
@@ -233,6 +268,15 @@ exports.generateCollectionAndQuerySearch = (
     case "createAt":
       querySort = { createdAt: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
+    case "agentName":
+      querySort = { agentName: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
+    case "customerName":
+      querySort = { customerName: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
+    case "customerPhone":
+      querySort = { customerPhone: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
     default:
       querySort = { createdAt: -1 };
   }
@@ -270,24 +314,20 @@ exports.generateCollectionAndQuerySearch = (
       if (element == "EstimateId")
         querySearchsort.push({
           EstimateId: new RegExp(search, "i"),
-          approvalFromAdminAsPO:false,
-          approvalFromAdminAsQuotes:false
+          approvalFromAdminAsPO: false,
+          approvalFromAdminAsQuotes: false
         });
-      // if (element == "EstimateNo")
-      //   querySearchsort.push({
-      //     EstimateNo: parseInt(search),
-      //   });
       if (element == "QuotationId")
         querySearchsort.push({
           QuotationId: new RegExp(search, "i"),
-          approvalFromAdminAsPO:false,
-          approvalFromAdminAsQuotes:true
+          approvalFromAdminAsPO: false,
+          approvalFromAdminAsQuotes: true
         });
       if (element == "PO_Id")
         querySearchsort.push({
           PO_Id: new RegExp(search, "i"),
-          approvalFromAdminAsPO:true,
-          approvalFromAdminAsQuotes:false
+          approvalFromAdminAsPO: true,
+          approvalFromAdminAsQuotes: false
         });
       if (element == "agentId")
         querySearchsort.push({
@@ -326,6 +366,18 @@ exports.generateCollectionAndQuerySearch = (
             PAN_Agent: new RegExp(search, "i"),
           }
         );
+      if (element == "agentName")
+        querySearchsort.push({
+          agentName: new RegExp(search, "i"),
+        });
+      if (element == "customerName")
+        querySearchsort.push({
+          customerName: new RegExp(search, "i"),
+        });
+      if(element == "customerPhone")
+          querySearchsort.push({
+            customerPhone: new RegExp(search, "i"),
+          });
       if (
         element == undefined ||
         element == "undefined" ||
@@ -356,21 +408,18 @@ exports.generateCollectionAndQuerySearch = (
           },
           {
             EstimateId: new RegExp(search, "i"),
-            approvalFromAdminAsPO:false,
-            approvalFromAdminAsQuotes:false
+            approvalFromAdminAsPO: false,
+            approvalFromAdminAsQuotes: false
           },
-          // {
-          //   EstimateNo: parseInt(search),
-          // },
           {
             QuotationId: new RegExp(search, "i"),
-            approvalFromAdminAsPO:false,
-            approvalFromAdminAsQuotes:true
+            approvalFromAdminAsPO: false,
+            approvalFromAdminAsQuotes: true
           },
           {
             PO_Id: new RegExp(search, "i"),
-            approvalFromAdminAsPO:true,
-            approvalFromAdminAsQuotes:false
+            approvalFromAdminAsPO: true,
+            approvalFromAdminAsQuotes: false
           },
           {
             agentId: new RegExp(search, "i"),
@@ -399,9 +448,19 @@ exports.generateCollectionAndQuerySearch = (
           {
             PAN_Agent: new RegExp(search, "i"),
           },
+          {
+            agentName: new RegExp(search, "i"),
+          },
+          {
+            customerName: new RegExp(search, "i"),
+          },
+          {
+            customerPhone: new RegExp(search, "i"),
+          },
         ];
     });
-    return { Collection, querySearchsort, query, querySort };
+    console.log("querySearchsort", querySearchsort)
+    return { Collection, querySearchsort, query, querySort, TOE };
   } else {
     switch (fieldForSearch) {
       case "firstName":
@@ -508,6 +567,21 @@ exports.generateCollectionAndQuerySearch = (
             PAN_Agent: new RegExp(search, "i"),
           },
         ];
+        break;
+      case "agentName":
+        queryS = {
+          agentName: new RegExp(search, "i"),
+        }
+        break;
+      case "customerName":
+        queryS = {
+          customerName: new RegExp(search, "i"),
+        }
+        break;
+      case "customerPhone":
+        queryS = {
+          customerPhone: new RegExp(search, "i"),
+        }
         break;
     }
     return { Collection, queryS, query, querySort };

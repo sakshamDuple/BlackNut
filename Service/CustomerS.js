@@ -15,7 +15,7 @@ exports.create = async (customer) => {
         //     return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
         // }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "given phone is already registered with some id, please provide some other phone", status: 409 }
+            return { error: "mobile already registered", message: "Customer is already registered with this mobile!", status: 409 }
         }
         if (customer.password == customer.confirmPassword) {
             console.log("Hii")
@@ -32,7 +32,7 @@ exports.create = async (customer) => {
         let createdAgent = await Agent.create(newcustomer)
         let doMobileRegistration = await VerifiedNumberS.create({ role: customer.role, number: customer.phone, id: createdAgent.id })
         await sendEmail(customer.email, "Your Customer Account is Registered", "", { Name: newcustomer.firstName })
-        return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "customer successfully created", status: 201 }
+        return { Agent_ID: createdAgent._id, data: createdAgent.data, message: "Customer added to Estimate Successfully!", status: 201 }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }

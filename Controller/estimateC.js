@@ -5,6 +5,11 @@ const OtpS = require("../Service/OtpS")
 const { findOnly } = require("../Service/verifyNumberS")
 const { generateOtp } = require("../Middleware/genOtp")
 const { sendEmail } = require("../Middleware/emailSend")
+const pdf = require("html-pdf")
+const ejs = require("ejs")
+const moment = require("moment")
+const { ToWords } = require('to-words')
+const toWords = new ToWords();
 
 exports.getAll = async (req, res) => {
     let page = req.query.page
@@ -90,6 +95,55 @@ exports.getDetailedEstimateById = async (req, res) => {
     }
 }
 
+exports.getPdfById = async (req, res) => {
+    let id = req.query.id
+    let Estimate = await EstimateS.getDetailEstimateById(id)
+    let MainVal = "Estimate"
+    let date, estimatedDateOfPurchase, numericPrice
+    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Order"
+    if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Quotation"
+    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Estimate"
+    if (Estimate.data.createdAt) date = moment(Estimate.createdAt, 'dd/mm/yyyy');
+    if (Estimate.data.EstimateDateOfPurchase) estimatedDateOfPurchase = moment(Estimate.EstimateDateOfPurchase, 'dd/mm/yyyy');
+    let totel = Estimate.data.Products.reduce((total, prod) => {
+        let amt = prod.Product.Price * prod.quantity;
+        return total + Math.round(amt);
+    }, 0);
+    let totelgst = Estimate.data.Products.reduce((totel, prod) => {
+        let amt = (prod.Product.Price * prod.quantity * prod.Gst) / 100;
+        return totel + Math.round(amt);
+    }, 0);
+    let totelamount = Estimate.data.Products.reduce((totel, prod) => {
+        let amt = (prod.quantity * prod.Product.Price * prod.Gst) / 100 + prod.quantity *
+            prod.Product.Price;
+        return totel + Math.round(amt);
+    }, 0);
+    if (Estimate.data.Products.length > 0) numericPrice = toWords.convert(parseInt(totelamount).toFixed(2))
+    try {
+        let options = {
+            "height": "11.25in",
+            "width": "8.5in",
+            "header": {
+                "height": "20mm"
+            },
+            "footer": {
+                "height": "20mm",
+            },
+        };
+        let html = await ejs.renderFile(`./public/Estimate.ejs`, { Estimate: Estimate.data, MainVal, date, estimatedDateOfPurchase, totelamount, totelgst, totel, numericPrice }, { async: true })
+        pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
+            if (err) {
+                res.send(err);
+                return
+            } else {
+                res.download(`./${Estimate.data.EstimateId}.pdf`)
+            }
+        });
+    } catch (e) {
+        console.log(e.message);
+    }
+}
+
 exports.getEstimatesByAgentId = async (req, res) => {
     let id = req.query.id
     let state = req.query.state
@@ -132,7 +186,7 @@ exports.customerOtpRecieve = async (req, res) => {
         })
         if (mobileExists == null) return res.status(404).send({ message: "No such mobile found", status: 404 })
         await sendEmail(email, "OTP request for File Upload & Updation Of quotation To Purchase Order", otp, { Name: foundAgent.data.firstName })
-        res.status(200).send({ message: `an otp is sent on customer mail, please verify otp to process to complete process file upload process, tempOtp:${otp}`, status: 200 })
+        res.status(200).send({ message: `OTP is sent on Customer's Mobile Number! tempOtp:${otp}`, status: 200 })
     }
     res.status(400).send({ error: "Not a valid phone", message: "Please enter a valid phone number", status: 400 })
 }
@@ -169,10 +223,9 @@ exports.getReportsFromEstimates = async (req, res) => {
     let endDate = req.query.endDate
     if (startDate && endDate) {
         query = {
-            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
-    console.log(query)
     let start = (parseInt(page) - 1) * parseInt(limit)
     try {
         let agentId = req.query.id
@@ -281,24 +334,26 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
     let endDate = req.query.endDate
     if (startDate && endDate) {
         query = {
-            $and: [{ createdAt: { $gt: new Date(startDate.toString()) } }, { createdAt: { $lt: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
-    let agg = [
-        {
-            '$project': {
-                '_id': 1,
-                'agentId': 1,
-                'createdAt': 1,
-                'TotalCost': {
-                    '$sum': '$Products.ProductEstimatedPrice'
-                },
-                'agentName': 1,
-                'Agent_Code': 1,
-                'approvalFromAdminAsQuotes': 1,
-                'approvalFromAdminAsPO': 1
-            }
+    let agg = [{
+        '$match': query
+    },
+    {
+        '$project': {
+            '_id': 1,
+            'agentId': 1,
+            'createdAt': 1,
+            'TotalCost': {
+                '$sum': '$Products.ProductEstimatedPrice'
+            },
+            'agentName': 1,
+            'Agent_Code': 1,
+            'approvalFromAdminAsQuotes': 1,
+            'approvalFromAdminAsPO': 1
         }
+    }
     ]
     try {
         let foundEstimates = await Estimate.aggregate(agg)
@@ -406,9 +461,9 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                 }
             }
         })
-        let totalCount= Report.length
+        let totalCount = Report.length
         return res.status(200).send({
-            data: Report.splice(start,limit),
+            data: Report.splice(start, limit),
             totalCount,
             message: "reports made",
             status: 200,

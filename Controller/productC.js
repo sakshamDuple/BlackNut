@@ -63,6 +63,15 @@ exports.getAllProducts = async (req, res) => {
     status: 200,
   });
 };
+exports.getAllProductwithProductId = async (req, res) => {
+  let productId = req.body.productId
+  console.log(productId,'productID');
+  res.status(200).send({
+    data: await ProductS.getAllProductswithProductId(productId),
+    message: "All Products",
+    status: 200,
+  });
+};
 
 exports.getAllProductsForSelectCropId = async (req, res) => {
   let products = await ProductS.findByCropId(req.query.id)
@@ -181,7 +190,8 @@ exports.machineCreate = async (req, res) => {
   res.status(createdCrop.status).json(createdCrop);
 };
 exports.machinesForcropandProduct = async (req, res) => {
-  let cropId = req.body.cropId;
+  console.log(req.body,'deaaaaaaaaaaaaaaaaa');
+  let cropId = req.body.crop;
   let productname=req.body.productname
   let machines = await MachineS.findMachineByCropandproductname(cropId,productname);
   res.status(machines.status).json(machines);
@@ -205,6 +215,7 @@ exports.productUpdateForASelectMachine = async (req, res) => {
   let products = await ProductS.findProductsForMachineId(machineId);
   if (!products.data) return res.status(products.status).json(products);
   let updateProcess = await ProductS.updateTheProductByMachine(machineId, products.data, updateProductsList)
+  console.log("updateProcess",updateProcess);
   res.status(updateProcess.status).json(updateProcess);
 };
 

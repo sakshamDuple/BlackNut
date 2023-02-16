@@ -55,8 +55,9 @@ exports.create = async (estimate) => {
   let year = dates.getYear() - 100
   let EstimateId = `${year}-${month}-${nextSeq<1000?nextSeq<100?nextSeq<10?"000"+nextSeq:"00"+nextSeq:"0"+nextSeq:nextSeq}`
   try {
+    console.log("\n\n\n\nProducts\n\n\n\n",Products)
     let createdEstimate = await Estimate.create({
-      Products: data[0].products,
+      Products: Products,
       agentId,
       customerId,
       customerName,
@@ -94,15 +95,16 @@ let allProducts = (products, fails, successes) => {
       products.map(async (element) => {
         return new Promise(async function (resolve, reject) {
           let fail, success;
-          let { ProductId, quantity, ProductEstimatedPrice, ProductName } =
+          let { ProductId, quantity, ProductEstimatedPrice, ProductName, Gst } =
             element;
           let foundProduct = await productS.findOneById(ProductId);
+          console.log("foundProduct",foundProduct)
           let foundMachine = await MachineS.findMachineById(
             foundProduct.machineId
           );
           element.ProductIDToShow = foundProduct.ProductID;
-          element.OriginalPriceOfProduct = foundProduct.Price;
           element.ProductName = foundMachine.data.Product_name;
+          element.Gst = foundProduct.Gst
           if (!foundProduct) {
             fails.push(ProductId);
           } else {
@@ -181,7 +183,7 @@ async function getValueForNextSequence(val) {
 
 exports.getAllEstimates = async (id, field, page, limit, state) => {
   try {
-    let agentId, AllEstimates, query;
+    let agentId, AllEstimates, query, start;
     if (state) state = { $regex: `(?i)${state}(?-i)` };
     if (field == "agent") {
       agentId = id;
@@ -209,15 +211,19 @@ exports.getAllEstimates = async (id, field, page, limit, state) => {
             state,
           });
     }
+    let agg = []
     console.log(query);
     totalCount = await Estimate.count(query);
     if (page && limit) {
       start = limit * (page - 1);
-      AllEstimates = await Estimate.find(query)
+      // agg = [{
+        
+      // }]
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,
@@ -268,11 +274,11 @@ exports.getAllQuotation = async (id, field, page, limit, state) => {
     totalCount = await Estimate.count(query);
     if (page && limit) {
       start = limit * (page - 1);
-      AllEstimates = await Estimate.find(query)
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,
@@ -321,11 +327,11 @@ exports.getAllPO = async (id, field, page, limit, state) => {
     start = limit * (page - 1);
     let totalCount = await Estimate.count(query);
     if (page && limit) {
-      AllEstimates = await Estimate.find(query)
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1})
         .skip(start)
         .limit(parseInt(limit));
     } else {
-      AllEstimates = await Estimate.find(query);
+      AllEstimates = await Estimate.find(query).sort({createdAt:-1});
     }
     return {
       data: AllEstimates,
@@ -488,13 +494,12 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
       message:
         updateThisEstimate.nModified > 0
           ? approval
-            ? "Updatation Of Quotation To Purchase Order Request Accepted"
+            ? "Updatation Of Quotation To Purchase Order Request Accepted, "
             : `${
-                updateThisEstimate.nModified > 0 && PurchaseInvoice1 ? "Quotation To Purchase Order" : "Price"
-              } was Updatated${
+                updateThisEstimate.nModified > 0 && PurchaseInvoice1 ? "Quotation has been Approved!" : "Quotation Details"
+              } were Updatated${
                 approval != undefined
-                  ? " But Quotation To Purchase Order Request Rejected"
-                  : ""
+                  && " But Quotation To Purchase Order Request Rejected"
               }`
           : "Updation failed",
       status: updateThisEstimate.nModified > 0 ? 200 : 400,

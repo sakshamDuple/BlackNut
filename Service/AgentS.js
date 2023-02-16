@@ -15,10 +15,10 @@ exports.create = async (agent) => {
         let agentExistsWithSuchEmail = await Agent.findOne({ email: agent.email })
         let phoneAlreadyRegistered = await VerifiedNumberS.findOnly(agent.phone)
         if (agentExistsWithSuchEmail) {
-            return { error: "id already exists", message: "Agent / Customer is already registered with this Email Address !", status: 409 }
+            return { error: "id already exists", message: "Agent / Dealer is already registered with this Email Address!", status: 409 }
         }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "Agent / Customer is already registered with this mobile number !", status: 409 }
+            return { error: "mobile already registered", message: "Agent / Dealer is already registered with this mobile number!", status: 409 }
         }
         if (agent.password == agent.confirmPassword) {
             delete newagent.confirmPassword
@@ -29,7 +29,9 @@ exports.create = async (agent) => {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
         let createdAgent = await Agent.create(newagent)
-        await sendEmail(newagent.email, "Your Agent Account is Registered", "", { Name: newagent.firstName })
+        let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" }
+        console.log(detail)
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", detail )
         await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
         return { Agent_ID: createdAgent._id, 
@@ -119,7 +121,7 @@ exports.getCommonByPhone = async (phone, bool) => {
         let theAgent
         if (bool) theAgent = await Agent.findOne({ phone: phone, status: "Active" })
         theAgent = await Agent.findOne({ phone: phone })
-        if (theAgent == null) return { data: theAgent, message: "no such detail found", status: 404 }
+        if (theAgent == null) return { data: theAgent, message: "Account Not Found", status: 404 }
         return { data: theAgent, message: "retrieval Success", status: 200 }
     } catch (e) {
         console.log(e)
@@ -137,7 +139,7 @@ exports.deleteAgentById = async (agentId) => {
         return { data: theAgentToDelete, message: "deleted Successfully", status: 202 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error" }
+        return { error: e, message: "we have an error", status:500 }
     }
 }
 
@@ -160,9 +162,9 @@ exports.updateThisAgent = async (agent, field) => {
         if(field == "login") newAgent.loginTime = [Date.now()]
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
         if(DocumentFile && updateThisAgent.nModified > 0){await create(`<b>Agreement File Updated For Agent: ${prevAgent.AgentID}</b>, Please review & update agent status`, "A")}
-        return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "updated Successfully" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
+        return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "Agent Updated Successfully!'" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error" }
+        return { error: e, message: "we have an error", status:500 }
     }
 }

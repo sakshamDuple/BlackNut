@@ -277,7 +277,8 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
   await sendEmail(
     email,
     "OTP request for email verification",
-    otp
+    otp,
+    { Name: "Guest" }
   );
   res
     .status(200)

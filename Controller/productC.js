@@ -4,7 +4,6 @@ const CropS = require("../Service/CropS");
 const MachineS = require("../Service/MachineS");
 const product = require("../Model/Product");
 var csv = require("csv-express");
-// const csv = require('csvtojson')
 
 exports.productCreate = async (req, res) => {
   let { crop, products, Unit } = req.body;
@@ -96,15 +95,12 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
     machineId,
     createdAt,
   } = await ProductS.findOneById(idOfProduct);
-  // let {Capacity, Model, Price, Status, UnitId, ProductID, cropId, machineId, createdAt} = data
-  // console.log(data)
   let {
     data: { crop },
   } = await CropS.findCropById(cropId);
   let {
     data: { Machine_name, Product_name },
   } = await MachineS.findMachineById(machineId);
-  // let { field, Unit } = await UnitS.findUnitById(UnitId);
   let DetailedProduct = {
     Capacity,
     Model,
@@ -116,7 +112,6 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
     Product_name,
     crop,
   };
-  // let {data2} = await MachineS.findCrop(machineId)
   res.status(200).send({
     data: DetailedProduct,
     message: "get Full Detail View Of Product",
@@ -125,7 +120,8 @@ exports.getFullDetailOfOneProduct = async (req, res) => {
 };
 
 exports.toGetAllDetailsOfProduct = async (id) => {
-  let idOfProduct = id;
+  try{let idOfProduct = id;
+  let foundProductDetail = await ProductS.findOneById(idOfProduct);
   let {
     Capacity,
     Model,
@@ -137,14 +133,13 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     createdAt,
     pdfFile,
     Gst
-  } = await ProductS.findOneById(idOfProduct);
+  } = foundProductDetail
   let {
     data: { crop },
   } = await CropS.findCropById(cropId);
   let {
     data: { Machine_name, Product_name },
   } = await MachineS.findMachineById(machineId);
-  // let { field, Unit } = await UnitS.findUnitById(UnitId);
   let DetailedProduct = {
     Capacity,
     Model,
@@ -159,11 +154,10 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     Gst
   };
   return DetailedProduct
+  }catch(e){
+    console.log(e)
+  }
 }
-
-// exports.getFullDetailOfTheseProducts = async (products) => {
-//   products
-// }
 
 exports.cropCreate = async (req, res) => {
   let crop = req.body.crop;
@@ -209,11 +203,6 @@ exports.generateCsvOfAll = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;
   let agg = [
-    // {
-    //   $match: {
-    //     machineId: id,
-    //   },
-    // },
     {
       '$lookup': {
         'from': 'crops',
@@ -273,9 +262,7 @@ exports.generateCsvOfAll = async (req, res) => {
         Model: 1,
         Price: 1,
         ProductID: 1,
-        // createdAt: 1,
         Capacity: 1,
-        // updateAt: 1,
         crop: { $arrayElemAt: ["$result1.crop", 0] },
         Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
         Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
@@ -283,13 +270,7 @@ exports.generateCsvOfAll = async (req, res) => {
     },
   ];
   let productRes = await product.aggregate(agg);
-  //   let productRes = await product.find({machineId: id});
   console.log(productRes);
-  // let productC = []
-  //   productRes.map((element) => {
-  //     element.Unit = element.result[0].Unit;
-  //     delete element.result;
-  //   });
   console.log(productRes);
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/csv");
@@ -301,11 +282,6 @@ exports.generateCsvOfOneMachine = async (req, res) => {
   var filename = "products.csv";
   let id = req.query.id;
   let agg = [
-    // {
-    //   $match: {
-    //     machineId: id,
-    //   },
-    // },
     {
       '$lookup': {
         'from': 'crops',
@@ -365,9 +341,7 @@ exports.generateCsvOfOneMachine = async (req, res) => {
         Model: 1,
         Price: 1,
         ProductID: 1,
-        // createdAt: 1,
         Capacity: 1,
-        // updateAt: 1,
         crop: { $arrayElemAt: ["$result1.crop", 0] },
         Product_name: { '$arrayElemAt': ["$result2.Product_name", 0] },
         Machine_name: { '$arrayElemAt': ["$result2.Machine_name", 0] },
@@ -375,14 +349,6 @@ exports.generateCsvOfOneMachine = async (req, res) => {
     },
   ];
   let productRes = await product.aggregate(agg);
-  //   let productRes = await product.find({machineId: id});
-  console.log(productRes);
-  // let productC = []
-  //   productRes.map((element) => {
-  //     element.Unit = element.result[0].Unit;
-  //     delete element.result;
-  //   });
-  console.log(productRes);
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", "attachment; filename=" + filename);

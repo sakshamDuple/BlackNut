@@ -1,14 +1,17 @@
-const Estimate = require("../Model/Estimate")
-const { getCommonById } = require("../Service/AgentS")
-const EstimateS = require("../Service/estimateS")
-const OtpS = require("../Service/OtpS")
-const { findOnly } = require("../Service/verifyNumberS")
-const { generateOtp } = require("../Middleware/genOtp")
-const { sendEmail } = require("../Middleware/emailSend")
-const pdf = require("html-pdf")
-const ejs = require("ejs")
-const moment = require("moment")
-const { ToWords } = require('to-words')
+const Estimate = require("../Model/Estimate");
+const { getCommonById } = require("../Service/AgentS");
+const EstimateS = require("../Service/estimateS");
+const OtpS = require("../Service/OtpS");
+const { findOnly } = require("../Service/verifyNumberS");
+const { generateOtp } = require("../Middleware/genOtp");
+const { sendEmail } = require("../Middleware/emailSend");
+const fs = require('fs');
+const pdf = require("html-pdf");
+const ejs = require("ejs");
+const moment = require("moment");
+const https = require("https");
+const { ToWords } = require('to-words');
+const PDFMerger = require('pdf-merger-js');
 const toWords = new ToWords();
 
 exports.getAll = async (req, res) => {
@@ -121,8 +124,8 @@ exports.getPdfById = async (req, res) => {
     if (Estimate.data.Products.length > 0) numericPrice = toWords.convert(parseInt(totelamount).toFixed(2))
     try {
         let options = {
-            "height": "11.25in",
-            "width": "8.5in",
+            "height": "21.16in",
+            "width": "15.00in",
             "header": {
                 "height": "20mm"
             },
@@ -131,14 +134,61 @@ exports.getPdfById = async (req, res) => {
             },
         };
         let html = await ejs.renderFile(`./public/Estimate.ejs`, { Estimate: Estimate.data, MainVal, date, estimatedDateOfPurchase, totelamount, totelgst, totel, numericPrice }, { async: true })
-        pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
-            if (err) {
-                res.send(err);
-                return
-            } else {
-                res.download(`./${Estimate.data.EstimateId}.pdf`)
-            }
+        var filePath = `./${Estimate.data.EstimateId}.pdf`;
+        let pdfo = []
+        Estimate.data.Products.forEach(element => {
+            console.log(element.Product)
+            if (element.Product.pdfFile != null) pdfo.push(element.Product.pdfFile)
         });
+        const merger = new PDFMerger();
+        console.log("pdfo",pdfo)
+        let mergeFiles = []
+        pdfo.forEach((element, i) => {
+            https.get(element, (res) => {
+                const path = `file${i + 1}.pdf`;
+                mergeFiles.push(path)
+                const writeStream = fs.createWriteStream(path);
+                res.pipe(writeStream);
+                writeStream.on("finish", () => {
+                    writeStream.close();
+                    console.log("Download Completed!");
+                })
+            })
+        });
+        pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
+            try {
+                if (err) {
+                    res.send(err);
+                    return
+                } else {
+                    await merger.add(`${Estimate.data.EstimateId}.pdf`)
+                    for (const file of mergeFiles) {
+                        await merger.add(file)
+                    }
+                    await merger.save('mergedPdf.pdf');
+                    res.download('mergedPdf.pdf')
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        })
+        // return new Promise((resolve, reject) => {
+        //     pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
+        //         if (err) {
+        //             res.send(err);
+        //             return
+        //         } else {
+        //             // res.download(filePath)
+        //             // resolve(data.filename)
+        //             await merger.add(data.filename)
+        //             for (const file of pdfo) {
+        //                 await merger.add(file)
+        //             }
+        //             await merger.save('mergerPdf.pdf');
+        //             res.download(`./mergerPdf.pdf`)
+        //         }
+        //     });
+        // })
     } catch (e) {
         console.log(e.message);
     }

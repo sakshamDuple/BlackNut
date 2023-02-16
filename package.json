@@ -28,6 +28,7 @@
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "html-pdf": "^3.0.1",
+    "https": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "mongoose": "^5.13.15",
@@ -37,6 +38,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pdf-merger-js": "^4.2.0",
     "socket.io": "^4.5.4",
     "to-words": "^3.4.0"
   },

@@ -135,6 +135,7 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     cropId,
     machineId,
     createdAt,
+    pdfFile,
     Gst
   } = await ProductS.findOneById(idOfProduct);
   let {
@@ -154,6 +155,7 @@ exports.toGetAllDetailsOfProduct = async (id) => {
     Machine_name,
     Product_name,
     crop,
+    pdfFile,
     Gst
   };
   return DetailedProduct
@@ -189,7 +191,8 @@ exports.machinesForASelectCrop = async (req, res) => {
 
 exports.productDetailForASelectMachine = async (req, res) => {
   let machineId = req.query.machineId;
-  let products = await ProductS.findProductsForMachineId(machineId);
+  let status = req.query.status
+  let products = await ProductS.findProductsForMachineId(machineId,status);
   res.status(products.status).json(products);
 };
 
@@ -198,8 +201,7 @@ exports.productUpdateForASelectMachine = async (req, res) => {
   let machineId = req.query.machineId;
   let products = await ProductS.findProductsForMachineId(machineId);
   if (!products.data) return res.status(products.status).json(products);
-  let updateProcess = await ProductS.updateTheProductByMachine(machineId, products.data, updateProductsList)
-  console.log("updateProcess",updateProcess);
+  let updateProcess = await ProductS.updateTheProductByMachine(machineId, products.data, updateProductsList);
   res.status(updateProcess.status).json(updateProcess);
 };
 

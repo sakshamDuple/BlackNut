@@ -98,6 +98,14 @@ exports.sendEmail = async (email, subject, text, details) => {
                 message = `Cheers, A New Agent Is Added, look forward to Preview all their Documents and Agreements. Enable the Agent if all Documents are correct.`
                 data = {type:"", Name} //Super Admin
                 break;
+            case 'Your Agent Account is Activated':
+                message = `Thank you for your interest in Blacknut. Your request for registration for Agent as Approved.`
+                data = {type:"", Name} //Agent
+                break;
+            case 'Your Agent Account is Suspended':
+                message = `Thank you for your interest in Blacknut. Your request for registration for Agent as Rejected.`
+                data = {type:"", Name} //Agent
+                break;
             default:
                 break;
         }

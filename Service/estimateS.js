@@ -125,13 +125,13 @@ let allProductsDetailed = (products, fails, successes) => {
       products.map(async (element) => {
         return new Promise(async function (resolve, reject) {
           let fail, success;
-          let { ProductId, quantity, Gst } = element;
+          let { ProductId, quantity, Gst, ProductEstimatedPrice } = element;
           console.log(element);
           let Product = await productC.toGetAllDetailsOfProduct(ProductId);
           if (!Product) {
             fails.push(ProductId);
           } else {
-            successes.push({ Product, quantity, Gst });
+            successes.push({ Product, quantity, Gst, ProductEstimatedPrice });
           }
           resolve({ fail, success });
         });
@@ -568,6 +568,7 @@ exports.getDetailEstimateById = async (id) => {
     let { agentId, customerId } = estimate;
     let customer = await getCustomerToShowById(customerId);
     let agent = await AgentS.getAgentToShowById(agentId);
+    console.log(agent)
     let newEstimate = { ...estimate };
     let fails = [],
       successes = [];

@@ -81,8 +81,9 @@ exports.getAllAgents = async (bool, page, limit) => {
 exports.getAgentToShowById = async (id, bool) => {
     try {
         let theCustomer
-        theCustomer = await Agent.findOne({ _id: id, role: "agent" })
-        if (bool) theCustomer = await Agent.findOne({ _id: id, role: "agent", status: "Active" })
+        let query = { _id: id, role: "agent" }
+        if (bool) query = { _id: id, role: "agent", status: "Active" }
+        theCustomer = await Agent.findOne(query)
         let { role, firstName, lastName, phone, email, createdAt, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address } = theCustomer
         let customerToShow = { role, firstName, lastName, phone, email, createdAt, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address }
         return { data: customerToShow, message: "retrieval Success", status: 201 }
@@ -158,7 +159,12 @@ exports.updateThisAgent = async (agent, field) => {
         if (PAN_Agent) newAgent.PAN_Agent = PAN_Agent
         if (Address) newAgent.Address = Address
         if (DocumentFile) newAgent.DocumentFile = DocumentFile
-        if (status) newAgent.status = status
+        if (status) {
+            newAgent.status = status
+            let detail = { Name: newAgent.firstName}
+            if(status == "ACTIVE")  await sendEmail(newAgent.email, "Your Agent Account is Activated", "", detail )
+            if(status == "SUSPENDED") await sendEmail(newAgent.email, "Your Agent Account is Suspended", "", detail )
+        }
         if(field == "login") newAgent.loginTime = [Date.now()]
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
         if(DocumentFile && updateThisAgent.nModified > 0){await create(`<b>Agreement File Updated For Agent: ${prevAgent.AgentID}</b>, Please review & update agent status`, "A")}

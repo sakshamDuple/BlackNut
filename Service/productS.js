@@ -139,9 +139,12 @@ exports.findByCropName = async (name) => {
     return await product.find({ cropId: foundCrop.data._id })
 }
 
-exports.findProductsForMachineId = async (MachineId) => {
+exports.findProductsForMachineId = async (MachineId,status) => {
+    let query = { machineId: MachineId }
+    if(status == "ACTIVE") query.status="ACTIVE"
+    if(status == "INACTIVE") query.status="INACTIVE"
     let agg = [{
-        '$match': { machineId: MachineId }
+        '$match': query
     }, {
         '$lookup': {
             'from': 'crops',

@@ -201,7 +201,7 @@ exports.customerOtpRecieve = async (req, res) => {
     if (mobileExists != null) {
       await sendEmail(
         email,
-        "OTP request for Existing Customer Verify on Blacknut",
+        "OTP request for email verification",
         otp,
         { Name: foundAgent.data.firstName }
       );
@@ -276,7 +276,7 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
   });
   await sendEmail(
     email,
-    "OTP request for Existing Customer Verify on Blacknut",
+    "OTP request for email verification",
     otp
   );
   res

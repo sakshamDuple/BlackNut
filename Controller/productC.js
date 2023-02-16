@@ -180,6 +180,12 @@ exports.machineCreate = async (req, res) => {
   });
   res.status(createdCrop.status).json(createdCrop);
 };
+exports.machinesForcropandProduct = async (req, res) => {
+  let cropId = req.body.cropId;
+  let productname=req.body.productname
+  let machines = await MachineS.findMachineByCropandproductname(cropId,productname);
+  res.status(machines.status).json(machines);
+};
 
 exports.machinesForASelectCrop = async (req, res) => {
   let cropId = req.query.cropId;

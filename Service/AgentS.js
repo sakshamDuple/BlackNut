@@ -167,7 +167,7 @@ exports.updateThisAgent = async (agent, field) => {
         }
         if(field == "login") newAgent.loginTime = [Date.now()]
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
-        if(DocumentFile && updateThisAgent.nModified > 0){await create(`<b>Agreement File Updated For Agent: ${prevAgent.AgentID}</b>, Please review & update agent status`, "A")}
+        if(DocumentFile && updateThisAgent.nModified > 0){await create(`Agreement File Updated For Agent: ${prevAgent.AgentID}, Please review & update agent status`, "A")}
         return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "Agent Updated Successfully!'" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)

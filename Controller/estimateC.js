@@ -12,6 +12,7 @@ const moment = require("moment");
 const https = require("https");
 const { ToWords } = require('to-words');
 const PDFMerger = require('pdf-merger-js');
+const { uploadFiles } = require("./UploadC");
 const toWords = new ToWords();
 
 exports.getAll = async (req, res) => {
@@ -106,8 +107,8 @@ exports.getPdfById = async (req, res) => {
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Order"
     if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Quotation"
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Estimate"
-    if (Estimate.data.createdAt) date = moment(Estimate.createdAt, 'dd/mm/yyyy');
-    if (Estimate.data.EstimateDateOfPurchase) estimatedDateOfPurchase = moment(Estimate.EstimateDateOfPurchase, 'dd/mm/yyyy');
+    if (Estimate.data.createdAt) date = moment(Estimate.data.createdAt).format("DD-MM-YYYY") //moment(Estimate.data.createdAt, 'DD-MM-YYYY');
+    if (Estimate.data.EstimateDateOfPurchase) estimatedDateOfPurchase = moment(Estimate.data.EstimateDateOfPurchase).format("DD-MM-YYYY") //moment(Estimate.data.EstimateDateOfPurchase, 'dd/mm/yyyy');
     let totel = Estimate.data.Products.reduce((total, prod) => {
         let amt = prod.Product.Price * prod.quantity;
         return total + Math.round(amt);
@@ -133,6 +134,7 @@ exports.getPdfById = async (req, res) => {
                 "height": "20mm",
             },
         };
+        console.log("date", date)
         let html = await ejs.renderFile(`./public/Estimate.ejs`, { Estimate: Estimate.data, MainVal, date, estimatedDateOfPurchase, totelamount, totelgst, totel, numericPrice }, { async: true })
         var filePath = `./${Estimate.data.EstimateId}.pdf`;
         let pdfo = []
@@ -141,7 +143,6 @@ exports.getPdfById = async (req, res) => {
             if (element.Product.pdfFile != null) pdfo.push(element.Product.pdfFile)
         });
         const merger = new PDFMerger();
-        console.log("pdfo",pdfo)
         let mergeFiles = []
         pdfo.forEach((element, i) => {
             https.get(element, (res) => {
@@ -156,20 +157,16 @@ exports.getPdfById = async (req, res) => {
             })
         });
         pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
-            try {
-                if (err) {
-                    res.send(err);
-                    return
-                } else {
-                    await merger.add(`${Estimate.data.EstimateId}.pdf`)
-                    for (const file of mergeFiles) {
-                        await merger.add(file)
-                    }
-                    await merger.save('mergedPdf.pdf');
-                    res.download('mergedPdf.pdf')
+            if (err) {
+                res.send(err);
+                return
+            } else {
+                await merger.add(`${Estimate.data.EstimateId}.pdf`)
+                for (const file of mergeFiles) {
+                    await merger.add(file)
                 }
-            } catch (e) {
-                console.log(e)
+                await merger.save('mergedPdf.pdf');
+                res.download('mergedPdf.pdf')
             }
         })
         // return new Promise((resolve, reject) => {
@@ -312,7 +309,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                         Report[0].PurchaseOrder += 1
                         Report[0].Quotation += 1
                         Report[0].Estimate += 1
-                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? (product.ProductEstimatedPrice * product.quantity) : 0
+                        Report[0].ProductOrderPrice += parseInt(product.ProductEstimatedPrice) ? (product.ProductEstimatedPrice * product.quantity * (100 + product.Gst) / 100) : 0
                     }
                 } else {
                     let m
@@ -398,6 +395,7 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             'TotalCost': {
                 '$sum': '$Products.ProductEstimatedPrice'
             },
+            // 'Products':1,
             'agentName': 1,
             'Agent_Code': 1,
             'approvalFromAdminAsQuotes': 1,

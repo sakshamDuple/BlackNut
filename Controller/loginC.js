@@ -185,7 +185,7 @@ exports.forgotPasswordAdmin = async (req, res) => {
         if (!theAdminFound) return res.status(404).json({ message: "Admin not found", status: 404 })
         if (theAdminFound._id.toString()) {
             let otp = generateOtp()
-            await OtpS.deleteOnly(phone)
+            await OtpS.deleteOnly(theAdminFound.phone)
             let genTempOtpOnDB = await OtpS.create({
                 number: theAdminFound.phone,
                 id: theAdminFound._id.toString(),

@@ -47,10 +47,10 @@ exports.getAllNotify = async (read,page,limit) => {
         if(read){
             query = {read}
             totalCount = await Notification.count(query)
-            Notifications = await Notification.find(query).skip(start).limit(limit)
+            Notifications = await Notification.find(query).skip(start).limit(limit).sort({createdAt:-1})
         }else{
             totalCount = await Notification.count()
-            Notifications = await Notification.find().skip(start).limit(limit)
+            Notifications = await Notification.find().skip(start).limit(limit).sort({createdAt:-1})
         }
         return { data: Notifications, totalCount, message: Notifications.length>0?"Notifications retrieved successfully":"No Notifications found", status: Notifications.length>0?200:404 }
     } catch (e) {

@@ -32,6 +32,7 @@ exports.commonlogin = async (req, res) => {
         res.status(201).json({ Authorization:accessToken, message: "login success", status: 201 })
     } else if (phone && password) {
         theAgentFound = await AgentS.getCommonByPhone(phone)
+        console.log(theAgentFound)
         if(theAgentFound.data != null){
             if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE")
             return res.status(400).json({ error: "can't log in", message: "Your Account is currently INACTIVE or Waiting for admins Approval, You Can't login to this Account", status: 400 })

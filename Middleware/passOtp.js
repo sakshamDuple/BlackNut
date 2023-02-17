@@ -14,12 +14,12 @@ exports.sendOTPonPhone = async (field,otp,phone) => {
             break;
     }
     let sent = await axios.get(Link)
-    if(sent.statusCode == 200) {
-        sent.status = 200
-        sent.message = "otp sent"
+    if(sent.data.statusCode == 200) {
+        sent.data.status = 200
+        sent.data.message = "otp sent"
     } else {
-        sent.status = 400
-        sent.message = "otp not sent"
+        sent.data.status = 400
+        sent.data.message = "otp not sent"
     }
-    return sent
+    return sent.data
 }

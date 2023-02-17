@@ -183,13 +183,13 @@ exports.customerOtpRecieve = async (req, res) => {
   let phone = req.query.phone;
   let Nphone = parseInt(phone);
   let otpSent
-  console.log(10000000000 > Nphone && Nphone >= 1000000000);
   if (10000000000 > Nphone && Nphone >= 1000000000) {
     let email = req.query.email;
     let agentid = req.query.agentid;
     if (!phone && !email && !agentid)
       return res.status(400).send({ message: "fields missing", status: 400 });
     let foundAgent = await getCommonById(agentid);
+    console.log("foundAgent",foundAgent)
     if (!foundAgent.data)
       return res
         .status(foundAgent.status)
@@ -197,14 +197,14 @@ exports.customerOtpRecieve = async (req, res) => {
     let mobileExists = await findOnly(phone);
     // if (mobileExists != null) return res.status(409).send({ message: "requested phone is already registered", status: 409 })
     let otp = generateOtp();
-    await OtpS.deleteOnly(foundAgent.data.phone);
+    await OtpS.deleteOnly(phone);
     await OtpS.create({
       number: foundAgent.data.phone,
       id: agentid,
       otp: otp,
     });
     if (mobileExists != null) {
-      otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+      otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
       if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
       // await sendEmail(
       //   email,
@@ -215,7 +215,7 @@ exports.customerOtpRecieve = async (req, res) => {
       return res
         .status(200)
         .send({
-          message: `OTP is sent on Customer's Mobile Number. tempOtp:${otp}`, //The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,
+          message: `OTP is sent on Customer's Mobile Number.`, //The Customer is Already Registered with given mobile, we are not updating customer details, an otp is sent on your mobile & to continue create estimate process put them in the black below,
           status: 200,
         });
     }
@@ -225,12 +225,12 @@ exports.customerOtpRecieve = async (req, res) => {
     //   otp,
     //   { Name: foundAgent.data.firstName }
     // );
-    otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+    otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
     if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
     return res
       .status(200)
       .send({
-        message: `OTP is sent on Customer's Mobile Number! tempOtp:${otp}`, //an otp is sent on customer mail, please verify otp to process customer creation
+        message: `OTP is sent on Customer's Mobile Number!`, //an otp is sent on customer mail, please verify otp to process customer creation
         status: 200,
       });
   }
@@ -262,8 +262,8 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
     if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
     return res
       .status(200)
-      .send({
-        message: `OTP is sent to your mobile number for verification, tempOtp:${otp}`,
+      .json({
+        message: `OTP is sent to your mobile number for verification`,
         status: 200,
       });
   }

@@ -13,6 +13,7 @@ const https = require("https");
 const { ToWords } = require('to-words');
 const PDFMerger = require('pdf-merger-js');
 const { uploadFiles } = require("./UploadC");
+const { sendOTPonPhone } = require("../Middleware/passOtp");
 const toWords = new ToWords();
 
 exports.getAll = async (req, res) => {
@@ -225,15 +226,17 @@ exports.customerOtpRecieve = async (req, res) => {
         let mobileExists = await findOnly(phone)
         // if (mobileExists != null) return res.status(409).send({ message: "requested phone is already registered", status: 409 })
         let otp = generateOtp()
+        if (mobileExists == null) return res.status(404).send({ message: "No such mobile found", status: 404 })
         await OtpS.deleteOnly(foundAgent.data.phone)
         await OtpS.create({
             number: foundAgent.data.phone,
             id: agentid,
             otp: otp
         })
-        if (mobileExists == null) return res.status(404).send({ message: "No such mobile found", status: 404 })
+        let otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+        if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
         await sendEmail(email, "OTP request for File Upload & Updation Of quotation To Purchase Order", otp, { Name: foundAgent.data.firstName })
-        res.status(200).send({ message: `OTP is sent on Customer's Mobile Number! tempOtp:${otp}`, status: 200 })
+        res.status(200).send({ message: `OTP is sent on Customer's Mobile Number!`, status: 200 })
     }
     res.status(400).send({ error: "Not a valid phone", message: "Please enter a valid phone number", status: 400 })
 }

@@ -5,6 +5,7 @@ const verifiedNumberS = require("../Service/verifyNumberS")
 const OtpS = require("../Service/OtpS")
 const { searchGlobal } = require("../Service/searchS")
 const { error } = require("../Middleware/error")
+const { sendOTPonPhone } = require("../Middleware/passOtp")
 
 exports.getActiveAgents = async (req, res) => {
     let page = req.query.page
@@ -89,8 +90,9 @@ exports.getOtpForUpdateDocument = async (req, res) => {
     if ((role != "agent" && role != "dealer") || role == null) return res.status(404).send({ error: "agent not found", message: "please provide phone of a valid register agent", status: 404 })
     let foundAgent = await AgentS.getCommonById(id)
     let otp = generateOtp()
-    console.log(foundAgent.data.email, otp)
-    await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp, { Name: foundAgent.data.firstName })
+    // await sendEmail(foundAgent.data.email, "Otp Request For Agreement Document Submit", otp, { Name: foundAgent.data.firstName })
+    let otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+    if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
     await OtpS.deleteOnly(foundAgent.data.phone)
     await OtpS.create({
         number: foundAgent.data.phone,

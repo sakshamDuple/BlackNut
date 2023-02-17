@@ -1,5 +1,6 @@
 const { sendEmail } = require("../Middleware/emailSend");
 const { generateOtp } = require("../Middleware/genOtp");
+const { sendOTPonPhone } = require("../Middleware/passOtp");
 const Agent = require("../Model/Agent");
 const { getCommonById } = require("../Service/AgentS");
 const CustomerS = require("../Service/CustomerS");
@@ -181,6 +182,7 @@ exports.updateCustomerById = async (req, res) => {
 exports.customerOtpRecieve = async (req, res) => {
   let phone = req.query.phone;
   let Nphone = parseInt(phone);
+  let otpSent
   console.log(10000000000 > Nphone && Nphone >= 1000000000);
   if (10000000000 > Nphone && Nphone >= 1000000000) {
     let email = req.query.email;
@@ -202,12 +204,14 @@ exports.customerOtpRecieve = async (req, res) => {
       otp: otp,
     });
     if (mobileExists != null) {
-      await sendEmail(
-        email,
-        "OTP request for email verification",
-        otp,
-        { Name: foundAgent.data.firstName }
-      );
+      otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+      if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+      // await sendEmail(
+      //   email,
+      //   "OTP request for email verification",
+      //   otp,
+      //   { Name: foundAgent.data.firstName }
+      // );
       return res
         .status(200)
         .send({
@@ -215,13 +219,15 @@ exports.customerOtpRecieve = async (req, res) => {
           status: 200,
         });
     }
-    await sendEmail(
-      email,
-      "OTP request for Customer Creation on Blacknut",
-      otp,
-      { Name: foundAgent.data.firstName }
-    );
-    res
+    // await sendEmail(
+    //   email,
+    //   "OTP request for Customer Creation on Blacknut",
+    //   otp,
+    //   { Name: foundAgent.data.firstName }
+    // );
+    otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
+    if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+    return res
       .status(200)
       .send({
         message: `OTP is sent on Customer's Mobile Number! tempOtp:${otp}`, //an otp is sent on customer mail, please verify otp to process customer creation
@@ -240,6 +246,7 @@ exports.customerOtpRecieve = async (req, res) => {
 exports.DefaultPhoneOtpRecieve = async (req, res) => {
   let phone = req.query.phone;
   let Nphone = parseInt(phone);
+  let otpSent
   console.log(10000000000 > Nphone && Nphone >= 1000000000);
   if (10000000000 > Nphone && Nphone >= 1000000000) {
     if (!phone)
@@ -251,7 +258,9 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
       otp: otp,
     });
     // otp for phone here
-    res
+    otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
+    if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+    return res
       .status(200)
       .send({
         message: `OTP is sent to your mobile number for verification, tempOtp:${otp}`,

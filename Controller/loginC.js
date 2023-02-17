@@ -7,6 +7,7 @@ const TempOtp = require("../Model/TempOtp")
 const AgentS = require("../Service/AgentS")
 const AdminS = require("../Service/adminS")
 const OtpS = require("../Service/OtpS")
+const { sendOTPonPhone } = require("../Middleware/passOtp")
 
 // exports.loginAgent = async (req,res) => {
 //     console.log("hii")
@@ -64,6 +65,8 @@ exports.forgotPassword = async (req, res) => {
             })
             let details={Name:theAgentFound1.data.firstName}
             await sendEmail(email, "password change request otp", otp, details)
+            let otpSent = await sendOTPonPhone("CustomerLink",otp,theAgentFound1.data.phone)
+            if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
             return res.status(200).send({ data: { phone: theAgentFound1.data.phone }, message: "an otp is sent on your mail, please create new password after verifying otp", status: 200 })
         }
         // return res.status(400).send({ data: "accounts from phone & email do not match", message: "the retreived accounts for email & phone are not macthed", status: 400 })

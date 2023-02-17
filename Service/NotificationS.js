@@ -31,7 +31,7 @@ exports.getOneNotify = async ({notificationNumber, _id}) => {
 
 exports.readTheNotification = async (_id) => {
     try {
-        let updateNotification = await Notification.updateOne({_id},{read:true})
+        let updateNotification = await Notification.updateMany({},{read:true}) //{_id}
         return { data: updateNotification.nModified>0, message: updateNotification.nModified>0?"Notification was read":"Notification was not updated", status: updateNotification.nModified>0? 200:400 }
     } catch (e) {
         console.log(e)
@@ -44,6 +44,8 @@ exports.getAllNotify = async (read,page,limit) => {
         let Notifications, query
         let start = (page-1)*limit
         let totalCount
+        let readCount = {read:false}
+        readCount = await Notification.count(readCount)
         if(read){
             query = {read}
             totalCount = await Notification.count(query)
@@ -52,7 +54,7 @@ exports.getAllNotify = async (read,page,limit) => {
             totalCount = await Notification.count()
             Notifications = await Notification.find().skip(start).limit(limit).sort({createdAt:-1})
         }
-        return { data: Notifications, totalCount, message: Notifications.length>0?"Notifications retrieved successfully":"No Notifications found", status: Notifications.length>0?200:404 }
+        return { data: Notifications, totalCount, readCount, message: Notifications.length>0?"Notifications retrieved successfully":"No Notifications found", status: Notifications.length>0?200:404 }
     } catch (e) {
         console.log(e)
         return { error:e,message: "Notification can't be retrieved, got in some issue", status: 400 }

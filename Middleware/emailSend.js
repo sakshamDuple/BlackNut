@@ -48,8 +48,12 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name, Link} //Agent
                 break;
             case "Your Customer Account is Registered":
-                message = `Cheers, We gladly invite you to as a new customer. Please keep checking your email for further operation in blacknut`
+                message = `Cheers, We gladly invite you to as a new customer. Please keep checking your email for further operation in blacknut.`
                 data = {type:"", Name} //Customer
+                break;
+            case "New Customer Account is Registered":
+                message = `Cheers, A new Customer:${agentId} has been registered into the system.`
+                data = {type:"", Name} //Admin
                 break;
             case "Your Customer Registered":
                 message = `Cheers, Your Added Customer is now registered. Please keep track of his/her transactions & operations`
@@ -58,7 +62,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Added New Estimate":
                 message = `Cheers, You Added a new estimate, look forward to convert it as Quotations`
                 data = {type:"", Name} //Agent
-                await create(`A new Estimate is added by agent: ${agentId}, look forward to convert it as Quotations`,"E") // to super admin
+                await create(`A new Estimate is added by agent: ${agentId}, look forward to convert it as Quotations`,"admin/listestimate") // to super admin
                 break;
             case "Added New Estimate":
                 message = `Cheers, An estimate is added on your behalf from admin, look forward to convert it as Quotations`
@@ -71,7 +75,7 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Converted Estimate To Quotation":
                 message = `Congratulations, An estimate was added by you is now converted to the quotation, to complete the purchase of order of machine, keep track of the quotation`
                 data = {type:"", Name} //Agent
-                await create(`An Estimate is converted to Quotation by Agent:${agentId}, The Agent is now waiting for approval of Quotation.<br/>`,"Q" )  // to super admin
+                await create(`An Estimate is converted to Quotation by Agent:${agentId}, The Agent is now waiting for approval of Quotation.`,"admin/listquotations" )  // to super admin
                 break;
             case "Your Machine Quotation Processed":
                 message = `Congratulations, We have successful completion of Estimate To Quotation for your order, keep track of the conversion of your orders`
@@ -92,10 +96,10 @@ exports.sendEmail = async (email, subject, text, details) => {
             case "You Converted Quotation To Order":
                 message = `Congratulations, Your Customer Place Order is successfully completed, find the details below`
                 data = {type:"", Name} //Agent
-                await create(`Cheers, A Quotaion is now converted to purchase order by Agent:${agentId}.`,"PO")
+                await create(`Cheers, A Quotaion is now converted to purchase order by Agent:${agentId}.`,"admin/ListPurchaseOrder")
                 break;
             case 'A New Agent Account is Registered':
-                message = `Cheers, A New Agent Is Added, look forward to Preview all their Documents and Agreements. Enable the Agent if all Documents are correct.`
+                message = `Cheers, A new Agent has been registered into the system. Enable the Agent if all Documents are correct.`
                 data = {type:"", Name} //Super Admin
                 break;
             case 'Your Agent Account is Activated':

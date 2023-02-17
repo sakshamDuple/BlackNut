@@ -32,7 +32,7 @@ mongoose.connect(process.env.DATABASE_URL, {
     useUnifiedTopology: true
 });
 
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 8000;
 
 // app.use((req, res, next) => {
 //     var ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;

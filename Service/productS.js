@@ -141,8 +141,8 @@ exports.findByCropName = async (name) => {
 
 exports.findProductsForMachineId = async (MachineId,status) => {
     let query = { machineId: MachineId }
-    if(status == "ACTIVE") query.status="ACTIVE"
-    if(status == "INACTIVE") query.status="INACTIVE"
+    if(status == "ACTIVE") query.Status="ACTIVE"
+    if(status == "INACTIVE") query.Status="INACTIVE"
     let agg = [{
         '$match': query
     }, {

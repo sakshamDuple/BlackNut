@@ -384,24 +384,47 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
         }
     }
-    let agg = [{
-        '$match': query
-    },
-    {
-        '$project': {
-            '_id': 1,
-            'agentId': 1,
-            'createdAt': 1,
-            'TotalCost': {
-                '$sum': '$Products.ProductEstimatedPrice'
-            },
-            // 'Products':1,
-            'agentName': 1,
-            'Agent_Code': 1,
-            'approvalFromAdminAsQuotes': 1,
-            'approvalFromAdminAsPO': 1
+    let agg = [
+        {
+            '$match': query
+        },
+        {
+            '$addFields': {
+                'total': {
+                    '$map': {
+                        'input': '$Products',
+                        'as': 'total',
+                        'in': {
+                            'actualCost': {
+                                '$multiply': [
+                                    '$$total.ProductEstimatedPrice', {
+                                        '$add': [
+                                            '$$total.Gst', 100
+                                        ]
+                                    }, 0.01
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 1,
+                'agentId': 1,
+                'createdAt': 1,
+                'TotalCost': {
+                    '$sum': '$Products.ProductEstimatedPrice'
+                },
+                'agentName': 1,
+                'Agent_Code': 1,
+                'approvalFromAdminAsQuotes': 1,
+                'approvalFromAdminAsPO': 1,
+                'GrandTotalCost': {
+                    '$sum': '$total.actualCost'
+                }
+            }
         }
-    }
     ]
     try {
         let foundEstimates = await Estimate.aggregate(agg)
@@ -428,21 +451,21 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                 Report[0].Agent_Code = estimate.Agent_Code
                 if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
                     Report[0].Estimate += 1
-                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                 }
                 if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                     Report[0].Quotation += 1
                     Report[0].Estimate += 1
-                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                    Report[0].QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                    Report[0].QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                 }
                 if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                     Report[0].PurchaseOrder += 1
                     Report[0].Quotation += 1
                     Report[0].Estimate += 1
-                    Report[0].EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                    Report[0].QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                    Report[0].ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                    Report[0].EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                    Report[0].QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                    Report[0].ProductOrderPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                 }
             } else {
                 let m
@@ -462,21 +485,21 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                     foundreport.Agent_Code = estimate.Agent_Code
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
                         foundreport.Estimate += 1
-                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         foundreport.Quotation += 1
                         foundreport.Estimate += 1
-                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        foundreport.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        foundreport.QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                         foundreport.PurchaseOrder += 1
                         foundreport.Quotation += 1
                         foundreport.Estimate += 1
-                        foundreport.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        foundreport.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        foundreport.ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        foundreport.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        foundreport.QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        foundreport.ProductOrderPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     NewReport.push(foundreport)
                     Report = NewReport
@@ -489,21 +512,21 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
                     report.QuotationPrice = 0
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) {
                         report.Estimate += 1
-                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         report.Quotation += 1
                         report.Estimate += 1
-                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        report.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        report.QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == true) {
                         report.PurchaseOrder += 1
                         report.Quotation += 1
                         report.Estimate += 1
-                        report.EstimatePrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        report.QuotationPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
-                        report.ProductOrderPrice += estimate.TotalCost ? parseInt(estimate.TotalCost) : 0
+                        report.EstimatePrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        report.QuotationPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
+                        report.ProductOrderPrice += estimate.GrandTotalCost ? parseInt(estimate.GrandTotalCost) : 0
                     }
                     Report.push(report)
                 }

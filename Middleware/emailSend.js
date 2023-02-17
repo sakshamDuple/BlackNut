@@ -16,19 +16,19 @@ exports.sendEmail = async (email, subject, text, details) => {
         let Link = details?details.Link:""
         switch (subject) {
             case "new Password Created":
-                message = `Your Request For New BlackNut Password Creation is processed, Your new Password is ${text}`
+                message = `Your Request For New BlackNut Password Creation is processed. Your new Password is ${text}`
                 data = {type:"", Name} //{type:"User", Name:details.Name}
                 break;
             case "password change request otp":
-                message = `Your Request For BlackNut Forgot Password is recieved, Your Otp is ${text}`
+                message = `Your Request For BlackNut Forgot Password is recieved. Your Otp is ${text}`
                 data = {type:"", Name} //User
                 break;
             case "OTP request for Customer Creation on Blacknut":
-                message = `Your Request For New BlackNut Customer Creation is processed, Your Otp is ${text}`
+                message = `Your Request For New BlackNut Customer Creation is processed. Your Otp is ${text}`
                 data = {type:"", Name} //Agent
                 break;
             case "otp for Agreement Document Submit":
-                message = `Your Request For BlackNut Agent Agreement Document Creation is processed, Your Otp is ${text}, Please complete your process of agreement document upload`
+                message = `Your Request For BlackNut Agent Agreement Document Creation is processed. Your Otp is ${text}, Please complete your process of agreement document upload`
                 data = {type:"", Name} //Agent
                 break;
             case "OTP request for email verification":
@@ -36,7 +36,7 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //done //Customer
                 break;
             case "OTP request for File Upload & Updation Of quotation To Purchase Order":
-                message = `Your Request For Customer Verification for file Purchase Invoice upload will be processed after file upload only, Your Otp is ${text}`
+                message = `Your Request For Customer Verification for file Purchase Invoice upload will be processed after file upload only. Your Otp is ${text}`
                 data = {type:"", Name} //done //Customer
                 break;
             case "Your Admin Account is Registered":
@@ -44,15 +44,15 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Admin
                 break;
             case "Your Agent Account is Registered":
-                message = `Cheers, We gladly invite you to as a new agent, now you will be able to create estimates for several customers in your region, please hit the link below to download the agreement file.`
+                message = `Cheers, We gladly invite you to as a new agent. Now you will be able to create estimates for several customers in your region, please hit the link below to download the agreement file.`
                 data = {type:"", Name, Link} //Agent
                 break;
             case "Your Customer Account is Registered":
-                message = `Cheers, We gladly invite you to as a new customer, please keep checking your email for further operation in blacknut`
+                message = `Cheers, We gladly invite you to as a new customer. Please keep checking your email for further operation in blacknut`
                 data = {type:"", Name} //Customer
                 break;
             case "Your Customer Registered":
-                message = `Cheers, Your Added Customer is now registered, please keep track of his/her transactions & operations`
+                message = `Cheers, Your Added Customer is now registered. Please keep track of his/her transactions & operations`
                 data = {type:"", Name} //Agent
                 break;
             case "You Added New Estimate":
@@ -65,7 +65,7 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Customer
                 break;
             case "New Estimate Added":
-                message = `Cheers, An estimate is added by an agent, keep track of the conversion of estimates`
+                message = `Cheers, A new Estimate generated into the system by an agent: ${agentId}.`
                 data = {type:"", Name} //Admin
                 break;
             case "You Converted Estimate To Quotation":
@@ -78,7 +78,7 @@ exports.sendEmail = async (email, subject, text, details) => {
                 data = {type:"", Name} //Customer
                 break;
             case "A Quotation is Processed":
-                message = `Congratulations, We have successful completion of Estimate To Quotation process, keep track of the same Quotation conversion to Orders`
+                message = `Congratulations, A new Quotation is generated into the system.`
                 data = {type:"", Name} //Admin
                 break;
             case "An Ordered is Processed":

@@ -120,14 +120,11 @@ exports.adminLogin = async (req, res) => {
     let email = req.body.email
     let password = req.body.password
     let phone = req.body.phone
-    console.log(email, password, phone)
     let match = true
     let adminFound = await AdminS.adminLogin({ email, password, phone })
-    // if(adminFound.data && adminFound.data.status == "PENDING" || adminFound.data.status == "INACTIVE"){
-    //     return res.status(400).json({ error: "can't log in", message: "Your Account is currently INACTIVE or Waiting for admins Approval, You Can't login to this Account", status: 400 })
-    // }
+    if(adminFound.status == 400) return res.status(adminFound.status).send(adminFound)
     if (adminFound) match = await hashCompare(password, adminFound.data.password)
-    if (match) {
+    if (match && adminFound.status != 400) {
         await AdminS.editAdmin(adminFound.data._id,{},"login")
         let accessToken = generateAccessToken({ role: adminFound.data.role, firstName: adminFound.data.firstName, lastName: adminFound.data.lastName, phone: adminFound.data.phone, email: adminFound.data.email, id: adminFound.data._id })
         res.setHeader("Authorization", accessToken)

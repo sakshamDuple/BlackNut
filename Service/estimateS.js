@@ -8,7 +8,7 @@ const { dateToDateNowConverter } = require("../Middleware/dateConverter");
 const { getCustomerToShowById } = require("./CustomerS");
 const OtpS = require("../Service/OtpS");
 const verifiedNumberS = require("../Service/verifyNumberS");
-const { sendEmail } = require("../Middleware/emailSend");
+const { sendEmail, SuperAdminEmail } = require("../Middleware/emailSend");
 
 exports.create = async (estimate) => {
   let {
@@ -72,12 +72,12 @@ exports.create = async (estimate) => {
     });
     await sendEmail(foundAgent.data.email, "You Added New Estimate", "", {
       Name: foundAgent.data.firstName,
-      agentId
+      agentId: foundAgent.data.AgentID
     });
     await sendEmail(foundcustomer.data.email, "Added New Estimate", "", {
       Name: foundcustomer.data.firstName,
     });
-    // await sendEmail(foundcustomer.data.email, "New Estimate Added", "", { Name: foundcustomer.data.firstName })
+    await sendEmail(SuperAdminEmail, "New Estimate Added", "", { Name: "Super Admin", agentId: foundAgent.data.AgentID })
     return {
       data: createdEstimate,
       message: "estimate created Successfully",
@@ -377,12 +377,12 @@ exports.updateEstimateToQuotation = async (id) => {
       foundAgent.data.email,
       "You Converted Estimate To Quotation",
       "",
-      { Name: foundAgent.data.firstName, agentId: foundEstimate.agentId }
+      { Name: foundAgent.data.firstName, agentId: foundAgent.data.AgentID }
     );
     await sendEmail(foundcustomer.data.email, "Added New Estimate", "", {
       Name: foundcustomer.data.firstName,
     });
-    // await sendEmail(foundcustomer.data.email, "A Quotation is Processed", "", { Name: foundcustomer.data.firstName })
+    await sendEmail(SuperAdminEmail, "A Quotation is Processed", "", { Name: "Super Admin", agentId: foundAgent.data.AgentID })
   }
   try {
     return {
@@ -482,7 +482,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
         foundAgent.data.email,
         "You Converted Quotation To Order",
         "",
-        { Name: foundAgent.data.firstName, agentId: foundEstimate.agentId }
+        { Name: foundAgent.data.firstName, agentId: foundAgent.data.AgentID }
       );
       await sendEmail(foundcustomer.data.email, "Your Machine Is Ordered", "", {
         Name: foundcustomer.data.firstName,

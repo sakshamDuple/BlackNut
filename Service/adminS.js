@@ -27,7 +27,7 @@ exports.create = async (admin) => {
 
 exports.adminLogin = async ({ email, password, phone }) => {
     if (!password) return { message: "can't login without password", status: 400 }
-    if (!email && !phone) return { message: "please provide either email or phone to login to admin", status: 400 }
+    if (!email || !phone) return { message: "Please provide either email or phone to login to admin", status: 400 }
     let foundAdmin
     if (email) foundAdmin = await this.findAdmin({ data: email, field: "email" })
     if (!email && phone) foundAdmin = await this.findAdmin({ data: phone, field: "phone" })

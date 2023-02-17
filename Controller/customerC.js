@@ -4,7 +4,7 @@ const Agent = require("../Model/Agent");
 const { getCommonById } = require("../Service/AgentS");
 const CustomerS = require("../Service/CustomerS");
 const OtpS = require("../Service/OtpS");
-const { findOnly } = require("../Service/verifyNumberS");
+const { findOnly, deleteOnly } = require("../Service/verifyNumberS");
 
 exports.getActiveCustomers = async (req, res) => {
   let page = req.query.page;
@@ -83,6 +83,7 @@ exports.addCustomer = async (req, res) => {
     let RegisteredCustomerByThisPhone = await Agent.findOne({
       phone: Customer.phone,
     });
+    console.log("RegisteredCustomerByThisPhone",RegisteredCustomerByThisPhone)
     newCustomer.Agent_ID = RegisteredCustomerByThisPhone._id;
     newCustomer.status = 200;
     newCustomer.message = "Customer added to Estimate Successfully!";
@@ -108,10 +109,10 @@ exports.addCustomer = async (req, res) => {
   }
 };
 
-exports.getThisCustomer = async (req, res) => {
-  let customerId = req.query.id;
-  await CustomerS.getAllCustomer();
-};
+// exports.getThisCustomer = async (req, res) => {
+//   let customerId = req.query.id;
+//   await CustomerS.getAllCustomer();
+// };
 
 exports.getAllCustomers = async (req, res) => {
   let page = req.query.page;
@@ -133,6 +134,8 @@ exports.getAllCustomers = async (req, res) => {
 
 exports.deleteTheCustomer = async (req, res) => {
   let customerId = req.query.id;
+  let thisCustomer = await CustomerS.getCustomerToShowById(customerId);
+  await deleteOnly(thisCustomer.data.phone);
   let deleteCustomer = await CustomerS.deleteCustomerById(customerId);
   if (deleteCustomer.status == 202) {
     res

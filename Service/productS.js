@@ -331,6 +331,9 @@ exports.findOneByProductId = async (ProductId) => {
 exports.getAllProducts = async () => {
     return await product.find()
 }
+exports.getAllProductswithProductId = async (productId) => {
+    return await product.find({ProductID:productId})
+}
 
 exports.deleteOnly = async (id) => {
     try {

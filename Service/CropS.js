@@ -12,6 +12,7 @@ exports.create = async (cropName) => {
 
 exports.findCrop = async (data) => {
     try {
+        console.log(data);
         let foundCrop = await Crop.findOne({ crop: data.cropName })
         return { data: foundCrop, message: foundCrop?"crop retrieved successfully":"crop not found", status: foundCrop? 200:404 }
     } catch (e) {

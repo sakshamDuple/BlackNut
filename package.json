@@ -19,6 +19,7 @@
   "homepage": "https://github.com/sakshamDuple/Black-Nut#readme",
   "dependencies": {
     "aws-sdk": "^2.1310.0",
+    "axios": "^1.3.2",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "bson": "^5.0.0",

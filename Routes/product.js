@@ -12,7 +12,9 @@ const { updateProductById } = require("../Service/productS");
 router.post("/createProduct", productC.productCreate);
 router.post("/createCrop", productC.cropCreate);
 router.get("/getAllProducts", productC.getAllProducts);
+router.post("/getProductsproductId", productC.getAllProductwithProductId);
 router.post("/machineCreate", productC.machineCreate);
+router.post("/findmachinecrop", productC.machinesForcropandProduct);
 router.get("/machinesForASelectCrop", productC.machinesForASelectCrop);
 router.get("/getAllProductsForSelectCrop", productC.getAllProductsForSelectCropId)
 router.get("/getAllProductsForSelectCropName", productC.getAllProductsForSelectCropName)

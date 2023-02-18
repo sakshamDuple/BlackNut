@@ -5,7 +5,9 @@ exports.create = async (data) => {
 }
 
 exports.findOnly = async (number) => {
-    return await TempOtp.findOne({number})
+    let findOne = await TempOtp.find({ number:number }).sort({createdAt: -1}).limit(1)
+    console.log("findOne",findOne[0],await TempOtp.findOne({number}))
+    return findOne[0]
 }
 
 exports.deleteOnly = async (number) => {

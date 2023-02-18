@@ -295,7 +295,7 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
   res
     .status(200)
     .send({
-      message: `OTP is sent to your Email Id for verification, tempOtp:${otp}`,
+      message: `OTP is sent to your Email Id for verification`,
       status: 200,
     });
 };

@@ -111,16 +111,16 @@ exports.getPdfById = async (req, res) => {
     if (Estimate.data.createdAt) date = moment(Estimate.data.createdAt).format("DD-MM-YYYY") //moment(Estimate.data.createdAt, 'DD-MM-YYYY');
     if (Estimate.data.EstimateDateOfPurchase) estimatedDateOfPurchase = moment(Estimate.data.EstimateDateOfPurchase).format("DD-MM-YYYY") //moment(Estimate.data.EstimateDateOfPurchase, 'dd/mm/yyyy');
     let totel = Estimate.data.Products.reduce((total, prod) => {
-        let amt = prod.Product.Price * prod.quantity;
+        let amt = prod.ProductEstimatedPrice * prod.quantity;
         return total + Math.round(amt);
     }, 0);
     let totelgst = Estimate.data.Products.reduce((totel, prod) => {
-        let amt = (prod.Product.Price * prod.quantity * prod.Gst) / 100;
+        let amt = (prod.ProductEstimatedPrice * prod.quantity * prod.Gst) / 100;
         return totel + Math.round(amt);
     }, 0);
     let totelamount = Estimate.data.Products.reduce((totel, prod) => {
-        let amt = (prod.quantity * prod.Product.Price * prod.Gst) / 100 + prod.quantity *
-            prod.Product.Price;
+        let amt = (prod.quantity * prod.ProductEstimatedPrice * prod.Gst) / 100 + prod.quantity *
+        prod.ProductEstimatedPrice;
         return totel + Math.round(amt);
     }, 0);
     if (Estimate.data.Products.length > 0) numericPrice = toWords.convert(parseInt(totelamount).toFixed(2))

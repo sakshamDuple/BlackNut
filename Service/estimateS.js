@@ -25,8 +25,6 @@ exports.create = async (estimate) => {
   if (!customerId) return error("customerId", "missing field");
   if (!EstimateDateOfPurchase)
     return error("EstimateDateOfPurchase", "missing field");
-  //   if (!approvalFromAdminAsQuotes)
-  //     return error("approvalFromAdminAsQuotes", "missing field");
   let foundcustomer,
     foundAgent,
     newDate,
@@ -125,13 +123,13 @@ let allProductsDetailed = (products, fails, successes) => {
       products.map(async (element) => {
         return new Promise(async function (resolve, reject) {
           let fail, success;
-          let { ProductId, quantity, Gst, ProductEstimatedPrice } = element;
+          let { ProductId, quantity, Gst, ProductEstimatedPrice, ProductName } = element;
           console.log(element);
           let Product = await productC.toGetAllDetailsOfProduct(ProductId);
           if (!Product) {
             fails.push(ProductId);
           } else {
-            successes.push({ Product, quantity, Gst, ProductEstimatedPrice });
+            successes.push({ Product, quantity, Gst, ProductEstimatedPrice,ProductId,ProductName });
           }
           resolve({ fail, success });
         });
@@ -402,6 +400,8 @@ exports.updateEstimateToQuotation = async (id) => {
 exports.updateQuotationToPO = async (id, quotation, approval, data) => {
   try {
     let foundEstimate = await Estimate.findById(id);
+    console.log("foundEstimate",foundEstimate)
+    let theProductToUpdate = foundEstimate.Products
     if (!foundEstimate)
       return {
         error: "Quotation Not Found",
@@ -417,14 +417,15 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
       };
     if (data) {
       let { otp, phone } = data;
-      let { role } = await verifiedNumberS.findOnly(phone);
-      if ((role != "agent" && role != "dealer") || role == null)
+      let findNumber = await verifiedNumberS.findOnly(phone);console.log(phone)
+      let foundAgent = await AgentS.getCommonById(foundEstimate.agentId);
+      if ((findNumber.role != "agent" && findNumber.role != "dealer") && findNumber.role == null)
         return {
           error: "agent not found",
           message: "please provide phone of a valid register agent",
           status: 404,
         };
-      let otpRecieved = await OtpS.findOnly(phone);
+      let otpRecieved = await OtpS.findOnly(foundAgent.data.phone);
       if (otpRecieved == null)
         return { message: "no otp found on this number", status: 400 };
       if (otpRecieved.otp != otp)
@@ -434,6 +435,8 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     let PurchaseInvoice1;
     if (quotation) {
       let { Products, _id, PurchaseInvoice } = quotation;
+      console.log("!data",!data)
+      if(!data) theProductToUpdate = Products
       if (_id != foundEstimate._id)
         return { message: "Id did not match Found", status: 409 };
       if (Products) {
@@ -442,7 +445,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
             product.ProductIDToShow == foundEstimate.Products[i].ProductIDToShow
           )
             {
-              foundEstimate.Products[i].ProductEstimatedPrice = product.ProductEstimatedPrice
+              foundEstimate.Products[i].ProductEstimatedPrice = parseInt(product.ProductEstimatedPrice)
               foundEstimate.Products[i].Gst = product.Gst
             }
         });
@@ -464,11 +467,11 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     }
     foundEstimate.PO_No = await getValueForNextSequence("PO");
     foundEstimate.Updates.QuotationToPO = Date.now();
-    // foundEstimate.PO_Id = "PO_Id" + Date.now().toString();
     let dates = new Date()
     let month = dates.getMonth()<10?'0'+(dates.getMonth()+1):(dates.getMonth()+1)
     let year = dates.getYear() - 100
     foundEstimate.PO_Id = `${year}-${month}-${foundEstimate.PO_No<1000?foundEstimate.PO_No<100?foundEstimate.PO_No<10?"000"+foundEstimate.PO_No:"00"+foundEstimate.PO_No:"0"+foundEstimate.PO_No:foundEstimate.PO_No}`
+    foundEstimate.Products = theProductToUpdate
     let updateThisEstimate = await Estimate.updateOne(
       { _id: id },
       { $set: foundEstimate }

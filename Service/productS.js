@@ -14,7 +14,7 @@ exports.create = async (data) => {
         let productToCreate = data.products[0].productDetail
         if (foundCrop.data != null) {
             foundCropId = foundCrop.data._id
-            if (data.products[0].Machine_name) foundMachine = await MachineS.findMachine({ Machine_name: data.products[0].Machine_name })
+            if (data.products[0].Machine_name) foundMachine = await MachineS.findMachineBycropandmachine({ Machine_name: data.products[0].Machine_name },foundCrop.data._id)
             if (foundMachine.data != null) {
                 foundMachineId = foundMachine.data._id
                 let createProduct

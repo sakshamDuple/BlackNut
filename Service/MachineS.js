@@ -27,7 +27,7 @@ exports.findMachine = async (data) => {
 }
 
 exports.findMachineById = async (id) => {
-    console.log(id,"ii")
+    console.log(id, "ii")
     try {
         let foundMachine = await Machine.findById(id)
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
@@ -37,10 +37,10 @@ exports.findMachineById = async (id) => {
     }
 }
 
-exports.findMachineBycropandmachine = async (data,id) => {
-    console.log(id,"ii")
+exports.findMachineBycropandmachine = async (data, id) => {
+    console.log(id, "ii")
     try {
-        let foundMachine = await Machine.findOne({ Machine_name: data.Machine_name,cropId:id })
+        let foundMachine = await Machine.findOne({ Machine_name: data.Machine_name, cropId: id })
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
         console.log(e)
@@ -49,34 +49,30 @@ exports.findMachineBycropandmachine = async (data,id) => {
 }
 exports.findMachineByCropId = async (cropId) => {
     try {
-        let foundMachine = await Machine.find({cropId:cropId})
+        let foundMachine = await Machine.find({ cropId: cropId })
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
-        console.log(e) 
+        console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
     }
 }
-exports.findMachineByCropandproductname = async (cropId,productname) => {
-    console.log(cropId,'nammmmmmmme');
+exports.findMachineByCropandproductname = async (cropId, productname) => {
     try {
         let foundCrop = await CropS.findCrop({ cropName: cropId })
-      console.log(foundCrop,'founded');
-      let foundMachine
-      if(foundCrop.data){
-         foundMachine = await Machine.find({cropId:foundCrop.data._id,Product_name:productname})
-
-      }
-
+        let foundMachine
+        if (foundCrop.data) {
+            foundMachine = await Machine.find({ cropId: foundCrop.data._id, Product_name: productname })
+        }
         return { data: foundMachine, message: foundMachine ? "retrieval Success" : "machine not found", status: foundMachine ? 200 : 404 }
     } catch (e) {
-        console.log(e) 
+        console.log(e)
         return { error: e, message: "machine be retrieved, got in some issue", status: 400 }
     }
 }
 
 exports.getAllMachines = async () => {
     try {
-        let allMachine = await Machine.find().sort({createdAt:-1})
+        let allMachine = await Machine.find().sort({ createdAt: -1 })
         let totalCount = await Machine.count()
         return { data: allMachine, totalCount, message: "retrieval Success", status: 200 }
     } catch (e) {
@@ -86,7 +82,7 @@ exports.getAllMachines = async () => {
 }
 exports.getAllMachinesAlphabers = async (number) => {
     try {
-        let allMachine = await Machine.find().sort({Product_name:number})
+        let allMachine = await Machine.find().sort({ Product_name: number })
         let totalCount = await Machine.count()
         return { data: allMachine, totalCount, message: "retrieval Success", status: 200 }
     } catch (e) {

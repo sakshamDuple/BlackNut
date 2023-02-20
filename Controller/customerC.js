@@ -6,6 +6,7 @@ const { getCommonById } = require("../Service/AgentS");
 const CustomerS = require("../Service/CustomerS");
 const OtpS = require("../Service/OtpS");
 const { findOnly, deleteOnly } = require("../Service/verifyNumberS");
+const axios = require("axios");
 
 exports.getActiveCustomers = async (req, res) => {
   let page = req.query.page;
@@ -80,11 +81,36 @@ exports.addCustomer = async (req, res) => {
         status: 400,
       });
   const newCustomer = await CustomerS.create(Customer);
+  let a = new Date()
+  var day = a.getDate()
+  var year = a.getFullYear()
+  var month = a.getMonth()
+  let ledate = year + "-" + month + "-" + day
+  let data = {
+    "apikey": "NF8xXzE3MTAkQDIjIzIwMjMtMDItMTggMTY6MjY6NTA=",
+    "formname": "Leads",
+    "operation": "insertRecords",
+    "Overwrite": "true",
+    "records": [{
+      "Contact​ ​Name": Customer.firstName,
+      "Company​ ​Name": Customer.Company_Name,
+      "Email": Customer.email,
+      "Mobile": Customer.phone,
+      "Assigned​ ​To": "",
+      "Lead​ ​Date": ledate
+    }]
+  }
+  let result = await axios({
+    method: 'post',
+    url: 'https://apps.cratiocrm.com/api/apirequest.php',
+    data
+  })
+  console.log(result.data, 'result');
   if (newCustomer.error == "mobile already registered") {
     let RegisteredCustomerByThisPhone = await Agent.findOne({
       phone: Customer.phone,
     });
-    console.log("RegisteredCustomerByThisPhone",RegisteredCustomerByThisPhone)
+    console.log("RegisteredCustomerByThisPhone", RegisteredCustomerByThisPhone)
     newCustomer.Agent_ID = RegisteredCustomerByThisPhone._id;
     newCustomer.status = 200;
     newCustomer.message = "Customer added to Estimate Successfully!";
@@ -189,7 +215,7 @@ exports.customerOtpRecieve = async (req, res) => {
     if (!phone && !email && !agentid)
       return res.status(400).send({ message: "fields missing", status: 400 });
     let foundAgent = await getCommonById(agentid);
-    console.log("foundAgent",foundAgent)
+    console.log("foundAgent", foundAgent)
     if (!foundAgent.data)
       return res
         .status(foundAgent.status)
@@ -204,8 +230,8 @@ exports.customerOtpRecieve = async (req, res) => {
       otp: otp,
     });
     if (mobileExists != null) {
-      otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
-      if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+      otpSent = await sendOTPonPhone("CustomerLink", otp, phone)
+      if (otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
       // await sendEmail(
       //   email,
       //   "OTP request for email verification",
@@ -225,8 +251,8 @@ exports.customerOtpRecieve = async (req, res) => {
     //   otp,
     //   { Name: foundAgent.data.firstName }
     // );
-    otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
-    if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+    otpSent = await sendOTPonPhone("CustomerLink", otp, phone)
+    if (otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
     return res
       .status(200)
       .send({
@@ -258,8 +284,8 @@ exports.DefaultPhoneOtpRecieve = async (req, res) => {
       otp: otp,
     });
     // otp for phone here
-    otpSent = await sendOTPonPhone("CustomerLink",otp,phone)
-    if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+    otpSent = await sendOTPonPhone("CustomerLink", otp, phone)
+    if (otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
     return res
       .status(200)
       .json({
@@ -300,24 +326,24 @@ exports.DefaultEmailOtpRecieve = async (req, res) => {
     });
 };
 
-exports.otpVerification = async (req,res) => {
-    let otp = req.query.otp
-    let mobile = req.query.mobile
-    let email = req.query.email
-    if(!otp) return res.status(400).send({
-      message: `Can't Continue without otp`,
-      status: 400,
-    });
-    if(!mobile && !email) return res.status(400).send({
-        message: `Should have atleast one field out of mobile & email to continue`,
-        status: 400,
-    });
-    let data = mobile?mobile:email
-    let otpRecieved = await OtpS.findOnly(data);
+exports.otpVerification = async (req, res) => {
+  let otp = req.query.otp
+  let mobile = req.query.mobile
+  let email = req.query.email
+  if (!otp) return res.status(400).send({
+    message: `Can't Continue without otp`,
+    status: 400,
+  });
+  if (!mobile && !email) return res.status(400).send({
+    message: `Should have atleast one field out of mobile & email to continue`,
+    status: 400,
+  });
+  let data = mobile ? mobile : email
+  let otpRecieved = await OtpS.findOnly(data);
   if (!otpRecieved)
     return res.status(400).send({ message: "NO otp found on given mobile / email", status: 400 });
   if (otpRecieved.otp != otp)
     return res.status(400).send({ message: "otp doesn't match", status: 400 });
-    await OtpS.deleteOnly(data);
-    res.status(200).send({data:true,status:200,message:`Otp verification for ${mobile?"Mobile":"Email"} is successfully executed`})
+  await OtpS.deleteOnly(data);
+  res.status(200).send({ data: true, status: 200, message: `Otp verification for ${mobile ? "Mobile" : "Email"} is successfully executed` })
 }

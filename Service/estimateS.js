@@ -419,6 +419,7 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
       let { otp, phone } = data;
       let findNumber = await verifiedNumberS.findOnly(phone);console.log(phone)
       let foundAgent = await AgentS.getCommonById(foundEstimate.agentId);
+      console.log("!data",!data)
       if ((findNumber.role != "agent" && findNumber.role != "dealer") && findNumber.role == null)
         return {
           error: "agent not found",
@@ -436,7 +437,6 @@ exports.updateQuotationToPO = async (id, quotation, approval, data) => {
     if (quotation) {
       let { Products, _id, PurchaseInvoice } = quotation;
       console.log("!data",!data)
-      if(!data) theProductToUpdate = Products
       if (_id != foundEstimate._id)
         return { message: "Id did not match Found", status: 409 };
       if (Products) {

@@ -269,11 +269,23 @@ exports.getReportsFromEstimates = async (req, res) => {
     let page = req.query.page ? req.query.page : 1
     let limit = req.query.limit ? req.query.limit : 10
     let query = {}
-    let startDate = req.query.startDate
-    let endDate = req.query.endDate
-    if (startDate && endDate) {
+    let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
+    let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
+    let year = parseInt(endDate.split("-")[0])
+    let monthEnd = parseInt(endDate.split("-")[1])
+    let dateEnd = parseInt(endDate.split("-")[2])+1
+    if(dateEnd > 27){
+        dateEnd = 1
+        monthEnd = parseInt(endDate.split("-")[1])+1
+        if(monthEnd>11){
+            monthEnd = 1
+            year = parseInt(endDate.split("-")[0])+1
+        }
+    }
+    let endSearchDate = year + "-" + monthEnd + "-" + dateEnd
+    if (startDate && endSearchDate) {
         query = {
-            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endSearchDate.toString()) } }]
         }
     }
     let start = (parseInt(page) - 1) * parseInt(limit)
@@ -380,11 +392,23 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
     let limit = req.query.limit ? req.query.limit : 10
     let start = (parseInt(page) - 1) * parseInt(limit)
     let query = {}
-    let startDate = req.query.startDate
-    let endDate = req.query.endDate
-    if (startDate && endDate) {
+    let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
+    let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
+    let year = parseInt(endDate.split("-")[0])
+    let monthEnd = parseInt(endDate.split("-")[1])
+    let dateEnd = parseInt(endDate.split("-")[2])+1
+    if(dateEnd > 27){
+        dateEnd = 1
+        monthEnd = parseInt(endDate.split("-")[1])+1
+        if(monthEnd>11){
+            monthEnd = 1
+            year = parseInt(endDate.split("-")[0])+1
+        }
+    }
+    let endSearchDate = year + "-" + monthEnd + "-" + dateEnd
+    if (startDate && endSearchDate) {
         query = {
-            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endDate.toString()) } }]
+            $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endSearchDate.toString()) } }]
         }
     }
     let agg = [

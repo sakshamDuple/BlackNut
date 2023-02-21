@@ -87,10 +87,6 @@ exports.addCustomer = async (req, res) => {
   var month = a.getMonth()
   let ledate = year + "-" + month + "-" + day
   let data = {
-    "apikey": "NF8xXzE3MTAkQDIjIzIwMjMtMDItMTggMTY6MjY6NTA=",
-    "formname": "Leads",
-    "operation": "insertRecords",
-    "Overwrite": "true",
     "records": [{
       "Contact​ ​Name": Customer.firstName,
       "Company​ ​Name": Customer.Company_Name,
@@ -102,7 +98,7 @@ exports.addCustomer = async (req, res) => {
   }
   let result = await axios({
     method: 'post',
-    url: 'https://apps.cratiocrm.com/api/apirequest.php',
+    url: 'https://apps.cratiocrm.com/api/apirequest.php?apikey=NF8xXzE3MTAkQDIjIzIwMjMtMDItMTggMTY6MjY6NTA=&formname=Leads&operation=insertRecords&Overwrite=true',
     data
   })
   console.log(result.data, 'result');

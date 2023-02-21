@@ -100,7 +100,7 @@ exports.getOtpForUpdateDocument = async (req, res) => {
         otp: otp
     })
     if (foundAgent.status == 200) {
-        res.status(foundAgent.status).send({ message: "OTP is sent to Agent's mobile number for verification !" + otp, status: foundAgent.status })
+        res.status(foundAgent.status).send({ message: "OTP is sent to Agent's mobile number for verification !", status: foundAgent.status })
     } else {
         res.status(foundAgent.status).send({ error: foundAgent.error, message: foundAgent.message, status: foundAgent.status })
     }

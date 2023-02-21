@@ -159,7 +159,7 @@ exports.updateThisAgent = async (agent, field) => {
         if (PAN_Agent) newAgent.PAN_Agent = PAN_Agent
         if (Address) newAgent.Address = Address
         if (DocumentFile) newAgent.DocumentFile = DocumentFile
-        if (status) {
+        if (status && field != "login") {
             newAgent.status = status
             let detail = { Name: newAgent.firstName}
             if(status == "ACTIVE")  await sendEmail(newAgent.email, "Your Agent Account is Activated", "", detail )

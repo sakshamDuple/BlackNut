@@ -18,7 +18,7 @@ exports.searchGlobal = async (
   typeOfEstimate
 ) => {
   if (!sortBy) sortBy = "createdAt";
-  console.log("sortBy,sortVal",sortBy,sortVal)
+  console.log("sortBy,sortVal", sortBy, sortVal)
   if (!sortVal) sortBy = 1;
   let matchSearch;
   let { Collection, queryS, query, querySort, querySearchsort, TOE } =
@@ -143,10 +143,9 @@ exports.generateCollectionAndQuerySearch = (
   multiFieldSearch,
   typeOfEstimate
 ) => {
-  let Collection, queryS, query, querySort
+  let Collection, queryS, query, querySort, nameSearch
   let TOE = {};
-  let multipleField = [],
-    querySearchsort = [];
+  let multipleField = [], nameSearchQuery = [], querySearchsort = [];
   switch (collection) {
     case "Admin":
       Collection = Admin;
@@ -204,6 +203,12 @@ exports.generateCollectionAndQuerySearch = (
     case "lastName":
       querySort = { lastName: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
+    case "name":
+      querySort = { firstName: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
+    case "fullName":
+      querySort = { fullName: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
     case "email":
       querySort = { email: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
@@ -215,6 +220,9 @@ exports.generateCollectionAndQuerySearch = (
       break;
     case "CustomerID":
       querySort = { CustomerID: parseInt(sortVal) == 1 ? 1 : -1 };
+      break;
+    case "Company_Name":
+      querySort = { Company_Name: parseInt(sortVal) == 1 ? 1 : -1 };
       break;
     case "crop":
       querySort = { crop: parseInt(sortVal) == 1 ? 1 : -1 };
@@ -280,104 +288,128 @@ exports.generateCollectionAndQuerySearch = (
     default:
       querySort = { createdAt: -1 };
   }
+  let regex = new RegExp(search, "i")
   if (multiFieldSearch) {
     multipleField = multiFieldSearch.split(",");
     multipleField.forEach((element) => {
       if (element == "firstName")
         querySearchsort.push({
-          firstName: new RegExp(search, "i"),
+          firstName: regex,
         });
+      if (element == "fullName")
+        querySearchsort.push({
+          fullName: regex,
+        });
+      if (element == "name") {
+        nameSearch = search.split(" ")
+        nameSearch.forEach(element => {
+          nameSearchQuery.push({
+            '$or': [{
+              'firstName': new RegExp(element, 'i')
+            }, {
+              'lastName': new RegExp(element, 'i')
+            }]
+          })
+        });
+        querySearchsort.push({
+            '$and': nameSearchQuery
+          });
+      }
       if (element == "lastName")
         querySearchsort.push({
-          lastName: new RegExp(search, "i"),
+          lastName: regex,
         });
       if (element == "email")
         querySearchsort.push({
-          email: new RegExp(search, "i"),
+          email: regex,
         });
       if (element == "phone")
         querySearchsort.push({
-          phone: new RegExp(search, "i"),
+          phone: regex,
         });
       if (element == "AgentID")
         querySearchsort.push({
-          AgentID: new RegExp(search, "i"),
+          AgentID: regex,
         });
       if (element == "CustomerID")
         querySearchsort.push({
-          CustomerID: new RegExp(search, "i"),
+          CustomerID: regex,
+        });
+      if (element == "Company_Name")
+        querySearchsort.push({
+          Company_Name: regex,
         });
       if (element == "crop")
         querySearchsort.push({
-          crop: new RegExp(search, "i"),
+          crop: regex,
         });
       if (element == "EstimateId")
         querySearchsort.push({
-          EstimateId: new RegExp(search, "i"),
+          EstimateId: regex,
           approvalFromAdminAsPO: false,
           approvalFromAdminAsQuotes: false
         });
       if (element == "QuotationId")
         querySearchsort.push({
-          QuotationId: new RegExp(search, "i"),
+          QuotationId: regex,
           approvalFromAdminAsPO: false,
           approvalFromAdminAsQuotes: true
         });
       if (element == "PO_Id")
         querySearchsort.push({
-          PO_Id: new RegExp(search, "i"),
+          PO_Id: regex,
           approvalFromAdminAsPO: true,
           approvalFromAdminAsQuotes: false
         });
       if (element == "agentId")
         querySearchsort.push({
-          agentId: new RegExp(search, "i"),
+          agentId: regex,
         });
       if (element == "customerId")
         querySearchsort.push({
-          customerId: new RegExp(search, "i"),
+          customerId: regex,
         });
       if (element == "Agent_Code")
         querySearchsort.push({
-          Agent_Code: new RegExp(search, "i"),
+          Agent_Code: regex,
         });
       if (element == "Machine_name")
         querySearchsort.push({
-          Machine_name: new RegExp(search, "i"),
+          Machine_name: regex,
         });
       if (element == "Product_name")
         querySearchsort.push({
-          Product_name: new RegExp(search, "i"),
+          Product_name: regex,
         });
       if (element == "ProductID")
         querySearchsort.push({
-          ProductID: new RegExp(search, "i"),
+          ProductID: regex,
         });
       if (element == "gst")
         querySearchsort.push({
-          GST_Number: new RegExp(search, "i"),
+          GST_Number: regex,
         });
       if (element == "pan")
         querySearchsort.push(
           {
-            PAN_Company: new RegExp(search, "i"),
+            PAN_Company: regex,
           },
           {
-            PAN_Agent: new RegExp(search, "i"),
+            PAN_Agent: regex,
           }
         );
       if (element == "agentName")
         querySearchsort.push({
-          agentName: new RegExp(search, "i"),
+          agentName: regex,
         });
       if (element == "customerName")
         querySearchsort.push({
-          customerName: new RegExp(search, "i"),
+          customerName: regex,
         });
-      if(element == "customerPhone")
-          querySearchsort.push({
-            customerPhone: new RegExp(search, "i"),
-          });
+      if (element == "customerPhone")
+        querySearchsort.push({
+          customerPhone: regex,
+        });
       if (
         element == undefined ||
         element == "undefined" ||
@@ -386,76 +418,82 @@ exports.generateCollectionAndQuerySearch = (
       )
         querySearchsort = [
           {
-            firstName: new RegExp(search, "i"),
+            firstName: regex,
           },
           {
-            lastName: new RegExp(search, "i"),
+            lastName: regex,
           },
           {
-            email: new RegExp(search, "i"),
+            fullName: regex,
           },
           {
-            phone: new RegExp(search, "i"),
+            email: regex,
           },
           {
-            AgentID: new RegExp(search, "i"),
+            phone: regex,
           },
           {
-            CustomerID: new RegExp(search, "i"),
+            AgentID: regex,
           },
           {
-            crop: new RegExp(search, "i"),
+            CustomerID: regex,
           },
           {
-            EstimateId: new RegExp(search, "i"),
+            Company_Name: regex,
+          },
+          {
+            crop: regex,
+          },
+          {
+            EstimateId: regex,
             approvalFromAdminAsPO: false,
             approvalFromAdminAsQuotes: false
           },
           {
-            QuotationId: new RegExp(search, "i"),
+            QuotationId: regex,
             approvalFromAdminAsPO: false,
             approvalFromAdminAsQuotes: true
           },
           {
-            PO_Id: new RegExp(search, "i"),
+            PO_Id: regex,
             approvalFromAdminAsPO: true,
             approvalFromAdminAsQuotes: false
           },
           {
-            agentId: new RegExp(search, "i"),
+            agentId: regex,
           },
           {
-            customerId: new RegExp(search, "i"),
+            customerId: regex,
           },
           {
-            Agent_Code: new RegExp(search, "i"),
+            Agent_Code: regex,
           },
           {
-            Machine_name: new RegExp(search, "i"),
+            Machine_name: regex,
           },
           {
-            Product_name: new RegExp(search, "i"),
+            Product_name: regex,
           },
           {
-            ProductID: new RegExp(search, "i"),
+            ProductID: regex,
           },
           {
-            GST_Number: new RegExp(search, "i"),
+            GST_Number: regex,
           },
           {
-            PAN_Company: new RegExp(search, "i"),
+            PAN_Company: regex,
           },
           {
-            PAN_Agent: new RegExp(search, "i"),
+            PAN_Agent: regex,
           },
           {
-            agentName: new RegExp(search, "i"),
+            agentName: regex,
           },
           {
-            customerName: new RegExp(search, "i"),
+            customerName: regex,
           },
           {
-            customerPhone: new RegExp(search, "i"),
+            customerPhone: regex,
           },
         ];
     });
@@ -465,42 +503,65 @@ exports.generateCollectionAndQuerySearch = (
     switch (fieldForSearch) {
       case "firstName":
         queryS = {
-          firstName: new RegExp(search, "i"),
+          firstName: regex,
         };
         break;
+      case 'fullName':
+        queryS = {
+          fullName: regex,
+        }
+      case 'name':
+        nameSearch = search.split(" ")
+        nameSearch.forEach(element => {
+          nameSearchQuery.push({
+            '$or': [{
+              'firstName': new RegExp(element, 'i')
+            }, {
+              'lastName': new RegExp(element, 'i')
+            }]
+          })
+        });
+        queryS = {
+            '$and': nameSearchQuery
+          }
       case "lastName":
         queryS = {
-          lastName: new RegExp(search, "i"),
+          lastName: regex,
         };
         break;
       case "email":
         queryS = {
-          email: new RegExp(search, "i"),
+          email: regex,
         };
         break;
       case "phone":
         queryS = {
-          phone: new RegExp(search, "i"),
+          phone: regex,
         };
         break;
       case "AgentID":
         queryS = {
-          AgentID: new RegExp(search, "i"),
+          AgentID: regex,
         };
         break;
       case "CustomerID":
         queryS = {
-          CustomerID: new RegExp(search, "i"),
+          CustomerID: regex,
         };
+        break;
+      case 'Company_Name':
+        queryS = {
+          Company_Name:regex,
+        }
         break;
       case "crop":
         queryS = {
-          crop: new RegExp(search, "i"),
+          crop: regex,
         };
         break;
       case "EstimateId":
         queryS = {
-          EstimateId: new RegExp(search, "i"),
+          EstimateId: regex,
         };
         break;
       // case "EstimateNo":
@@ -510,77 +571,77 @@ exports.generateCollectionAndQuerySearch = (
       //   break;
       case "QuotationId":
         queryS = {
-          QuotationId: new RegExp(search, "i"),
+          QuotationId: regex,
         };
         break;
       case "PO_Id":
         queryS = {
-          PO_Id: new RegExp(search, "i"),
+          PO_Id: regex,
         };
         break;
       case "agentId":
         queryS = {
-          agentId: new RegExp(search, "i"),
+          agentId: regex,
         };
         break;
       case "customerId":
         queryS = {
-          customerId: new RegExp(search, "i"),
+          customerId: regex,
         };
         break;
       case "Agent_Code":
         queryS = {
-          Agent_Code: new RegExp(search, "i"),
+          Agent_Code: regex,
         };
         break;
       case "Machine_name":
         queryS = {
-          Machine_name: new RegExp(search, "i"),
+          Machine_name: regex,
         };
         break;
       case "Product_name":
         queryS = {
-          Product_name: new RegExp(search, "i"),
+          Product_name: regex,
         };
         break;
       case "ProductID":
         queryS = {
-          ProductID: new RegExp(search, "i"),
+          ProductID: regex,
         };
         break;
       case "gst":
         queryS = {
-          GST_Number: new RegExp(search, "i"),
+          GST_Number: regex,
         };
         break;
       case "Company_Name":
         queryS = {
-          Company_Name: new RegExp(search, "i"),
+          Company_Name: regex,
         };
         break;
       case "pan":
         queryS = [
           {
-            PAN_Company: new RegExp(search, "i"),
+            PAN_Company: regex,
           },
           {
-            PAN_Agent: new RegExp(search, "i"),
+            PAN_Agent: regex,
           },
         ];
         break;
       case "agentName":
         queryS = {
-          agentName: new RegExp(search, "i"),
+          agentName: regex,
         }
         break;
       case "customerName":
         queryS = {
-          customerName: new RegExp(search, "i"),
+          customerName: regex,
         }
         break;
       case "customerPhone":
         queryS = {
-          customerPhone: new RegExp(search, "i"),
+          customerPhone: regex,
         }
         break;
     }

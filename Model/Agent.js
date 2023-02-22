@@ -50,6 +50,8 @@ const Agent = new mongoose.Schema({
         required: true
     },
 
+    fullName: String,
+
     phone: {
         type: String,
         required: true

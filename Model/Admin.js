@@ -32,6 +32,8 @@ const Admin = new mongoose.Schema({
         required: true
     },
 
+    fullName: String,
+
     email: {
         type: String,
         required: true

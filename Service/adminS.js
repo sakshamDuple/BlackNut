@@ -15,6 +15,7 @@ exports.create = async (admin) => {
             return { error: "password doesn't match", message: "please provide matching password & confirm password", status: 401 }
         }
         console.log(admin.Address)
+        admin.fullName =  (admin.firstName?admin.firstName.trim():""+" "+admin.lastName?admin.lastName.trim():"").trim()
         let createdAdmin = await Admin.create(admin)
         sendEmail(admin.email, "Your Admin Account is Registered", "", { Name: admin.firstName })
         // let doMobileRegistration = await VerifiedNumberS.create({ role: admin.role, number: admin.phone, id: createdAgent.id })

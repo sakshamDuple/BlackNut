@@ -20,6 +20,8 @@ const dashboard = require("./Routes/dashboard")
 const admin = require("./Routes/admin")
 const notification = require("./Routes/notification")
 
+const UCIDB = require("./Routes/UCIDB")
+
 const cors = require("cors")
 
 let app = express()
@@ -32,7 +34,7 @@ mongoose.connect(process.env.DATABASE_URL, {
     useUnifiedTopology: true
 });
 
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 8000;
 
 // app.use((req, res, next) => {
 //     var ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
@@ -42,7 +44,7 @@ const port = process.env.PORT || 9000;
 
 // app.use("/", (req,res)=>{
 //     res.send("hii")
-// }); 
+// });
 app.use("/login", login)
 app.use("/signUp", signUp)
 app.use("/product", product)  
@@ -56,6 +58,7 @@ app.use("/search",agentC.searchGlobal)
 app.use("/dashboard",dashboard)
 app.use("/admin",admin)
 app.use("/notification",notification)
+app.use("/UCIDB",UCIDB)
 
 let server = app.listen(port, () => console.log('Listening on http://localhost:' + port))
 let io = socket(server)

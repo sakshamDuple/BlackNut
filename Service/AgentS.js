@@ -28,6 +28,7 @@ exports.create = async (agent) => {
         } else {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
+        newagent.fullName = (newagent.firstName?newagent.firstName.trim():""+" "+newagent.lastName?newagent.lastName.trim():"").trim()
         let createdAgent = await Agent.create(newagent)
         let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" }
         console.log(detail)

@@ -4,6 +4,7 @@ const { EmailHTML } = require("./html");
 
 exports.SuperAdminEmail = "blacknut.2023@gmail.com"
 exports.SuperAdminPass = "mjmzjaoouytjvscv"
+exports.SalesAgreement = "https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1677144273406_Sales_Agent_Application_Form.pdf"
 
 exports.sendEmail = async (email, subject, text, details) => {
     // console.log(email, subject, text, details)

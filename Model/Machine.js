@@ -16,7 +16,8 @@ const Machine = {
     createdAt: {
         type: Date,
         default: () => Date.now()
-    }
+    },
+    ProductIDs:[String]
 }
 
 module.exports = mongoose.model("Machine", Machine);

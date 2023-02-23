@@ -72,7 +72,89 @@ exports.findMachineByCropandproductname = async (cropId, productname) => {
 
 exports.getAllMachines = async () => {
     try {
-        let allMachine = await Machine.find().sort({ createdAt: -1 })
+        // let agg = [
+        //     {
+        //         '$lookup': {
+        //             'from': 'products',
+        //             'let': {
+        //                 'machineID': {
+        //                     '$toString': '$_id'
+        //                 }
+        //             },
+        //             'pipeline': [
+        //                 {
+        //                     '$match': {
+        //                         '$expr': {
+        //                             '$eq': [
+        //                                 '$machineId', '$$machineID'
+        //                             ]
+        //                         }
+        //                     }
+        //                 }, {
+        //                     '$project': {
+        //                         '_id': 0,
+        //                         'ProductID': 1,
+        //                         'Machine_name': 1
+        //                     }
+        //                 }
+        //             ],
+        //             'as': 'result'
+        //         }
+        //     }, {
+        //         '$lookup': {
+        //             'from': 'crops',
+        //             'let': {
+        //                 'cropId': {
+        //                     '$toObjectId': '$cropId'
+        //                 }
+        //             },
+        //             'pipeline': [
+        //                 {
+        //                     '$match': {
+        //                         '$expr': {
+        //                             '$eq': [
+        //                                 '$_id', '$$cropId'
+        //                             ]
+        //                         }
+        //                     }
+        //                 }, {
+        //                     '$project': {
+        //                         '_id': 0,
+        //                         'crop': 1
+        //                     }
+        //                 }
+        //             ],
+        //             'as': 'result1'
+        //         }
+        //     }, {
+        //         '$project': {
+        //             'ProductIds': {
+        //                 '$map': {
+        //                     'input': '$result',
+        //                     'as': 'result',
+        //                     'in': '$$result.ProductID'
+        //                 }
+        //             },
+        //             'crop': {
+        //                 '$map': {
+        //                     'input': '$result1',
+        //                     'as': 'result1',
+        //                     'in': '$$result1.crop'
+        //                 }
+        //             },
+        //             'createdAt': 1,
+        //             'cropId': 1,
+        //             'Product_name': 1,
+        //             'Machine_name': 1
+        //         }
+        //     }, {
+        //         '$sort': {
+        //             'createdAt': -1
+        //         }
+        //     }
+        // ];
+        // let allMachine = await Machine.aggregate(agg)
+        let allMachine = await Machine.find().sort({createdAt:-1})
         let totalCount = await Machine.count()
         return { data: allMachine, totalCount, message: "retrieval Success", status: 200 }
     } catch (e) {

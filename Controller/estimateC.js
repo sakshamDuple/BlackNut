@@ -105,7 +105,7 @@ exports.getPdfById = async (req, res) => {
     let Estimate = await EstimateS.getDetailEstimateById(id)
     let MainVal = "Estimate"
     let date, estimatedDateOfPurchase, numericPrice
-    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Order"
+    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Invoice"
     if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Quotation"
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Estimate"
     if (Estimate.data.createdAt) date = moment(Estimate.data.createdAt).format("DD-MM-YYYY") //moment(Estimate.data.createdAt, 'DD-MM-YYYY');
@@ -120,7 +120,7 @@ exports.getPdfById = async (req, res) => {
     }, 0);
     let totelamount = Estimate.data.Products.reduce((totel, prod) => {
         let amt = (prod.quantity * prod.ProductEstimatedPrice * prod.Gst) / 100 + prod.quantity *
-        prod.ProductEstimatedPrice;
+            prod.ProductEstimatedPrice;
         return totel + Math.round(amt);
     }, 0);
     if (Estimate.data.Products.length > 0) numericPrice = toWords.convert(parseInt(totelamount).toFixed(2))
@@ -233,8 +233,8 @@ exports.customerOtpRecieve = async (req, res) => {
             id: agentid,
             otp: otp
         })
-        let otpSent = await sendOTPonPhone("CustomerLink",otp,foundAgent.data.phone)
-        if(otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
+        let otpSent = await sendOTPonPhone("CustomerLink", otp, foundAgent.data.phone)
+        if (otpSent.status != 200) return res.status(otpSent.status).send(otpSent)
         await sendEmail(email, "OTP request for File Upload & Updation Of quotation To Purchase Order", otp, { Name: foundAgent.data.firstName })
         res.status(200).send({ message: `OTP is sent on Customer's Mobile Number!`, status: 200 })
     }
@@ -269,17 +269,18 @@ exports.getReportsFromEstimates = async (req, res) => {
     let page = req.query.page ? req.query.page : 1
     let limit = req.query.limit ? req.query.limit : 10
     let query = {}
-    let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
-    let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
+    let search = req.query.search ? req.query.search : ""
+    let startDate = req.query.startDate ? req.query.startDate : "2000-01-01"
+    let endDate = req.query.endDate ? req.query.endDate : "2050-01-01"
     let year = parseInt(endDate.split("-")[0])
     let monthEnd = parseInt(endDate.split("-")[1])
-    let dateEnd = parseInt(endDate.split("-")[2])+1
-    if(dateEnd > 27){
+    let dateEnd = parseInt(endDate.split("-")[2]) + 1
+    if (dateEnd > 27) {
         dateEnd = 1
-        monthEnd = parseInt(endDate.split("-")[1])+1
-        if(monthEnd>11){
+        monthEnd = parseInt(endDate.split("-")[1]) + 1
+        if (monthEnd > 11) {
             monthEnd = 1
-            year = parseInt(endDate.split("-")[0])+1
+            year = parseInt(endDate.split("-")[0]) + 1
         }
     }
     let endSearchDate = year + "-" + monthEnd + "-" + dateEnd
@@ -290,6 +291,7 @@ exports.getReportsFromEstimates = async (req, res) => {
     }
     let start = (parseInt(page) - 1) * parseInt(limit)
     try {
+        let Reports
         let agentId = req.query.id
         let foundEstimates = await Estimate.find(query)
         let Report = [{
@@ -374,9 +376,21 @@ exports.getReportsFromEstimates = async (req, res) => {
                 }
             })
         })
-        let totalCount = Report.length
+        Reports = Report
+        if(search){
+            let reg =new RegExp(search, 'i')
+            let newReport = []
+            Reports = Report.find((report, i) => {
+                if (report.ProductID.match(reg)!=null || report.ProductName.match(reg)!=null) {
+                    newReport.push(report)
+                }
+            });
+            Reports = newReport
+        }
+        console.log(Reports)
+        let totalCount = Reports.length
         return res.status(200).send({
-            data: Report.splice(start, limit),
+            data: Reports.splice(start, limit),
             totalCount,
             message: "reports made",
             status: 200,
@@ -392,17 +406,19 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
     let limit = req.query.limit ? req.query.limit : 10
     let start = (parseInt(page) - 1) * parseInt(limit)
     let query = {}
-    let startDate = req.query.startDate?req.query.startDate:"2000-01-01"
-    let endDate = req.query.endDate?req.query.endDate:"2050-01-01"
+    let query2 = {}
+    let search = req.query.search ? req.query.search : ""
+    let startDate = req.query.startDate ? req.query.startDate : "2000-01-01"
+    let endDate = req.query.endDate ? req.query.endDate : "2050-01-01"
     let year = parseInt(endDate.split("-")[0])
     let monthEnd = parseInt(endDate.split("-")[1])
-    let dateEnd = parseInt(endDate.split("-")[2])+1
-    if(dateEnd > 27){
+    let dateEnd = parseInt(endDate.split("-")[2]) + 1
+    if (dateEnd > 27) {
         dateEnd = 1
-        monthEnd = parseInt(endDate.split("-")[1])+1
-        if(monthEnd>11){
+        monthEnd = parseInt(endDate.split("-")[1]) + 1
+        if (monthEnd > 11) {
             monthEnd = 1
-            year = parseInt(endDate.split("-")[0])+1
+            year = parseInt(endDate.split("-")[0]) + 1
         }
     }
     let endSearchDate = year + "-" + monthEnd + "-" + dateEnd
@@ -411,9 +427,17 @@ exports.getAgentReportsFromEstimates = async (req, res) => {
             $and: [{ createdAt: { $gte: new Date(startDate.toString()) } }, { createdAt: { $lte: new Date(endSearchDate.toString()) } }]
         }
     }
+    if (search != "") {
+        query2 = {
+            $or: [{ agentName: new RegExp(search, 'i') }, { Agent_Code: new RegExp(search, 'i') }]
+        }
+    }
     let agg = [
         {
             '$match': query
+        },
+        {
+            '$match': query2
         },
         {
             '$addFields': {

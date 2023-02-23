@@ -15,7 +15,11 @@ exports.create = async (customer) => {
         //     return { error: "id already exists", message: "an id already exists with given email, please provide some other email", status: 409 }
         // }
         if (phoneAlreadyRegistered) {
-            return { error: "mobile already registered", message: "Customer is already registered with this mobile!", status: 409 }
+            let customerExistsWithSuchId = await Agent.findOne({ _id: phoneAlreadyRegistered.id, role:"customer" })
+            if(customerExistsWithSuchId != undefined){
+                return { Agent_ID: customerExistsWithSuchId.id, data: customerExistsWithSuchId, message: "Existing customer added to estimate!", status: 200 }
+            }
+            return { error: "mobile already registered for some agent", message: "Agent cannot be added to estimate!", status: 400 }
         }
         if (customer.password == customer.confirmPassword) {
             console.log("Hii")

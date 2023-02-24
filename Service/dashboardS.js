@@ -571,12 +571,31 @@ exports.getTotalEstimateForAgent = async (id,startDate,endDate) => {
             }
         },
         {
+            '$addFields': {
+                'total': {
+                    '$map': {
+                        'input': '$Products',
+                        'as': 'total',
+                        'in': {
+                            'actualCost': {
+                                '$multiply': [
+                                    '$$total.ProductEstimatedPrice', {
+                                        '$add': [
+                                            '$$total.Gst', 100
+                                        ]
+                                    }, 0.01
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
             "$project": {
                 "_id": 1,
-                "agentId": 1,
-                "createdAt": 1,
-                "TotalCost": {
-                    "$sum": "$Products.ProductEstimatedPrice"
+                'TotalCost': {
+                    '$sum': '$total.actualCost'
                 }
             }
         },{
@@ -606,12 +625,31 @@ exports.getTotalQuotationForAgent = async (id,startDate,endDate) => {
             }
         },
         {
+            '$addFields': {
+                'total': {
+                    '$map': {
+                        'input': '$Products',
+                        'as': 'total',
+                        'in': {
+                            'actualCost': {
+                                '$multiply': [
+                                    '$$total.ProductEstimatedPrice', {
+                                        '$add': [
+                                            '$$total.Gst', 100
+                                        ]
+                                    }, 0.01
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
             "$project": {
                 "_id": 1,
-                "agentId": 1,
-                "createdAt": 1,
-                "TotalCost": {
-                    "$sum": "$Products.ProductEstimatedPrice"
+                'TotalCost': {
+                    '$sum': '$total.actualCost'
                 }
             }
         },{
@@ -640,12 +678,31 @@ exports.getTotalPOForAgent = async (id,startDate,endDate) => {
             }
         },
         {
+            '$addFields': {
+                'total': {
+                    '$map': {
+                        'input': '$Products',
+                        'as': 'total',
+                        'in': {
+                            'actualCost': {
+                                '$multiply': [
+                                    '$$total.ProductEstimatedPrice', {
+                                        '$add': [
+                                            '$$total.Gst', 100
+                                        ]
+                                    }, 0.01
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
             "$project": {
                 "_id": 1,
-                "agentId": 1,
-                "createdAt": 1,
-                "TotalCost": {
-                    "$sum": "$Products.ProductEstimatedPrice"
+                'TotalCost': {
+                    '$sum': '$total.actualCost'
                 }
             }
         },{

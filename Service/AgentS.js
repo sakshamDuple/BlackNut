@@ -30,7 +30,7 @@ exports.create = async (agent) => {
         }
         newagent.fullName = (newagent.firstName?newagent.firstName.trim():""+" "+newagent.lastName?newagent.lastName.trim():"").trim()
         let createdAgent = await Agent.create(newagent)
-        let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1676285165793_1676283608610_Sales_Agent_Agreement.doc.pdf" }
+        let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1677239498757_Dealer_or_Sales_Agent_Application_Form.doc.pdf" }
         console.log(detail)
         await sendEmail(newagent.email, "Your Agent Account is Registered", "", detail )
         await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
@@ -137,7 +137,7 @@ exports.deleteAgentById = async (agentId) => {
         console.log("theAgent",theAgent)
         let theNumberToDelete = parseInt(theAgent.phone)
         let theAgentToDelete = await Agent.deleteOne({_id:agentId})
-        deleteOnly(theNumberToDelete)
+        await deleteOnly(theNumberToDelete)
         return { data: theAgentToDelete, message: "deleted Successfully", status: 202 }
     } catch (e) {
         console.log(e)

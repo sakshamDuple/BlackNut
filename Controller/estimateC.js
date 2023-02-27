@@ -103,10 +103,17 @@ exports.getDetailedEstimateById = async (req, res) => {
 exports.getPdfById = async (req, res) => {
     let id = req.query.id
     let Estimate = await EstimateS.getDetailEstimateById(id)
+    let PerformaPdf = req.query.PerformaPdf
     let MainVal = "Estimate"
     let date, estimatedDateOfPurchase, numericPrice
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Invoice"
-    if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Quotation"
+    if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) {
+        if(PerformaPdf == "true") {
+            MainVal = "Performa Invoice"
+        } else {
+            MainVal = "Quotation"
+        }
+    }
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == false) MainVal = "Estimate"
     if (Estimate.data.createdAt) date = moment(Estimate.data.createdAt).format("DD-MM-YYYY") //moment(Estimate.data.createdAt, 'DD-MM-YYYY');
     if (Estimate.data.EstimateDateOfPurchase) estimatedDateOfPurchase = moment(Estimate.data.EstimateDateOfPurchase).format("DD-MM-YYYY") //moment(Estimate.data.EstimateDateOfPurchase, 'dd/mm/yyyy');
@@ -135,12 +142,10 @@ exports.getPdfById = async (req, res) => {
                 "height": "20mm",
             },
         };
-        console.log("date", date)
         let html = await ejs.renderFile(`./public/Estimate.ejs`, { Estimate: Estimate.data, MainVal, date, estimatedDateOfPurchase, totelamount, totelgst, totel, numericPrice }, { async: true })
         var filePath = `./${Estimate.data.EstimateId}.pdf`;
         let pdfo = []
         Estimate.data.Products.forEach(element => {
-            console.log(element.Product)
             if (element.Product.pdfFile != null) pdfo.push(element.Product.pdfFile)
         });
         const merger = new PDFMerger();

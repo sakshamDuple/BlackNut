@@ -21,7 +21,7 @@ exports.commonlogin = async (req, res) => {
     if (!email && !phone) return res.status(404).send({ error: "email or phone field can't be empty", message: "please provide either email or phone to login", status: 400 })
     if (email && password) {
         theAgentFound = await AgentS.getCommonByEmail(email)
-        if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE"){
+        if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE" || theAgentFound.data.status == "SUSPENDED"){
             return res.status(400).json({ error: "can't log in", message: "Your Account is currently INACTIVE or Waiting for admins Approval, You Can't login to this Account", status: 400 })
         }
         let compare = await hashCompare(password, theAgentFound.data.password)
@@ -34,7 +34,7 @@ exports.commonlogin = async (req, res) => {
         theAgentFound = await AgentS.getCommonByPhone(phone)
         console.log(theAgentFound)
         if(theAgentFound.data != null){
-            if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE")
+            if(theAgentFound.data.status == "PENDING" || theAgentFound.data.status == "INACTIVE" || theAgentFound.data.status == "SUSPENDED")
             return res.status(400).json({ error: "can't log in", message: "Your Account is currently INACTIVE or Waiting for admins Approval, You Can't login to this Account", status: 400 })
         }
         if (theAgentFound.data == null) return res.status(theAgentFound.status).json({ message: theAgentFound.message, status: theAgentFound.status })

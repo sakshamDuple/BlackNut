@@ -6,8 +6,8 @@ const { create } = require("./NotificationS");
 require('dotenv').config();
 
 exports.create = async (agent) => {
-    agent.role = (agent.role=="dealer")?"dealer":"agent"
-    let codeForAgent = agent.role=="dealer"?"DR":"AG"
+    agent.role = (agent.role == "dealer") ? "dealer" : "agent"
+    let codeForAgent = agent.role == "dealer" ? "DR" : "AG"
     delete agent.role
     agent.role = "agent"
     let newagent = { ...agent }
@@ -24,21 +24,23 @@ exports.create = async (agent) => {
             delete newagent.confirmPassword
             newagent.password = await hashPassword(agent.password)
             newagent.AgentNo = await getValueForNextSequence()
-            newagent.AgentID = `${agent.Address.stateCode?agent.Address.stateCode:"IN"}${codeForAgent}${newagent.AgentNo<1000?newagent.AgentNo<100?newagent.AgentNo<10?"000"+newagent.AgentNo:"00"+newagent.AgentNo:"0"+newagent.AgentNo:newagent.AgentNo}`
+            newagent.AgentID = `${agent.Address.stateCode ? agent.Address.stateCode : "IN"}${codeForAgent}${newagent.AgentNo < 1000 ? newagent.AgentNo < 100 ? newagent.AgentNo < 10 ? "000" + newagent.AgentNo : "00" + newagent.AgentNo : "0" + newagent.AgentNo : newagent.AgentNo}`
         } else {
             return { error: "password doesn't match", message: "Password Do not Match !", status: 401 }
         }
-        newagent.fullName = (newagent.firstName?newagent.firstName.trim():""+" "+newagent.lastName?newagent.lastName.trim():"").trim()
+        newagent.fullName = (newagent.firstName ? newagent.firstName.trim() : "" + " " + newagent.lastName ? newagent.lastName.trim() : "").trim()
         let createdAgent = await Agent.create(newagent)
-        let detail = { Name: newagent.firstName, Link:"https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1677239498757_Dealer_or_Sales_Agent_Application_Form.doc.pdf" }
+        let detail = { Name: newagent.firstName, Link: "https://blacknut.sgp1.digitaloceanspaces.com/BlackNut/1677239498757_Dealer_or_Sales_Agent_Application_Form.doc.pdf" }
         console.log(detail)
-        await sendEmail(newagent.email, "Your Agent Account is Registered", "", detail )
+        await sendEmail(newagent.email, "Your Agent Account is Registered", "", detail)
         await sendEmail(SuperAdminEmail, "A New Agent Account is Registered", "", { Name: "Super Admin" })
         let doMobileRegistration = await VerifiedNumberS.create({ role: agent.role, number: agent.phone, id: createdAgent.id })
-        return { Agent_ID: createdAgent._id, 
-                 message: `Agent successfully registered. Agent's agreement is sent to your registered email. 
-                           You may Download the agreement.`, 
-                 status: 201 }
+        return {
+            Agent_ID: createdAgent._id,
+            message: `Agent successfully registered. Agent's agreement is sent to your registered email. 
+                           You may Download the agreement.`,
+            status: 201
+        }
     } catch (e) {
         console.log(e)
         return { error: e, message: "we have an error" }
@@ -68,9 +70,9 @@ exports.getAllAgents = async (bool, page, limit) => {
         totalCount = await Agent.count(query)
         if (page && limit) {
             start = limit * (page - 1)
-            allAgents = await Agent.find(query).skip(start).limit(parseInt(limit)).sort({createdAt:-1})
+            allAgents = await Agent.find(query).skip(start).limit(parseInt(limit)).sort({ createdAt: -1 })
         } else {
-            allAgents = await Agent.find(query).sort({createdAt:-1})
+            allAgents = await Agent.find(query).sort({ createdAt: -1 })
         }
         return { data: allAgents, totalCount, message: allAgents.length > 0 ? "retrieval Success" : "please upload some agents to view", status: allAgents.length > 0 ? 200 : 404 }
     } catch (e) {
@@ -133,22 +135,23 @@ exports.getCommonByPhone = async (phone, bool) => {
 
 exports.deleteAgentById = async (agentId) => {
     try {
-        let theAgent = await Agent.findOne({ _id: agentId})
-        console.log("theAgent",theAgent)
+        let theAgent = await Agent.findOne({ _id: agentId })
+        console.log("theAgent", theAgent)
         let theNumberToDelete = parseInt(theAgent.phone)
-        let theAgentToDelete = await Agent.deleteOne({_id:agentId})
+        let theAgentToDelete = await Agent.deleteOne({ _id: agentId })
         await deleteOnly(theNumberToDelete)
         return { data: theAgentToDelete, message: "deleted Successfully", status: 202 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error", status:500 }
+        return { error: e, message: "we have an error", status: 500 }
     }
 }
 
 exports.updateThisAgent = async (agent, field) => {
     try {
+        console.log(agent)
         let prevAgent = await Agent.findById(agent._id) //to Check For Future Conditions
-        let { role, firstName, lastName, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, password, DocumentFile, status } = agent
+        let { role, firstName, lastName, Company_Name, GST_Number, PAN_Company, PAN_Agent, Address, password, DocumentFile, status, PAN_Company_File, Agreement, PAN_Agent_File } = agent
         let newAgent = prevAgent
         if (field == "password") newAgent.password = password
         if (role) newAgent.role = role
@@ -160,18 +163,20 @@ exports.updateThisAgent = async (agent, field) => {
         if (PAN_Agent) newAgent.PAN_Agent = PAN_Agent
         if (Address) newAgent.Address = Address
         if (DocumentFile) newAgent.DocumentFile = DocumentFile
+        if (PAN_Company_File) newAgent.PAN_Company_File = PAN_Company_File
+        if (PAN_Agent_File) newAgent.PAN_Agent_File = PAN_Agent_File
         if (status && field != "login") {
             newAgent.status = status
-            let detail = { Name: newAgent.firstName}
-            if(status == "ACTIVE")  await sendEmail(newAgent.email, "Your Agent Account is Activated", "", detail )
-            if(status == "SUSPENDED") await sendEmail(newAgent.email, "Your Agent Account is Suspended", "", detail )
+            let detail = { Name: newAgent.firstName }
+            if (status == "ACTIVE") await sendEmail(newAgent.email, "Your Agent Account is Activated", "", detail)
+            if (status == "SUSPENDED") await sendEmail(newAgent.email, "Your Agent Account is Suspended", "", detail)
         }
-        if(field == "login") newAgent.loginTime = [Date.now()]
+        if (field == "login") newAgent.loginTime = [Date.now()]
         let updateThisAgent = await Agent.updateOne({ _id: agent._id }, { $set: newAgent })
-        if(DocumentFile && updateThisAgent.nModified > 0){await create(`Agreement File Updated For Agent: ${prevAgent.AgentID}, Please review & update agent status`, "admin/approvedagent")}
+        if (DocumentFile && updateThisAgent.nModified > 0) { await create(`Agreement File Updated For Agent: ${prevAgent.AgentID}, Please review & update agent status`, "admin/approvedagent") }
         return { data: updateThisAgent.nModified > 0, message: updateThisAgent.nModified > 0 ? "Agent Updated Successfully!'" : "no updation was done", status: updateThisAgent.nModified > 0 ? 200 : 400 }
     } catch (e) {
         console.log(e)
-        return { error: e, message: "we have an error", status:500 }
+        return { error: e, message: "we have an error", status: 500 }
     }
 }

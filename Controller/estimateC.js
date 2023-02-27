@@ -109,7 +109,7 @@ exports.getPdfById = async (req, res) => {
     if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Invoice"
     if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) {
         if(PerformaPdf == "true") {
-            MainVal = "Performa Invoice"
+            MainVal = "Pro Forma Invoice"
         } else {
             MainVal = "Quotation"
         }
@@ -175,23 +175,6 @@ exports.getPdfById = async (req, res) => {
                 res.download('mergedPdf.pdf')
             }
         })
-        // return new Promise((resolve, reject) => {
-        //     pdf.create(html, options).toFile(`${Estimate.data.EstimateId}.pdf`, async function (err, data) {
-        //         if (err) {
-        //             res.send(err);
-        //             return
-        //         } else {
-        //             // res.download(filePath)
-        //             // resolve(data.filename)
-        //             await merger.add(data.filename)
-        //             for (const file of pdfo) {
-        //                 await merger.add(file)
-        //             }
-        //             await merger.save('mergerPdf.pdf');
-        //             res.download(`./mergerPdf.pdf`)
-        //         }
-        //     });
-        // })
     } catch (e) {
         console.log(e.message);
     }

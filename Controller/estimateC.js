@@ -288,7 +288,8 @@ exports.getReportsFromEstimates = async (req, res) => {
             Quotation: 0,
             PurchaseOrder: 0,
             ProductOrderPrice: 0,
-            ProductName: ""
+            ProductName: "",
+            MachineName: ""
         }]
         let getValueFlag = true
         getValueFlag = agentId ? false : true
@@ -305,6 +306,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                 if (Report.length == 1 && Report[0].ProductID == "") {
                     Report[0].ProductID = product.ProductIDToShow
                     Report[0].ProductName = product.ProductName
+                    // Report[0].MachineName = product.MachineName
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) Report[0].Estimate += 1
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         Report[0].Quotation += 1

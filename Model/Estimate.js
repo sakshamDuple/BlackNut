@@ -27,7 +27,8 @@ const Products = {
     Gst: {
         type: Number,
         default: () => 5
-    }
+    },
+    MachineName: String
 }
 
 const Updates = {

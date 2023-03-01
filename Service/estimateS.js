@@ -102,6 +102,7 @@ let allProducts = (products, fails, successes) => {
           );
           element.ProductIDToShow = foundProduct.ProductID;
           element.ProductName = foundMachine.data.Product_name;
+          element.MachineName = foundMachine.data.Machine_name;
           element.Gst = foundProduct.Gst
           if (!foundProduct) {
             fails.push(ProductId);

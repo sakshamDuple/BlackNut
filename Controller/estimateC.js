@@ -106,7 +106,7 @@ exports.getPdfById = async (req, res) => {
     let PerformaPdf = req.query.PerformaPdf
     let MainVal = "Estimate"
     let date, estimatedDateOfPurchase, numericPrice
-    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Purchase Invoice"
+    if (Estimate.data.approvalFromAdminAsQuotes == false && Estimate.data.approvalFromAdminAsPO == true) MainVal = "Pro Forma Invoice" //should be 'Purchase Invoice'
     if (Estimate.data.approvalFromAdminAsQuotes == true && Estimate.data.approvalFromAdminAsPO == false) {
         if(PerformaPdf == "true") {
             MainVal = "Pro Forma Invoice"
@@ -306,7 +306,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                 if (Report.length == 1 && Report[0].ProductID == "") {
                     Report[0].ProductID = product.ProductIDToShow
                     Report[0].ProductName = product.ProductName
-                    // Report[0].MachineName = product.MachineName
+                    Report[0].MachineName = product.MachineName
                     if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) Report[0].Estimate += 1
                     if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                         Report[0].Quotation += 1
@@ -333,6 +333,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                         if (foundreport.ProductOrderPrice == undefined || foundreport.ProductOrderPrice == NaN) foundreport.ProductOrderPrice = 0
                         foundreport.ProductID = product.ProductIDToShow
                         foundreport.ProductName = product.ProductName
+                        foundreport.MachineName = product.MachineName
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) foundreport.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {
                             foundreport.Quotation += 1
@@ -349,6 +350,7 @@ exports.getReportsFromEstimates = async (req, res) => {
                     } else {
                         report.ProductID = product.ProductIDToShow
                         report.ProductName = product.ProductName
+                        report.MachineName = product.MachineName
                         report.ProductOrderPrice = 0
                         if (estimate.approvalFromAdminAsQuotes == false && estimate.approvalFromAdminAsPO == false) report.Estimate += 1
                         if (estimate.approvalFromAdminAsQuotes == true && estimate.approvalFromAdminAsPO == false) {

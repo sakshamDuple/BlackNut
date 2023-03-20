@@ -31,6 +31,7 @@ router.get("/generateCsvOfAll", productC.generateCsvOfAll);
 router.put("/updateOneProduct", productC.updateOneProduct)
 router.patch("/findCropByIdAndUpdate", productC.findCropByIdAndUpdate)
 router.delete("/deleteOneProduct", productC.deleteOneProduct)
+router.patch('/deletepdf',productC.deletepdf)
 router.delete("/deleteOneMachine", productC.deleteOneMachine)
 router.put("/bulkProductPriceUpdateOfOneMachine", upload.single("file"), async (req, res) => {
     let file = req.file;

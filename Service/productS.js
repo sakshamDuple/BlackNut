@@ -344,6 +344,16 @@ exports.deleteOnly = async (id) => {
         return { error: e, message: "deletion failed", status: 400 }
     }
 }
+exports.deletepdf = async (id) => {
+    console.log('pdf',id);
+    try {
+        let deleted = await product.updateOne({ProductID:id}, { $unset: { pdfFile: ""} })
+        return { data: deleted.nModified > 0, message: deleted.nModified > 0 ? "updated Successfully" : "update Failed", status: deleted.nModified > 0 ? 200 : 400 }
+     } catch (e) {
+        console.log(e)
+        return { error: e, message: "deletion failed", status: 400 }
+    }
+}
 
 exports.deleteMutliProducts = async (ids) => {
     try {

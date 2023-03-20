@@ -410,6 +410,12 @@ exports.deleteOneProduct = async (req, res) => {
   let deleted = await ProductS.deleteOnly(id)
   res.status(deleted.status).send(deleted)
 }
+exports.deletepdf = async (req, res) => {
+  let id = req.query.id
+  console.log(id,'idddd');
+  let deleted = await ProductS.deletepdf(id)
+  res.status(deleted.status).send(deleted)
+}
 
 exports.deleteOneMachine = async (req, res) => {
   let id = req.query.id
